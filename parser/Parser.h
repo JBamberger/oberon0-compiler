@@ -16,7 +16,8 @@ private:
     Scanner *scanner_;
     Logger *logger_;
 
-    const std::string ident();
+    void requireToken(const TokenType& type);
+    std::string ident();
 
     const Node* module();
     const Node* declarations();
@@ -49,7 +50,7 @@ private:
 public:
     explicit Parser(Scanner *scanner, Logger *logger);
     ~Parser();
-    const std::unique_ptr<const Node> parse();
+    std::unique_ptr<const Node> parse();
 };
 
 
