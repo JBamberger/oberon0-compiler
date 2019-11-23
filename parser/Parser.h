@@ -5,18 +5,16 @@
 #ifndef OBERON0C_PARSER_H
 #define OBERON0C_PARSER_H
 
-
 #include "../scanner/Scanner.h"
 #include "ast/Node.h"
 
-class Parser
-{
+class Parser {
 
-private:
-    Scanner *scanner_;
-    Logger *logger_;
+  private:
+    Scanner* scanner_;
+    Logger* logger_;
 
-    void requireToken(const TokenType& type);
+    std::unique_ptr<const Token> require_token(const TokenType& type);
     std::string ident();
 
     const Node* module();
@@ -47,11 +45,10 @@ private:
     const Node* actual_parameters();
     const Node* selector();
 
-public:
-    explicit Parser(Scanner *scanner, Logger *logger);
+  public:
+    explicit Parser(Scanner* scanner, Logger* logger);
     ~Parser();
     std::unique_ptr<const Node> parse();
 };
 
-
-#endif //OBERON0C_PARSER_H
+#endif // OBERON0C_PARSER_H

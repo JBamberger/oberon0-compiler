@@ -7,6 +7,7 @@
 #include <NumberToken.h>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
 Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
 
@@ -78,183 +79,35 @@ module = "MODULE" ident ";"
          "END" ident "." .
 ***/
 
-inline std::string type_str(const TokenType& t)
-{
-    std::string result;
-    switch (t) {
-    case TokenType::eof:
-        result = "EOF";
-        break;
-    case TokenType::null:
-        result = "NULL";
-        break;
-    case TokenType::const_true:
-        result = "TRUE";
-        break;
-    case TokenType::const_false:
-        result = "FALSE";
-        break;
-    case TokenType::const_number:
-        result = "number";
-        break;
-    case TokenType::const_string:
-        result = "string";
-        break;
-    case TokenType::const_ident:
-        result = "identifier";
-        break;
-    case TokenType::period:
-        result = ".";
-        break;
-    case TokenType::comma:
-        result = ",";
-        break;
-    case TokenType::colon:
-        result = ":";
-        break;
-    case TokenType::semicolon:
-        result = ";";
-        break;
-    case TokenType::lparen:
-        result = "(";
-        break;
-    case TokenType::rparen:
-        result = ")";
-        break;
-    case TokenType::lbrack:
-        result = "[";
-        break;
-    case TokenType::rbrack:
-        result = "]";
-        break;
-    case TokenType::op_times:
-        result = "*";
-        break;
-    case TokenType::op_div:
-        result = "DIV";
-        break;
-    case TokenType::op_mod:
-        result = "MOD";
-        break;
-    case TokenType::op_plus:
-        result = "+";
-        break;
-    case TokenType::op_minus:
-        result = "-";
-        break;
-    case TokenType::op_and:
-        result = "&";
-        break;
-    case TokenType::op_or:
-        result = "OR";
-        break;
-    case TokenType::op_not:
-        result = "~";
-        break;
-    case TokenType::op_eq:
-        result = "=";
-        break;
-    case TokenType::op_neq:
-        result = "#";
-        break;
-    case TokenType::op_lt:
-        result = "<";
-        break;
-    case TokenType::op_gt:
-        result = ">";
-        break;
-    case TokenType::op_leq:
-        result = "<=";
-        break;
-    case TokenType::op_geq:
-        result = ">=";
-        break;
-    case TokenType::op_becomes:
-        result = ":=";
-        break;
-    case TokenType::kw_module:
-        result = "MODULE";
-        break;
-    case TokenType::kw_procedure:
-        result = "PROCEDURE";
-        break;
-    case TokenType::kw_begin:
-        result = "BEGIN";
-        break;
-    case TokenType::kw_end:
-        result = "END";
-        break;
-    case TokenType::kw_if:
-        result = "IF";
-        break;
-    case TokenType::kw_then:
-        result = "THEN";
-        break;
-    case TokenType::kw_else:
-        result = "ELSE";
-        break;
-    case TokenType::kw_elsif:
-        result = "ELSIF";
-        break;
-    case TokenType::kw_while:
-        result = "WHILE";
-        break;
-    case TokenType::kw_do:
-        result = "DO";
-        break;
-    case TokenType::kw_array:
-        result = "ARRAY";
-        break;
-    case TokenType::kw_record:
-        result = "RECORD";
-        break;
-    case TokenType::kw_const:
-        result = "CONST";
-        break;
-    case TokenType::kw_type:
-        result = "TYPE";
-        break;
-    case TokenType::kw_var:
-        result = "VAR";
-        break;
-    case TokenType::kw_of:
-        result = "OF";
-        break;
-    }
-    return result;
-}
+inline std::string type_str(const TokenType& t) { return (std::stringstream() << t).str(); }
 
 std::unique_ptr<const Node> Parser::parse() { return std::unique_ptr<const Node>(module()); }
 
-void Parser::requireToken(const TokenType& type)
+std::unique_ptr<const Token> Parser::require_token(const TokenType& type)
 {
     auto token = scanner_->nextToken();
     if (token->getType() != type) {
-        logger_->error(token->getPosition(), "Expected " + type_str(type) + " but got " +
-                                                 (std::stringstream() << *token).str() + ".");
+        const auto msg = "Expected " + type_str(type) + " but got " +
+                         (std::stringstream() << *token).str() + ".";
+        logger_->error(token->getPosition(), msg);
         // TODO: terminate
     }
+    return token;
 }
 
 std::string Parser::ident()
 {
-    auto id = scanner_->nextToken();
-    if (id->getType() != TokenType::const_ident) {
-        logger_->error(id->getPosition(),
-                       "Expected identifier but got " + (std::stringstream() << *id).str() + ".");
-        // TODO: terminate
-    }
-    const auto token = dynamic_cast<const IdentToken*>(id.get());
-    if (token == nullptr)
-        throw new std::exception("Failed IdentToken cast");
-    return token->getValue();
+	auto token = require_token(TokenType::const_ident);
+    const auto ident_token = dynamic_cast<const IdentToken*>(token.get());
+    assert(ident_token != nullptr);
+	
+    return ident_token->getValue();
 }
-
 const Node* Parser::module()
 {
-    requireToken(TokenType::kw_module);
+    require_token(TokenType::kw_module);
     const auto moduleName = ident();
-    requireToken(TokenType::semicolon);
+    require_token(TokenType::semicolon);
     const auto decls = declarations();
 
     if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
@@ -262,7 +115,7 @@ const Node* Parser::module()
         const auto statements = statement_sequence();
     }
 
-    requireToken(TokenType::kw_end);
+    require_token(TokenType::kw_end);
 
     const auto namePos = scanner_->peekToken()->getPosition();
     const auto moduleName2 = ident();
@@ -271,7 +124,7 @@ const Node* Parser::module()
                                     moduleName2 + ".");
         // TODO: terminate
     }
-    requireToken(TokenType::period);
+    require_token(TokenType::period);
 
     // TODO: const auto node =  std::make_unique<ModuleNode>(moduleName, decls,
     // statements?);
@@ -287,7 +140,7 @@ const Node* Parser::declarations()
     auto next = scanner_->peekToken();
     while (next->getType() == TokenType::kw_procedure) {
         const auto procDec = procedure_declaration();
-        requireToken(TokenType::semicolon);
+        require_token(TokenType::semicolon);
         // TODO: add to tlist
         next = scanner_->peekToken();
     }
@@ -306,9 +159,9 @@ const Node* Parser::const_declarations()
         next = scanner_->peekToken();
         while (next->getType() == TokenType::const_ident) {
             const auto name = ident();
-            requireToken(TokenType::op_eq);
+            require_token(TokenType::op_eq);
             const auto expr = expression();
-            requireToken(TokenType::semicolon);
+            require_token(TokenType::semicolon);
             // TODO: add std::make_unique<ConstDeclNode>(name, expr);
             next = scanner_->peekToken();
         }
@@ -326,9 +179,9 @@ const Node* Parser::type_declarations()
         next = scanner_->peekToken();
         while (next->getType() == TokenType::const_ident) {
             const auto name = ident();
-            requireToken(TokenType::op_eq);
+            require_token(TokenType::op_eq);
             const auto tp = type();
-            requireToken(TokenType::semicolon);
+            require_token(TokenType::semicolon);
             // TODO: add std::make_unique<TypeDeclNode>(name, tp);
             next = scanner_->peekToken();
         }
@@ -346,9 +199,9 @@ const Node* Parser::var_declarations()
         next = scanner_->peekToken();
         while (next->getType() == TokenType::const_ident) {
             const auto identList = ident_list();
-            requireToken(TokenType::colon);
+            require_token(TokenType::colon);
             const auto tp = type();
-            requireToken(TokenType::semicolon);
+            require_token(TokenType::semicolon);
             // TODO: add std::make_unique<VarDeclNode>(identList, tp);
             next = scanner_->peekToken();
         }
@@ -360,7 +213,7 @@ const Node* Parser::var_declarations()
 const Node* Parser::procedure_declaration()
 {
     const auto heading = procedure_heading();
-    requireToken(TokenType::semicolon);
+    require_token(TokenType::semicolon);
     const auto body = procedure_body();
     // TODO: std::make_unique<ProcedureDeclarationNode>(heading, body);
     return nullptr;
@@ -368,7 +221,7 @@ const Node* Parser::procedure_declaration()
 
 const Node* Parser::procedure_heading()
 {
-    requireToken(TokenType::kw_procedure);
+    require_token(TokenType::kw_procedure);
     const auto name = ident();
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
         const auto params = formal_parameters();
@@ -384,7 +237,7 @@ const Node* Parser::procedure_body()
         scanner_->nextToken();
         const auto seq = statement_sequence();
     }
-    requireToken(TokenType::kw_end);
+    require_token(TokenType::kw_end);
     const auto name = ident();
     // TODO: std::make_unique<ProcedureBodyNode>(name, decls, seq);
     return nullptr;
@@ -458,17 +311,17 @@ const Node* Parser::factor()
     } else if (next->getType() == TokenType::const_number) {
         const auto num = scanner_->nextToken();
         const auto numToken = dynamic_cast<const NumberToken*>(num.get());
-        if (numToken == nullptr)
-            throw new std::exception("Failed IdentToken cast");
+        assert(numToken != nullptr);
+    	
         const auto number = numToken->getValue();
         // TODO: std::make_unique<NumberNode>(number);
     } else if (next->getType() == TokenType::lparen) {
-        requireToken(TokenType::lparen);
+        require_token(TokenType::lparen);
         const auto expr = expression();
-        requireToken(TokenType::rparen);
+        require_token(TokenType::rparen);
         // TODO: expr
     } else if (next->getType() == TokenType::op_not) {
-        requireToken(TokenType::op_not);
+        require_token(TokenType::op_not);
         const auto f = factor();
         // TODO: f
     } else {
@@ -502,9 +355,9 @@ const Node* Parser::type()
 
 const Node* Parser::array_type()
 {
-    requireToken(TokenType::kw_array);
+    require_token(TokenType::kw_array);
     const auto expr = expression();
-    requireToken(TokenType::kw_of);
+    require_token(TokenType::kw_of);
     const auto t = type();
     // TODO: std::make_unique<ArrayTypeNode>(expr, t);
     return nullptr;
@@ -512,14 +365,14 @@ const Node* Parser::array_type()
 
 const Node* Parser::record_type()
 {
-    requireToken(TokenType::kw_record);
+    require_token(TokenType::kw_record);
     const auto fields = field_list();
     while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-        requireToken(TokenType::semicolon);
+        require_token(TokenType::semicolon);
         const auto moreFields = field_list();
         // TODO: add fields
     }
-    requireToken(TokenType::kw_end);
+    require_token(TokenType::kw_end);
     // TODO: std::make_unique<RecordNode>(fields...);
     return nullptr;
 }
@@ -528,7 +381,7 @@ const Node* Parser::field_list()
 {
     if (scanner_->peekToken()->getType() == TokenType::const_ident) {
         const auto idList = ident_list();
-        requireToken(TokenType::colon);
+        require_token(TokenType::colon);
         const auto t = type();
         // TODO: std::make_unique<FieldListNode>(idList, t);
     }
@@ -550,7 +403,7 @@ const Node* Parser::ident_list()
 
 const Node* Parser::formal_parameters()
 {
-    requireToken(TokenType::lparen);
+    require_token(TokenType::lparen);
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
         const auto first = fp_section();
@@ -561,7 +414,7 @@ const Node* Parser::formal_parameters()
             // TODO: add to list
         }
     }
-    requireToken(TokenType::rparen);
+    require_token(TokenType::rparen);
     // TODO: std::make_unique<FormalParameterListNode>(list);
     return nullptr;
 }
@@ -574,7 +427,7 @@ const Node* Parser::fp_section()
         isVar = true;
     }
     const auto idList = ident_list();
-    requireToken(TokenType::colon);
+    require_token(TokenType::colon);
     const auto t = type();
     // TODO: std::make_shared<FormalParameterNode>(isVar, idList, t);
     return nullptr;
@@ -624,15 +477,15 @@ const Node* Parser::statement()
 
 const Node* Parser::if_statement()
 {
-    requireToken(TokenType::kw_if);
+    require_token(TokenType::kw_if);
     const auto ifCondition = expression();
-    requireToken(TokenType::kw_then);
+    require_token(TokenType::kw_then);
     const auto ifBlock = statement_sequence();
     // TODO: add if branch
     while (scanner_->peekToken()->getType() == TokenType::kw_elsif) {
         scanner_->nextToken();
         const auto cond = expression();
-        requireToken(TokenType::kw_then);
+        require_token(TokenType::kw_then);
         const auto blk = statement_sequence();
         // TODO: add to list
     }
@@ -642,7 +495,7 @@ const Node* Parser::if_statement()
         // TODO: add else branch
     }
 
-    requireToken(TokenType::kw_end);
+    require_token(TokenType::kw_end);
     // TODO: std::make_unique<ConditionalNode>(ifCondition, ifBlock, condList,
     // blkList, else
     return nullptr;
@@ -650,18 +503,18 @@ const Node* Parser::if_statement()
 
 const Node* Parser::while_statement()
 {
-    requireToken(TokenType::kw_while);
+    require_token(TokenType::kw_while);
     const auto cond = expression();
-    requireToken(TokenType::kw_do);
+    require_token(TokenType::kw_do);
     const auto body = statement_sequence();
-    requireToken(TokenType::kw_end);
+    require_token(TokenType::kw_end);
     // TODO: std::make_unique<WhileNode>(cond, body);
     return nullptr;
 }
 
 const Node* Parser::actual_parameters()
 {
-    requireToken(TokenType::lparen);
+    require_token(TokenType::lparen);
     if (scanner_->peekToken()->getType() != TokenType::rparen) {
         const auto first = expression();
         while (scanner_->peekToken()->getType() == TokenType::comma) {
@@ -671,7 +524,7 @@ const Node* Parser::actual_parameters()
         }
     }
 
-    requireToken(TokenType::rparen);
+    require_token(TokenType::rparen);
     // TODO: std::make_unique<ParamListNode>(list);
     return nullptr;
 }
@@ -687,7 +540,7 @@ const Node* Parser::selector()
         } else if (next->getType() == TokenType::lbrack) {
             scanner_->nextToken();
             const auto expr = expression();
-            requireToken(TokenType::rbrack);
+            require_token(TokenType::rbrack);
             // TODO: add SelectorNode(expr);
         } else {
             break;
