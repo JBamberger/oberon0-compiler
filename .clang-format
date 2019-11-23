@@ -1,0 +1,22 @@
+# Basic style
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+PointerAlignment: Left
+ColumnLimit: 100
+
+AlignOperands: true
+AllowShortBlocksOnASingleLine: true
+# AllowShortBlocksOnASingleLine: Empty
+# ShortBlockStyle: Empty
+BreakBeforeBraces: Custom
+BraceWrapping:
+	AfterFunction: true
+
+AllowShortLoopsOnASingleLine: true
+BinPackParameters: false
+
+# Comments
+AlwaysBreakTemplateDeclarations: true
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 1
