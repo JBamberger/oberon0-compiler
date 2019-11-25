@@ -5,9 +5,9 @@
 #include "Parser.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
+#include <cassert>
 #include <iostream>
 #include <sstream>
-#include <cassert>
 
 Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
 
@@ -90,17 +90,17 @@ std::unique_ptr<const Token> Parser::require_token(const TokenType& type)
         const auto msg = "Expected " + type_str(type) + " but got " +
                          (std::stringstream() << *token).str() + ".";
         logger_->error(token->getPosition(), msg);
-        // TODO: terminate
+        exit(EXIT_FAILURE);
     }
     return token;
 }
 
 std::string Parser::ident()
 {
-	auto token = require_token(TokenType::const_ident);
+    auto token = require_token(TokenType::const_ident);
     const auto ident_token = dynamic_cast<const IdentToken*>(token.get());
     assert(ident_token != nullptr);
-	
+
     return ident_token->getValue();
 }
 const Node* Parser::module()
@@ -122,7 +122,7 @@ const Node* Parser::module()
     if (moduleName != moduleName2) {
         logger_->error(namePos, "Expected equal module names but got " + moduleName + " and " +
                                     moduleName2 + ".");
-        // TODO: terminate
+        exit(EXIT_FAILURE);
     }
     require_token(TokenType::period);
 
@@ -312,7 +312,7 @@ const Node* Parser::factor()
         const auto num = scanner_->nextToken();
         const auto numToken = dynamic_cast<const NumberToken*>(num.get());
         assert(numToken != nullptr);
-    	
+
         const auto number = numToken->getValue();
         // TODO: std::make_unique<NumberNode>(number);
     } else if (next->getType() == TokenType::lparen) {
@@ -327,7 +327,7 @@ const Node* Parser::factor()
     } else {
         logger_->error(next->getPosition(), "Expected Identifier, Number, lparen or ~ but got " +
                                                 (std::stringstream() << *next).str() + ".");
-        // TODO: terminate
+        exit(EXIT_FAILURE);
     }
 
     return nullptr;
@@ -348,7 +348,7 @@ const Node* Parser::type()
     } else {
         logger_->error(next->getPosition(), "Expected Identifier, ARRAY or RECORD but got " +
                                                 (std::stringstream() << *next).str() + ".");
-        // TODO: terminate
+        exit(EXIT_FAILURE);
     }
     return nullptr;
 }
@@ -470,7 +470,7 @@ const Node* Parser::statement()
     } else {
         logger_->error(next->getPosition(), "Expected Identifier, IF or WHILE but got " +
                                                 (std::stringstream() << *next).str() + ".");
-        // TODO: terminate
+        exit(EXIT_FAILURE);
     }
     return nullptr;
 }
