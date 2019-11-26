@@ -28,7 +28,12 @@ enum class NodeType : char {
     variable,
     variable_reference,
     module,
-    procedure
+    procedure,
+    while_statement,
+    if_statement,
+    procedure_call,
+    assignment,
+    statement_sequence
 };
 
 class Node {

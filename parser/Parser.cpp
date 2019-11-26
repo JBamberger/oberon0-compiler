@@ -9,6 +9,7 @@
 #include "ast/MemberReferenceNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
+#include "ast/WhileStatementNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
 #include <cassert>
@@ -299,11 +300,14 @@ const ExpressionNode* Parser::factor()
         return new NumberConstantNode(pos, value);
     }
 
+    // TODO: string constant here
+    // TODO: bool constant here
+
     // nested expression
     if (next->getType() == TokenType::lparen) {
-        require_token(TokenType::lparen);
+        static_cast<void>(require_token(TokenType::lparen));
         const auto expr = expression();
-        require_token(TokenType::rparen);
+        static_cast<void>(require_token(TokenType::rparen));
         return expr;
     }
 
@@ -420,83 +424,113 @@ const Node* Parser::fp_section()
     return nullptr;
 }
 
-const Node* Parser::statement_sequence()
+const StatementSequenceNode* Parser::statement_sequence()
 {
-    const auto first = statement();
-    // TODO: add to list
+    const auto node = new StatementSequenceNode(scanner_->peekToken()->getPosition());
+    node->pushStatement(statement());
     while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-        scanner_->nextToken();
-        const auto next = statement();
-        // TODO: add to list
+        static_cast<void>(scanner_->nextToken());
+        node->pushStatement(statement());
     }
-    // std::make_unique<StatementListNode>(list);
-    return nullptr;
+    return node;
 }
 
-const Node* Parser::statement()
+const StatementNode* Parser::statement()
 {
     auto next = scanner_->peekToken();
     if (next->getType() == TokenType::const_ident) {
-        const auto id = ident();
-        const auto sel = selector();
-        next = scanner_->peekToken();
-        if (next->getType() == TokenType::op_becomes) {
-            scanner_->nextToken();
-            const auto expr = expression();
-            // TODO: std::make_unique<AssignmentNode>(id, sel, expr);
-        } else {
-            if (next->getType() == TokenType::lparen) {
-                const auto params = actual_parameters();
-            }
-            // TODO: std::make_unique<ProcedureCallNode(id, sel, params);
-        }
-    } else if (next->getType() == TokenType::kw_if) {
+        return procedure_call_or_assignment();
+    }
+    if (next->getType() == TokenType::kw_if) {
         return if_statement();
-    } else if (next->getType() == TokenType::kw_while) {
+    }
+    if (next->getType() == TokenType::kw_while) {
         return while_statement();
-    } else {
-        logger_->error(next->getPosition(), "Expected Identifier, IF or WHILE but got " +
-                                                (std::stringstream() << *next).str() + ".");
-        exit(EXIT_FAILURE);
     }
+
+    logger_->error(next->getPosition(), "Expected Identifier, IF or WHILE but got " +
+                                            (std::stringstream() << *next).str() + ".");
+    exit(EXIT_FAILURE);
+}
+
+const AssignmentNode* Parser::assignment(const MemberReferenceNode* assignee)
+{
+    const auto first = require_token(TokenType::op_becomes);
+    const auto expr = expression();
+
+    return new AssignmentNode(first->getPosition(), assignee, expr);
+}
+
+const ProcedureCallNode* Parser::procedure_call(const MemberReferenceNode* name)
+{
+    const auto next = scanner_->peekToken();
+    if (next->getType() == TokenType::lparen) {
+        const auto params = actual_parameters();
+    }
+    // TODO: std::make_unique<ProcedureCallNode(id, sel, params);
     return nullptr;
 }
 
-const Node* Parser::if_statement()
+const StatementNode* Parser::procedure_call_or_assignment()
 {
-    require_token(TokenType::kw_if);
-    const auto ifCondition = expression();
-    require_token(TokenType::kw_then);
-    const auto ifBlock = statement_sequence();
-    // TODO: add if branch
+    const auto pos = scanner_->peekToken()->getPosition();
+    const auto id = ident();
+    const auto sel = selector();
+    const auto base = new MemberReferenceNode(pos, id, sel);
+
+    const auto next = scanner_->peekToken();
+    if (next->getType() == TokenType::op_becomes) {
+        return assignment(base);
+    }
+    return procedure_call(base);
+}
+
+const IfStatementNode* Parser::if_statement()
+{
+    // if statement
+    auto pos = require_token(TokenType::kw_if)->getPosition();
+    auto cond = expression();
+    static_cast<void>(require_token(TokenType::kw_then));
+    auto block = statement_sequence();
+
+    const auto node = new IfStatementNode(pos, cond, block);
+    // this is the next node where the else body must be filled
+    auto nextNode = node;
+
+    // elif statements
     while (scanner_->peekToken()->getType() == TokenType::kw_elsif) {
-        scanner_->nextToken();
-        const auto cond = expression();
-        require_token(TokenType::kw_then);
-        const auto blk = statement_sequence();
-        // TODO: add to list
-    }
-    if (scanner_->peekToken()->getType() == TokenType::kw_else) {
-        scanner_->nextToken();
-        const auto blk = statement_sequence();
-        // TODO: add else branch
+        pos = scanner_->nextToken()->getPosition();
+        cond = expression();
+        static_cast<void>(require_token(TokenType::kw_then));
+        block = statement_sequence();
+
+        const auto body = new StatementSequenceNode(pos);
+        nextNode->setElseBody(body);
+        nextNode = new IfStatementNode(pos, cond, block);
+        body->pushStatement(nextNode);
     }
 
-    require_token(TokenType::kw_end);
-    // TODO: std::make_unique<ConditionalNode>(ifCondition, ifBlock, condList,
-    // blkList, else
-    return nullptr;
+    // else statement
+    if (scanner_->peekToken()->getType() == TokenType::kw_else) {
+        static_cast<void>(scanner_->nextToken());
+        block = statement_sequence();
+        nextNode->setElseBody(block);
+    }
+
+    static_cast<void>(require_token(TokenType::kw_end));
+
+    return node;
 }
 
-const Node* Parser::while_statement()
+const WhileStatementNode* Parser::while_statement()
 {
-    require_token(TokenType::kw_while);
+    const auto token = require_token(TokenType::kw_while);
     const auto cond = expression();
-    require_token(TokenType::kw_do);
+    static_cast<void>(require_token(TokenType::kw_do));
     const auto body = statement_sequence();
-    require_token(TokenType::kw_end);
-    // TODO: std::make_unique<WhileNode>(cond, body);
-    return nullptr;
+    static_cast<void>(require_token(TokenType::kw_end));
+
+    return new WhileStatementNode(token->getPosition(), cond, body);
 }
 
 const Node* Parser::actual_parameters()

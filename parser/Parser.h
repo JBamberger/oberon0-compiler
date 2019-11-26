@@ -9,6 +9,12 @@
 #include "ast/ExpressionNode.h"
 #include "ast/Node.h"
 #include "ast/VariableReferenceNode.h"
+#include "ast/WhileStatementNode.h"
+#include "ast/IfStatementNode.h"
+#include "ast/AssignmentNode.h"
+#include "ast/ProcedureCallNode.h"
+
+class MemberReferenceNode;
 
 class Parser {
 
@@ -38,14 +44,15 @@ class Parser {
     const Node* procedure_body();
     const Node* formal_parameters();
     const Node* fp_section();
-    const Node* statement_sequence();
-    const Node* statement();
-    const Node* assignment();
-    const Node* procedure_call();
-    const Node* if_statement();
-    const Node* while_statement();
+    const StatementSequenceNode* statement_sequence();
+    const StatementNode* statement();
+    const AssignmentNode* assignment(const MemberReferenceNode* assignee);
+    const ProcedureCallNode* procedure_call(const MemberReferenceNode* name);
+    const IfStatementNode* if_statement();
+    const WhileStatementNode* while_statement();
     const Node* actual_parameters();
     const VariableReferenceNode* selector();
+    const StatementNode* procedure_call_or_assignment();
 
   public:
     explicit Parser(Scanner* scanner, Logger* logger);
