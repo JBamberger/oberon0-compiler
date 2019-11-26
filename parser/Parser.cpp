@@ -3,6 +3,12 @@
 //
 
 #include "Parser.h"
+#include "ast/ArrayReferenceNode.h"
+#include "ast/BinaryExpressionNode.h"
+#include "ast/ExpressionNode.h"
+#include "ast/MemberReferenceNode.h"
+#include "ast/NumberConstantNode.h"
+#include "ast/UnaryExpressionNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
 #include <cassert>
@@ -12,72 +18,6 @@
 Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
 
 Parser::~Parser() = default;
-
-/***
-Grammar:
-
-ident = letter {letter | digit}.
-
-integer = digit {digit}.
-
-selector = {"." ident | "[" expression "]"}.
-
-number = integer.
-
-factor = ident selector | number | "(" expression ")" | "~" factor.
-
-term = factor {("*" | "DIV" | "MOD" | "&") factor}.
-
-SimpleExpression = ["+"|"-"] term {("+"|"-" | "OR") term}.
-
-expression = SimpleExpression [("=" | "#" | "<" | "<=" | ">" | ">=") SimpleExpression].
-
-assignment = ident selector ":=" expression.
-
-ActualParameters = "(" [expression {"," expression}] ")" .
-
-ProcedureCall = ident selector [ActualParameters].
-
-IfStatement = "IF" expression "THEN" StatementSequence
-              {"ELSIF" expression "THEN" StatementSequence}
-              ["ELSE" StatementSequence]
-              "END".
-
-WhileStatement = "WHILE" expression "DO" StatementSequence "END".
-
-statement = [assignment | ProcedureCall | IfStatement | WhileStatement].
-
-StatementSequence = statement {";" statement}.
-
-IdentList = ident {"," ident}.
-
-ArrayType = "ARRAY" expression "OF" type.
-
-FieldList = [IdentList ":" type].
-
-RecordType = "RECORD" FieldList {";" FieldList} "END".
-
-type = ident | ArrayType | RecordType.
-
-FPSection = ["VAR"] IdentList ":" type.
-
-FormalParameters = "(" [FPSection {";" FPSection}] ")".
-
-ProcedureHeading = "PROCEDURE" ident [FormalParameters].
-
-ProcedureBody = declarations ["BEGIN" StatementSequence] "END" ident.
-
-ProcedureDeclaration = ProcedureHeading ";" ProcedureBody.
-
-declarations = ["CONST" {ident "=" expression ";"}]
-               ["TYPE" {ident "=" type ";"}]
-               ["VAR" {IdentList ":" type ";"}]
-               {ProcedureDeclaration ";"}.
-
-module = "MODULE" ident ";"
-         declarations ["BEGIN" StatementSequence]
-         "END" ident "." .
-***/
 
 inline std::string type_str(const TokenType& t) { return (std::stringstream() << t).str(); }
 
@@ -103,6 +43,7 @@ std::string Parser::ident()
 
     return ident_token->getValue();
 }
+
 const Node* Parser::module()
 {
     require_token(TokenType::kw_module);
@@ -243,94 +184,140 @@ const Node* Parser::procedure_body()
     return nullptr;
 }
 
-const Node* Parser::expression()
+const ExpressionNode* Parser::expression()
 {
-    const auto first = simple_expression();
-    bool readSecond = false;
-    switch (scanner_->peekToken()->getType()) {
-    case TokenType::op_eq:
-    case TokenType::op_neq:
-    case TokenType::op_leq:
-    case TokenType::op_lt:
-    case TokenType::op_geq:
-    case TokenType::op_gt:
-        readSecond = true;
-        break;
-    default:
-        break;
+    const auto node = simple_expression();
+
+    BinaryOperator op;
+    const auto nt = scanner_->peekToken()->getType();
+    if (nt == TokenType::op_eq) {
+        op = BinaryOperator::eq;
+    } else if (nt == TokenType::op_neq) {
+        op = BinaryOperator::neq;
+    } else if (nt == TokenType::op_lt) {
+        op = BinaryOperator::lt;
+    } else if (nt == TokenType::op_leq) {
+        op = BinaryOperator::leq;
+    } else if (nt == TokenType::op_gt) {
+        op = BinaryOperator::gt;
+    } else if (nt == TokenType::op_geq) {
+        op = BinaryOperator::geq;
+    } else {
+        return node;
     }
-    if (readSecond) {
-        const auto type = scanner_->nextToken()->getType();
-        const auto second = simple_expression();
-        // TODO: std::make_unique<ComparisonNode>(first, second, operation);
-    }
-    // TODO: first;
-    return nullptr;
+
+    const auto next = scanner_->nextToken();
+    const auto second = simple_expression();
+    return new BinaryExpressionNode(next->getPosition(), op, node, second);
 }
 
-const Node* Parser::simple_expression()
+const ExpressionNode* Parser::simple_expression()
 {
+    const ExpressionNode* node;
+
     auto next = scanner_->peekToken()->getType();
     if (next == TokenType::op_plus || next == TokenType::op_minus) {
         const auto prefix = scanner_->nextToken();
+        const auto operand = term();
+        const auto op = next == TokenType::op_plus ? UnaryOperator::plus : UnaryOperator::minus;
+        node = new UnaryExpressionNode(prefix->getPosition(), op, operand);
+    } else {
+        node = term();
     }
-    const auto first = term();
+
     next = scanner_->peekToken()->getType();
-    while (next == TokenType::op_plus || next == TokenType::op_minus || next == TokenType::op_or) {
+    while (true) {
+        BinaryOperator op;
+        if (next == TokenType::op_plus) {
+            op = BinaryOperator::plus;
+        } else if (next == TokenType::op_minus) {
+            op = BinaryOperator::minus;
+        } else if (next == TokenType::op_or) {
+            op = BinaryOperator::logical_or;
+        } else {
+            break;
+        }
+
         const auto nextOp = scanner_->nextToken();
-        const auto nextTerm = term();
-        // TODO: add to list BinOpNode(nextOp, nextTerm, other);
+        const auto otherNode = term();
+        node = new BinaryExpressionNode(nextOp->getPosition(), op, node, otherNode);
         next = scanner_->peekToken()->getType();
     }
-    // TODO: list
-    return nullptr;
+    return node;
 }
 
-const Node* Parser::term()
+const ExpressionNode* Parser::term()
 {
-    const auto first = factor();
+    auto node = dynamic_cast<const ExpressionNode*>(factor());
+
     auto next = scanner_->peekToken()->getType();
-    while (next == TokenType::op_times || next == TokenType::op_div || next == TokenType::op_mod ||
-           next == TokenType::op_and) {
+    while (true) {
+        BinaryOperator op;
+        if (next == TokenType::op_times) {
+            op = BinaryOperator::times;
+        } else if (next == TokenType::op_div) {
+            op = BinaryOperator::div;
+        } else if (next == TokenType::op_mod) {
+            op = BinaryOperator::mod;
+        } else if (next == TokenType::op_and) {
+            op = BinaryOperator::logical_and;
+        } else {
+            break;
+        }
+
         const auto operation = scanner_->nextToken();
         const auto operand = factor();
-        // TODO: add to list BinNode(op, operand, other);
+
+        node = new BinaryExpressionNode(operation->getPosition(), op, node, operand);
+
         next = scanner_->peekToken()->getType();
     }
-    // TODO: list
-    return nullptr;
+
+    return node;
 }
 
-const Node* Parser::factor()
+const ExpressionNode* Parser::factor()
 {
-    auto next = scanner_->peekToken();
+    const auto next = scanner_->peekToken();
+    const auto pos = next->getPosition();
+
+    // variable access
     if (next->getType() == TokenType::const_ident) {
         const auto name = ident();
         const auto sel = selector();
-        // TODO: std::make_unique<IdFactorNode>(name, sel);
-    } else if (next->getType() == TokenType::const_number) {
+
+        return new MemberReferenceNode(pos, name, sel);
+    }
+
+    // number constant
+    if (next->getType() == TokenType::const_number) {
         const auto num = scanner_->nextToken();
         const auto numToken = dynamic_cast<const NumberToken*>(num.get());
         assert(numToken != nullptr);
+        const auto value = numToken->getValue();
 
-        const auto number = numToken->getValue();
-        // TODO: std::make_unique<NumberNode>(number);
-    } else if (next->getType() == TokenType::lparen) {
+        return new NumberConstantNode(pos, value);
+    }
+
+    // nested expression
+    if (next->getType() == TokenType::lparen) {
         require_token(TokenType::lparen);
         const auto expr = expression();
         require_token(TokenType::rparen);
-        // TODO: expr
-    } else if (next->getType() == TokenType::op_not) {
-        require_token(TokenType::op_not);
-        const auto f = factor();
-        // TODO: f
-    } else {
-        logger_->error(next->getPosition(), "Expected Identifier, Number, lparen or ~ but got " +
-                                                (std::stringstream() << *next).str() + ".");
-        exit(EXIT_FAILURE);
+        return expr;
     }
 
-    return nullptr;
+    // negation
+    if (next->getType() == TokenType::op_not) {
+        const auto op = require_token(TokenType::op_not);
+        const auto value = factor();
+
+        return new UnaryExpressionNode(pos, UnaryOperator::not, value);
+    }
+
+    logger_->error(next->getPosition(), "Expected Identifier, Number, lparen or ~ but got " +
+                                            (std::stringstream() << *next).str() + ".");
+    exit(EXIT_FAILURE);
 }
 
 const Node* Parser::type()
@@ -529,23 +516,36 @@ const Node* Parser::actual_parameters()
     return nullptr;
 }
 
-const Node* Parser::selector()
+const VariableReferenceNode* Parser::selector()
 {
+    const VariableReferenceNode* node = nullptr;
+    VariableReferenceNode* currentNode = nullptr;
     auto next = scanner_->peekToken();
     while (true) {
+        VariableReferenceNode* nextNode;
         if (next->getType() == TokenType::period) {
-            scanner_->nextToken();
-            const auto id = ident();
-            // TODO: add MemberNode(id);
+            const auto idToken = scanner_->nextToken();
+            const auto name = ident();
+
+            nextNode = new MemberReferenceNode(idToken->getPosition(), name, nullptr);
         } else if (next->getType() == TokenType::lbrack) {
-            scanner_->nextToken();
+            const auto openToken = scanner_->nextToken();
             const auto expr = expression();
             require_token(TokenType::rbrack);
-            // TODO: add SelectorNode(expr);
+
+            nextNode = new ArrayReferenceNode(openToken->getPosition(), nullptr, expr);
         } else {
             break;
         }
+
+        if (node == nullptr) {
+            node = nextNode;
+            currentNode = nextNode;
+        } else {
+            currentNode->setNext(nextNode);
+        }
+
+        next = scanner_->peekToken();
     }
-    // TODO: return list
-    return nullptr;
+    return node;
 }

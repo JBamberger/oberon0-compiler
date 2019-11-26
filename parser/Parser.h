@@ -6,7 +6,9 @@
 #define OBERON0C_PARSER_H
 
 #include "../scanner/Scanner.h"
+#include "ast/ExpressionNode.h"
 #include "ast/Node.h"
+#include "ast/VariableReferenceNode.h"
 
 class Parser {
 
@@ -23,10 +25,10 @@ class Parser {
     const Node* type_declarations();
     const Node* var_declarations();
     const Node* procedure_declaration();
-    const Node* expression();
-    const Node* simple_expression();
-    const Node* term();
-    const Node* factor();
+    const ExpressionNode* expression();
+    const ExpressionNode* simple_expression();
+    const ExpressionNode* term();
+    const ExpressionNode* factor();
     const Node* type();
     const Node* array_type();
     const Node* record_type();
@@ -43,7 +45,7 @@ class Parser {
     const Node* if_statement();
     const Node* while_statement();
     const Node* actual_parameters();
-    const Node* selector();
+    const VariableReferenceNode* selector();
 
   public:
     explicit Parser(Scanner* scanner, Logger* logger);
