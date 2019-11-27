@@ -18,7 +18,7 @@ class TypedIdentifierNode : public Node {
     void makeReference() { isReference = true; }
     void print(std::ostream& stream) const override
     {
-        stream << "FieldNode(" << name_ << ", " << type_ << ")";
+        stream << "FieldNode(" << name_ << ", " << *type_ << ")";
     }
 };
 

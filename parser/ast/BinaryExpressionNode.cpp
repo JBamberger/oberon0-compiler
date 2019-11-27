@@ -36,5 +36,5 @@ std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
 
 void BinaryExpressionNode::print(std::ostream& stream) const
 {
-    stream << "BinaryExpressionNode(" << op_ << ", " << operand1_ << ", " << operand2_ << ")";
+    stream << "BinaryExpressionNode(" << op_ << ", " << *operand1_ << ", " << *operand2_ << ")";
 }

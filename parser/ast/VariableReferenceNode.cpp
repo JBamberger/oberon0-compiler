@@ -10,5 +10,9 @@ VariableReferenceNode::~VariableReferenceNode() = default;
 
 void VariableReferenceNode::print(std::ostream& stream) const
 {
-    stream << "MemberReferenceNode(" << name_ << ", " << next_ << ")";
+    stream << "MemberReferenceNode(" << name_;
+    if (next_ != nullptr) {
+        stream << ", " << *next_;
+    }
+    stream << ")";
 }

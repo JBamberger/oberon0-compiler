@@ -12,5 +12,5 @@ ProcedureBodyNode::~ProcedureBodyNode() = default;
 
 void ProcedureBodyNode::print(std::ostream& stream) const
 {
-    stream << "ProcedureBodyNode(" << name_ << ", " << declarations_ << ")";
+    stream << "ProcedureBodyNode(" << name_ << ", " << *declarations_ << ")";
 }

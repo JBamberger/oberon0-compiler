@@ -11,5 +11,5 @@ ConstantDeclarationNode::~ConstantDeclarationNode() = default;
 
 void ConstantDeclarationNode::print(std::ostream& stream) const
 {
-    stream << "ConstantDeclarationNode(" << name_ << ", " << value_ << ")";
+    stream << "ConstantDeclarationNode(" << name_ << ", " << *value_ << ")";
 }

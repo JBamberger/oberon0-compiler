@@ -10,5 +10,5 @@ TypeReferenceNode::~TypeReferenceNode() = default;
 
 void TypeReferenceNode::print(std::ostream& stream) const
 {
-    stream << "TypeReferenceNode(" << type_ << ")";
+    stream << "TypeReferenceNode(" << *type_ << ")";
 }

@@ -11,5 +11,5 @@ WhileStatementNode::~WhileStatementNode() = default;
 
 void WhileStatementNode::print(std::ostream& stream) const
 {
-    stream << "While(" << condition_ << ", " << body_ << ")";
+    stream << "While(" << *condition_ << ", " << *body_ << ")";
 }

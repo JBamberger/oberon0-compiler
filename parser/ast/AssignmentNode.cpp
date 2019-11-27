@@ -11,5 +11,5 @@ AssignmentNode::~AssignmentNode() = default;
 
 void AssignmentNode::print(std::ostream& stream) const
 {
-    stream << "AssignmentNode(" << assignee_ << " := " << value_ << ")";
+    stream << "AssignmentNode(" << *assignee_ << " := " << *value_ << ")";
 }

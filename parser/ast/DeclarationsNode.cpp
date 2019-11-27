@@ -1,4 +1,5 @@
 #include "DeclarationsNode.h"
+#include "ProcedureDeclarationList.h"
 
 DeclarationsNode::DeclarationsNode(const FilePos& pos,
                                    const ConstantDeclarationList* constants,
@@ -15,6 +16,15 @@ DeclarationsNode::~DeclarationsNode() = default;
 
 void DeclarationsNode::print(std::ostream& stream) const
 {
-    stream << "Declarations(" << constants_ << ", " << variables_ << ", " << types_ << ", "
-           << procedures_ << ")";
+    stream << "Declarations(";
+    if (constants_ != nullptr)
+        stream << *constants_ << ", ";
+    if (variables_ != nullptr)
+        stream << *variables_ << ", ";
+    if (types_ != nullptr)
+        stream << *types_ << ", ";
+    if (procedures_ != nullptr)
+        stream << *procedures_;
+
+    stream << ")";
 }

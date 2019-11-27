@@ -14,5 +14,5 @@ ModuleNode::~ModuleNode() = default;
 
 void ModuleNode::print(std::ostream& stream) const
 {
-    stream << "Module(" << name_ << ", " << declarations_ << ", " << statements_ << ")";
+    stream << "Module(" << name_ << ", " << *declarations_ << ", " << *statements_ << ")";
 }

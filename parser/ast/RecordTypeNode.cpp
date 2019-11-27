@@ -19,8 +19,8 @@ void RecordTypeNode::addFields(const FieldListNode* fields)
 void RecordTypeNode::print(std::ostream& stream) const
 {
     stream << "RecordTypeNode(Types=(";
-    for (const auto& type_node : types_) stream << type_node << " ";
+    for (const auto& type_node : types_) stream << *type_node << " ";
     stream << "), Members=(";
-    for (const auto& field_node : members_) stream << field_node << " ";
+    for (const auto& field_node : members_) stream << *field_node << " ";
     stream << "))";
 }

@@ -18,7 +18,7 @@ int main(const int argc, const char *argv[]) {
     logger->setLevel(LogLevel::DEBUG);
     auto scanner = std::make_unique<Scanner>(filename, logger.get());
     auto parser = std::make_unique<Parser>(scanner.get(), logger.get());
-    parser->parse();
+    parser->parse()->print(std::cout);
     logger->info(filename, "Parsing complete.");
     exit(0);
 }

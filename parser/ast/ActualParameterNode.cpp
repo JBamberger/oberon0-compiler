@@ -16,7 +16,7 @@ void ActualParameterNode::print(std::ostream& stream) const
 {
     stream << "ActualParameterNode(" << param_;
     if (next_ != nullptr) {
-        stream << ", " << next_;
+        stream << ", " << *next_;
     }
     stream << ")";
 }

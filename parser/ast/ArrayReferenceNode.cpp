@@ -10,5 +10,9 @@ ArrayReferenceNode::~ArrayReferenceNode() = default;
 
 void ArrayReferenceNode::print(std::ostream& stream) const
 {
-    stream << "ArrayReferenceNode(" << index_ << ", " << next_ << ")";
+    stream << "ArrayReferenceNode(" << *index_;
+    if (next_ != nullptr) {
+        stream << ", " << *next_;
+    }
+    stream << ")";
 }

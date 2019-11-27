@@ -29,5 +29,5 @@ std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
 
 void UnaryExpressionNode::print(std::ostream& stream) const
 {
-    stream << "UnaryExpression(" << operator_ << ", " << operand_ << ")";
+    stream << "UnaryExpression(" << operator_ << ", " << *operand_ << ")";
 }

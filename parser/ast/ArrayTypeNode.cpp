@@ -9,5 +9,5 @@ ArrayTypeNode::~ArrayTypeNode() = default;
 
 void ArrayTypeNode::print(std::ostream& stream) const
 {
-    stream << "ArrayTypeNode(" << value_ << "," << type_ << ")";
+    stream << "ArrayTypeNode(" << *value_ << "," << *type_ << ")";
 }

@@ -16,8 +16,9 @@ void IfStatementNode::setElseBody(const StatementSequenceNode* elsePart)
 
 void IfStatementNode::print(std::ostream& stream) const
 {
-    stream << "IfStatementNode(" << condition_ << " then " << thenPart_;
-    if (elsePart_ != nullptr)
-        stream << " else " << elsePart_;
+    stream << "IfStatementNode(" << *condition_ << " then " << *thenPart_;
+    if (elsePart_ != nullptr) {
+        stream << " else " << *elsePart_;
+    }
     stream << ")";
 }

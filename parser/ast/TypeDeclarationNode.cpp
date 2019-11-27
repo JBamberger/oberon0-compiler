@@ -9,5 +9,5 @@ TypeDeclarationNode::~TypeDeclarationNode() = default;
 
 void TypeDeclarationNode::print(std::ostream& stream) const
 {
-    stream << "TypeDeclarationNode(" << name_ << ", " << type_ << ")";
+    stream << "TypeDeclarationNode(" << name_ << ", " << *type_ << ")";
 }

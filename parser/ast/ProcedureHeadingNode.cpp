@@ -11,5 +11,8 @@ ProcedureHeadingNode::~ProcedureHeadingNode() = default;
 
 void ProcedureHeadingNode::print(std::ostream& stream) const
 {
-    stream << "ProcedureHeadingNode(" << name_ << ", " << params_ << ")";
+    stream << "ProcedureHeadingNode(" << name_;
+    if (params_ != nullptr)
+        stream << ", " << *params_;
+    stream << ")";
 }

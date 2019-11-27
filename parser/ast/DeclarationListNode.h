@@ -1,5 +1,9 @@
 #pragma once
+#include "ConstantDeclarationNode.h"
+#include "DeclarationListNode.h"
 #include "Node.h"
+#include "TypeDeclarationNode.h"
+#include "TypedIdentifierListNode.h"
 #include <vector>
 
 template <class T>
@@ -15,14 +19,11 @@ class DeclarationListNode : public Node {
 
     void print(std::ostream& stream) const override
     {
-        stream << "DeclarationListNode("; //  << list_ << ")";
+        stream << "DeclarationListNode(";
+        for (const auto& v : list_) stream << *v << " ";
+        stream << ")";
     }
 };
-
-#include "ConstantDeclarationNode.h"
-#include "DeclarationListNode.h"
-#include "TypeDeclarationNode.h"
-#include "TypedIdentifierListNode.h"
 
 using ConstantDeclarationList = DeclarationListNode<ConstantDeclarationNode>;
 using VariableDeclarationList = DeclarationListNode<VariableListNode>;
