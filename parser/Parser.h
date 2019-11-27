@@ -50,7 +50,7 @@ class Parser {
     const ProcedureCallNode* procedure_call(const MemberReferenceNode* name);
     const IfStatementNode* if_statement();
     const WhileStatementNode* while_statement();
-    const Node* actual_parameters();
+    const ActualParameterNode* actual_parameters();
     const VariableReferenceNode* selector();
     const StatementNode* procedure_call_or_assignment();
 

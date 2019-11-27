@@ -45,6 +45,8 @@ add_executable(oberon0c
     parser/ast/AssignmentNode.h
     parser/ast/AssignmentNode.cpp
     parser/ast/ProcedureCallNode.h
-    # parser/ast/ProcedureCallNode.cpp
+    parser/ast/ProcedureCallNode.cpp
+    parser/ast/ActualParameterNode.h
+    parser/ast/ActualParameterNode.cpp
     main.cpp
 )

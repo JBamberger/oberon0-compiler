@@ -464,11 +464,12 @@ const AssignmentNode* Parser::assignment(const MemberReferenceNode* assignee)
 const ProcedureCallNode* Parser::procedure_call(const MemberReferenceNode* name)
 {
     const auto next = scanner_->peekToken();
+    const ActualParameterNode* params = nullptr;
     if (next->getType() == TokenType::lparen) {
-        const auto params = actual_parameters();
+        params = actual_parameters();
     }
-    // TODO: std::make_unique<ProcedureCallNode(id, sel, params);
-    return nullptr;
+
+    return new ProcedureCallNode(name, params);
 }
 
 const StatementNode* Parser::procedure_call_or_assignment()
@@ -533,21 +534,28 @@ const WhileStatementNode* Parser::while_statement()
     return new WhileStatementNode(token->getPosition(), cond, body);
 }
 
-const Node* Parser::actual_parameters()
+const ActualParameterNode* Parser::actual_parameters()
 {
-    require_token(TokenType::lparen);
+    ActualParameterNode* node = nullptr;
+
+    static_cast<void>(require_token(TokenType::lparen));
+
     if (scanner_->peekToken()->getType() != TokenType::rparen) {
-        const auto first = expression();
+        node = new ActualParameterNode(expression());
+        auto nextNode = node;
+
         while (scanner_->peekToken()->getType() == TokenType::comma) {
-            scanner_->nextToken();
-            const auto next = expression();
-            // TODO: add to list
+            static_cast<void>(scanner_->nextToken());
+
+            auto next = new ActualParameterNode(expression());
+            nextNode->setNext(next);
+            nextNode = next;
         }
     }
 
-    require_token(TokenType::rparen);
-    // TODO: std::make_unique<ParamListNode>(list);
-    return nullptr;
+    static_cast<void>(require_token(TokenType::rparen));
+
+    return node;
 }
 
 const VariableReferenceNode* Parser::selector()
