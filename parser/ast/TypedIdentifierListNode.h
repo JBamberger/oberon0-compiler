@@ -13,7 +13,8 @@ class TypedIdentifierListNode : public Node {
   public:
     TypedIdentifierListNode(const FilePos& pos,
                             const IdentifierListNode* names,
-                            const TypeNode* type)
+                            const TypeNode* type,
+                            const bool isReference)
         : Node(NodeType::typed_id_list, pos),
           pairs_(std::make_shared<std::vector<std::unique_ptr<const TypedIdentifierNode<T>>>>()),
           type_(type)
@@ -21,8 +22,18 @@ class TypedIdentifierListNode : public Node {
         for (const auto& name : names->getNames()) {
             const auto fieldType = new TypeReferenceNode(type->getFilePos(), type_);
             auto field = new TypedIdentifierNode<T>(fieldType->getFilePos(), name, fieldType);
+            if (isReference) {
+                field->makeReference();
+            }
             pairs_->emplace_back(field);
         }
+    }
+
+    TypedIdentifierListNode(const FilePos& pos,
+                            const IdentifierListNode* names,
+                            const TypeNode* type)
+        : TypedIdentifierListNode(pos, names, type, false)
+    {
     }
     ~TypedIdentifierListNode() override = default;
 

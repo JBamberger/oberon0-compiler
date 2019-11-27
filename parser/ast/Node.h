@@ -35,7 +35,14 @@ enum class NodeType : char {
     assignment,
     statement_sequence,
     id_list,
-    typed_id_list
+    typed_id_list,
+    declarations,
+    declaration_list,
+    type_declaration,
+    procedure_heading,
+    procedure_body,
+    procedure_declaration,
+    constant_declaration
 };
 
 class Node {

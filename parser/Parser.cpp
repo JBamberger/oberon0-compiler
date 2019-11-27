@@ -7,7 +7,10 @@
 #include "ast/ArrayReferenceNode.h"
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
+#include "ast/ConstantDeclarationNode.h"
 #include "ast/NumberConstantNode.h"
+#include "ast/ProcedureDeclarationList.h"
+#include "ast/TypeDeclarationNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
@@ -44,19 +47,23 @@ std::string Parser::ident()
     return ident_token->getValue();
 }
 
-const Node* Parser::module()
+const ModuleNode* Parser::module()
 {
-    require_token(TokenType::kw_module);
+    const auto pos = require_token(TokenType::kw_module)->getPosition();
     const auto moduleName = ident();
-    require_token(TokenType::semicolon);
+
+    static_cast<void>(require_token(TokenType::semicolon));
+
     const auto decls = declarations();
 
+    const StatementSequenceNode* statements = nullptr;
     if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
-        scanner_->nextToken(); // just consume the token, we've checked it already.
-        const auto statements = statement_sequence();
+        // just consume the token, we've checked it already.
+        static_cast<void>(scanner_->nextToken());
+        statements = statement_sequence();
     }
 
-    require_token(TokenType::kw_end);
+    static_cast<void>(require_token(TokenType::kw_end));
 
     const auto namePos = scanner_->peekToken()->getPosition();
     const auto moduleName2 = ident();
@@ -65,123 +72,146 @@ const Node* Parser::module()
                                     moduleName2 + ".");
         exit(EXIT_FAILURE);
     }
-    require_token(TokenType::period);
+    static_cast<void>(require_token(TokenType::period));
 
-    // TODO: const auto node =  std::make_unique<ModuleNode>(moduleName, decls,
-    // statements?);
-    return nullptr;
+    return new ModuleNode(pos, moduleName, decls, statements);
 }
 
-const Node* Parser::declarations()
+const DeclarationsNode* Parser::declarations()
 {
+    const auto pos = scanner_->peekToken()->getPosition();
     const auto constDecls = const_declarations();
     const auto typeDecls = type_declarations();
     const auto varDecls = var_declarations();
 
     auto next = scanner_->peekToken();
+    const auto procPos = next->getPosition();
+    std::vector<std::unique_ptr<const ProcedureDeclarationNode>> procedureNodes;
     while (next->getType() == TokenType::kw_procedure) {
         const auto procDec = procedure_declaration();
-        require_token(TokenType::semicolon);
-        // TODO: add to tlist
+        static_cast<void>(require_token(TokenType::semicolon));
+
+        procedureNodes.emplace_back(procDec);
+
         next = scanner_->peekToken();
     }
 
-    // TODO: add std::make_unique<DeclarationsNode>(constDecls, typeDecls,
-    // varDecls, procDecl);
-    return nullptr;
+    const auto procDecls = new ProcedureDeclarationList(procPos, std::move(procedureNodes));
+    return new DeclarationsNode(pos, constDecls, varDecls, typeDecls, procDecls,
+                                [](const ProcedureDeclarationList* l) { delete l; });
 }
 
-const Node* Parser::const_declarations()
+const ConstantDeclarationList* Parser::const_declarations()
 {
     auto next = scanner_->peekToken();
 
     if (next->getType() == TokenType::kw_const) {
-        scanner_->nextToken(); // consume the const keyword
+        const auto pos = scanner_->nextToken()->getPosition();
+
         next = scanner_->peekToken();
+        std::vector<std::unique_ptr<const ConstantDeclarationNode>> nodes;
         while (next->getType() == TokenType::const_ident) {
+            const auto decPos = next->getPosition();
             const auto name = ident();
-            require_token(TokenType::op_eq);
-            const auto expr = expression();
-            require_token(TokenType::semicolon);
-            // TODO: add std::make_unique<ConstDeclNode>(name, expr);
+            static_cast<void>(require_token(TokenType::op_eq));
+            const auto value = expression();
+            static_cast<void>(require_token(TokenType::semicolon));
+
+            nodes.emplace_back(new ConstantDeclarationNode(decPos, name, value));
+
             next = scanner_->peekToken();
         }
+
+        return new ConstantDeclarationList(pos, std::move(nodes));
     }
-    // TODO: list
     return nullptr;
 }
 
-const Node* Parser::type_declarations()
+const TypeDeclarationList* Parser::type_declarations()
 {
     auto next = scanner_->peekToken();
 
     if (next->getType() == TokenType::kw_type) {
-        scanner_->nextToken();
+        const auto pos = scanner_->nextToken()->getPosition();
         next = scanner_->peekToken();
+        std::vector<std::unique_ptr<const TypeDeclarationNode>> nodes;
         while (next->getType() == TokenType::const_ident) {
+            const auto typePos = next->getPosition();
             const auto name = ident();
-            require_token(TokenType::op_eq);
+            static_cast<void>(require_token(TokenType::op_eq));
             const auto tp = type();
-            require_token(TokenType::semicolon);
-            // TODO: add std::make_unique<TypeDeclNode>(name, tp);
+            static_cast<void>(require_token(TokenType::semicolon));
+
+            nodes.emplace_back(new TypeDeclarationNode(typePos, name, tp));
+
             next = scanner_->peekToken();
         }
+        return new TypeDeclarationList(pos, std::move(nodes));
     }
-    // TODO: list
+
     return nullptr;
 }
 
-const Node* Parser::var_declarations()
+const VariableDeclarationList* Parser::var_declarations()
 {
     auto next = scanner_->peekToken();
 
     if (next->getType() == TokenType::kw_var) {
-        scanner_->nextToken();
+        const auto pos = scanner_->nextToken()->getPosition();
         next = scanner_->peekToken();
+        std::vector<std::unique_ptr<const VariableListNode>> nodes;
         while (next->getType() == TokenType::const_ident) {
-            const auto identList = ident_list();
-            require_token(TokenType::colon);
+            const auto varPos = next->getPosition();
+            const auto names = ident_list();
+            static_cast<void>(require_token(TokenType::colon));
             const auto tp = type();
-            require_token(TokenType::semicolon);
-            // TODO: add std::make_unique<VarDeclNode>(identList, tp);
+            static_cast<void>(require_token(TokenType::semicolon));
+
+            nodes.emplace_back(new VariableListNode(varPos, names, tp));
+
             next = scanner_->peekToken();
         }
+        return new VariableDeclarationList(pos, std::move(nodes));
     }
-    // TODO: list
     return nullptr;
 }
 
-const Node* Parser::procedure_declaration()
+const ProcedureDeclarationNode* Parser::procedure_declaration()
 {
+    const auto pos = scanner_->peekToken()->getPosition();
     const auto heading = procedure_heading();
-    require_token(TokenType::semicolon);
+    static_cast<void>(require_token(TokenType::semicolon));
     const auto body = procedure_body();
-    // TODO: std::make_unique<ProcedureDeclarationNode>(heading, body);
-    return nullptr;
+    return new ProcedureDeclarationNode(pos, heading, body);
 }
 
-const Node* Parser::procedure_heading()
+const ProcedureHeadingNode* Parser::procedure_heading()
 {
-    require_token(TokenType::kw_procedure);
+    const auto pos = require_token(TokenType::kw_procedure)->getPosition();
     const auto name = ident();
+
+    const FormalParameterList* params = nullptr;
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
-        const auto params = formal_parameters();
+        params = formal_parameters();
     }
-    // TODO: std::make_unique<ProcedureHeadingNode>(name, params);
-    return nullptr;
+
+    return new ProcedureHeadingNode(pos, name, params);
 }
 
-const Node* Parser::procedure_body()
+const ProcedureBodyNode* Parser::procedure_body()
 {
     const auto decls = declarations();
+
+    const StatementSequenceNode* statements = nullptr;
     if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
-        scanner_->nextToken();
-        const auto seq = statement_sequence();
+        static_cast<void>(scanner_->nextToken());
+        statements = statement_sequence();
     }
-    require_token(TokenType::kw_end);
+
+    static_cast<void>(require_token(TokenType::kw_end));
     const auto name = ident();
-    // TODO: std::make_unique<ProcedureBodyNode>(name, decls, seq);
-    return nullptr;
+
+    return new ProcedureBodyNode(decls->getFilePos(), name, decls, statements);
 }
 
 const ExpressionNode* Parser::expression()
@@ -399,36 +429,44 @@ const IdentifierListNode* Parser::ident_list()
     return node;
 }
 
-const Node* Parser::formal_parameters()
+const FormalParameterList* Parser::formal_parameters()
 {
-    require_token(TokenType::lparen);
+    const auto pos = require_token(TokenType::lparen)->getPosition();
+
+    std::vector<std::unique_ptr<const ParameterListNode>> nodes;
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
-        const auto first = fp_section();
-        // TODO: add to list
+
+        nodes.emplace_back(fp_section());
+
         while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-            scanner_->nextToken();
-            const auto next = fp_section();
-            // TODO: add to list
+            static_cast<void>(scanner_->nextToken());
+
+            nodes.emplace_back(fp_section());
         }
     }
-    require_token(TokenType::rparen);
-    // TODO: std::make_unique<FormalParameterListNode>(list);
-    return nullptr;
+
+    static_cast<void>(require_token(TokenType::rparen));
+
+    return new FormalParameterList(pos, std::move(nodes));
 }
 
-const Node* Parser::fp_section()
+const ParameterListNode* Parser::fp_section()
 {
-    bool isVar = false;
-    if (scanner_->peekToken()->getType() == TokenType::kw_var) {
-        scanner_->nextToken();
-        isVar = true;
+    const auto next_token = scanner_->peekToken();
+    const auto pos = next_token->getPosition();
+
+    auto is_reference = false;
+    if (next_token->getType() == TokenType::kw_var) {
+        static_cast<void>(scanner_->nextToken());
+        is_reference = true;
     }
-    const auto idList = ident_list();
-    require_token(TokenType::colon);
-    const auto t = type();
-    // TODO: std::make_shared<FormalParameterNode>(isVar, idList, t);
-    return nullptr;
+
+    const auto names = ident_list();
+    static_cast<void>(require_token(TokenType::colon));
+    const auto list_type = type();
+
+    return new ParameterListNode(pos, names, list_type, is_reference);
 }
 
 const StatementSequenceNode* Parser::statement_sequence()
