@@ -4,6 +4,7 @@
 
 #include "Parser.h"
 #include "ast/ArrayReferenceNode.h"
+#include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
 #include "ast/ExpressionNode.h"
 #include "ast/MemberReferenceNode.h"
@@ -324,72 +325,79 @@ const ExpressionNode* Parser::factor()
     exit(EXIT_FAILURE);
 }
 
-const Node* Parser::type()
+const TypeNode* Parser::type()
 {
     const auto next = scanner_->peekToken();
+
     if (next->getType() == TokenType::const_ident) {
-        const auto name = ident();
-        // TODO: std::make_unique<ReferenceTypeNode>(name);
-    } else if (next->getType() == TokenType::kw_array) {
-        const auto arr = array_type();
-        // TODO: arr;
-    } else if (next->getType() == TokenType::kw_record) {
-        const auto rec = record_type();
-        // TODO: rec;
-    } else {
-        logger_->error(next->getPosition(), "Expected Identifier, ARRAY or RECORD but got " +
-                                                (std::stringstream() << *next).str() + ".");
-        exit(EXIT_FAILURE);
+        const auto pos = next->getPosition();
+        return new BasicTypeNode(pos, ident());
     }
-    return nullptr;
+
+    if (next->getType() == TokenType::kw_array) {
+        return array_type();
+    }
+
+    if (next->getType() == TokenType::kw_record) {
+        return record_type();
+    }
+
+    logger_->error(next->getPosition(), "Expected Identifier, ARRAY or RECORD but got " +
+                                            (std::stringstream() << *next).str() + ".");
+    exit(EXIT_FAILURE);
 }
 
-const Node* Parser::array_type()
+const ArrayTypeNode* Parser::array_type()
 {
-    require_token(TokenType::kw_array);
-    const auto expr = expression();
-    require_token(TokenType::kw_of);
-    const auto t = type();
-    // TODO: std::make_unique<ArrayTypeNode>(expr, t);
-    return nullptr;
+    const auto pos = require_token(TokenType::kw_array)->getPosition();
+    const auto arrayValue = expression();
+    static_cast<void>(require_token(TokenType::kw_of));
+    const auto arrayType = type();
+
+    return new ArrayTypeNode(pos, arrayValue, arrayType);
 }
 
-const Node* Parser::record_type()
+const RecordTypeNode* Parser::record_type()
 {
-    require_token(TokenType::kw_record);
-    const auto fields = field_list();
+    const auto pos = require_token(TokenType::kw_record)->getPosition();
+
+    auto node = new RecordTypeNode(pos);
+    node->addFields(field_list());
+
     while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-        require_token(TokenType::semicolon);
-        const auto moreFields = field_list();
-        // TODO: add fields
-    }
-    require_token(TokenType::kw_end);
-    // TODO: std::make_unique<RecordNode>(fields...);
-    return nullptr;
-}
-
-const Node* Parser::field_list()
-{
-    if (scanner_->peekToken()->getType() == TokenType::const_ident) {
-        const auto idList = ident_list();
-        require_token(TokenType::colon);
-        const auto t = type();
-        // TODO: std::make_unique<FieldListNode>(idList, t);
+        static_cast<void>(require_token(TokenType::semicolon));
+        node->addFields(field_list());
     }
 
-    return nullptr;
+    static_cast<void>(require_token(TokenType::kw_end));
+
+    return node;
 }
 
-const Node* Parser::ident_list()
+const FieldListNode* Parser::field_list()
 {
-    const auto first = ident();
+    if (scanner_->peekToken()->getType() != TokenType::const_ident) {
+        return nullptr;
+    }
+
+    const auto identifiers = ident_list();
+    static_cast<void>(require_token(TokenType::colon));
+    const auto listType = type();
+
+    return new FieldListNode(identifiers->getFilePos(), identifiers, listType);
+}
+
+const IdentifierListNode* Parser::ident_list()
+{
+    const auto pos = scanner_->peekToken()->getPosition();
+    auto node = new IdentifierListNode(pos, ident());
+
     while (scanner_->peekToken()->getType() == TokenType::comma) {
-        scanner_->nextToken();
-        const auto next = ident();
-        // TODO: add to list
+        static_cast<void>(scanner_->nextToken());
+        node->addName(ident());
     }
-    // TODO: std::make_unique<IdentifierListNode>(list);
-    return nullptr;
+
+    return node;
 }
 
 const Node* Parser::formal_parameters()

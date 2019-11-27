@@ -6,13 +6,16 @@
 #define OBERON0C_PARSER_H
 
 #include "../scanner/Scanner.h"
+#include "ast/ArrayTypeNode.h"
+#include "ast/AssignmentNode.h"
 #include "ast/ExpressionNode.h"
+#include "ast/IfStatementNode.h"
 #include "ast/Node.h"
+#include "ast/ProcedureCallNode.h"
+#include "ast/RecordTypeNode.h"
+#include "ast/TypeNode.h"
 #include "ast/VariableReferenceNode.h"
 #include "ast/WhileStatementNode.h"
-#include "ast/IfStatementNode.h"
-#include "ast/AssignmentNode.h"
-#include "ast/ProcedureCallNode.h"
 
 class MemberReferenceNode;
 
@@ -35,11 +38,11 @@ class Parser {
     const ExpressionNode* simple_expression();
     const ExpressionNode* term();
     const ExpressionNode* factor();
-    const Node* type();
-    const Node* array_type();
-    const Node* record_type();
-    const Node* field_list();
-    const Node* ident_list();
+    const TypeNode* type();
+    const ArrayTypeNode* array_type();
+    const RecordTypeNode* record_type();
+    const FieldListNode* field_list();
+    const IdentifierListNode* ident_list();
     const Node* procedure_heading();
     const Node* procedure_body();
     const Node* formal_parameters();

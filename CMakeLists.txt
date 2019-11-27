@@ -48,5 +48,22 @@ add_executable(oberon0c
     parser/ast/ProcedureCallNode.cpp
     parser/ast/ActualParameterNode.h
     parser/ast/ActualParameterNode.cpp
+    parser/ast/IdentifierListNode.h
+    parser/ast/IdentifierListNode.cpp
+    parser/ast/FieldListNode.h
+    parser/ast/FieldListNode.cpp
+    parser/ast/FieldNode.h
+    parser/ast/FieldNode.cpp
+    parser/ast/TypeNode.h
+    parser/ast/TypeReferenceNode.h
+    parser/ast/TypeReferenceNode.cpp
+    parser/ast/BasicTypeNode.h
+    parser/ast/BasicTypeNode.cpp
+    parser/ast/ArrayTypeNode.h
+    parser/ast/ArrayTypeNode.cpp
+    parser/ast/RecordTypeNode.h
+    parser/ast/RecordTypeNode.cpp
+
+
     main.cpp
 )

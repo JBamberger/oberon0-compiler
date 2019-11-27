@@ -33,7 +33,9 @@ enum class NodeType : char {
     if_statement,
     procedure_call,
     assignment,
-    statement_sequence
+    statement_sequence,
+    id_list,
+    field_list
 };
 
 class Node {
