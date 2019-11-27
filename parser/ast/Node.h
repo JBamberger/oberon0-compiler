@@ -35,7 +35,7 @@ enum class NodeType : char {
     assignment,
     statement_sequence,
     id_list,
-    field_list
+    typed_id_list
 };
 
 class Node {

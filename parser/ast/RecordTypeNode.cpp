@@ -1,4 +1,5 @@
 #include "RecordTypeNode.h"
+#include "TypedIdentifierListNode.h"
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos) : TypeNode(NodeType::record_type, pos) {}
 
@@ -6,14 +7,11 @@ RecordTypeNode::~RecordTypeNode() = default;
 
 void RecordTypeNode::addFields(const FieldListNode* fields)
 {
-    const auto names = fields->getNames()->getNames();
+    const auto pairs = fields->getPairs();
     const auto type = fields->getType();
     types_.emplace_back(type);
-    for (const auto& name : names) {
-        const auto fieldType = new TypeReferenceNode(type->getFilePos(), type);
-        auto field = new FieldNode(fieldType->getFilePos(), name, fieldType);
-        members_.emplace_back(field);
-    }
+
+    for (auto& pair : *pairs) members_.push_back(std::move(pair));
 
     delete fields;
 }

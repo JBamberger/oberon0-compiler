@@ -1,12 +1,12 @@
 #pragma once
-#include "ExpressionNode.h"
 #include "TypeNode.h"
-#include "FieldListNode.h"
-#include "FieldNode.h"
+#include "TypedIdentifierListNode.h"
+#include "TypedIdentifierNode.h"
+#include <vector>
 
 class RecordTypeNode : public TypeNode {
     std::vector<std::shared_ptr<const TypeNode>> types_;
-    std::vector < std::unique_ptr<const FieldNode>> members_;
+    std::vector<std::unique_ptr<const FieldNode>> members_;
 
   public:
     RecordTypeNode(const FilePos& pos);

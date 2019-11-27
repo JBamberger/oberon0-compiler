@@ -17,10 +17,13 @@ add_executable(oberon0c
     scanner/StringToken.h
     scanner/Token.cpp
     scanner/Token.h
+
     util/Logger.cpp
     util/Logger.h
+
     parser/Parser.h
     parser/Parser.cpp
+
     parser/ast/Node.h
     parser/ast/Node.cpp
     parser/ast/ExpressionNode.h
@@ -50,10 +53,8 @@ add_executable(oberon0c
     parser/ast/ActualParameterNode.cpp
     parser/ast/IdentifierListNode.h
     parser/ast/IdentifierListNode.cpp
-    parser/ast/FieldListNode.h
-    parser/ast/FieldListNode.cpp
-    parser/ast/FieldNode.h
-    parser/ast/FieldNode.cpp
+    parser/ast/TypedIdentifierNode.h
+    parser/ast/TypedIdentifierListNode.h
     parser/ast/TypeNode.h
     parser/ast/TypeReferenceNode.h
     parser/ast/TypeReferenceNode.cpp
