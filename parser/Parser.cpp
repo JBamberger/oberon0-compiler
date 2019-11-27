@@ -3,14 +3,12 @@
 //
 
 #include "Parser.h"
+
 #include "ast/ArrayReferenceNode.h"
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
-#include "ast/ExpressionNode.h"
-#include "ast/MemberReferenceNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
-#include "ast/WhileStatementNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
 #include <cassert>
@@ -287,8 +285,9 @@ const ExpressionNode* Parser::factor()
     if (next->getType() == TokenType::const_ident) {
         const auto name = ident();
         const auto sel = selector();
-
-        return new MemberReferenceNode(pos, name, sel);
+        const auto variable = new VariableReferenceNode(pos, name);
+        variable->setNext(sel);
+        return variable;
     }
 
     // number constant
@@ -461,7 +460,7 @@ const StatementNode* Parser::statement()
     exit(EXIT_FAILURE);
 }
 
-const AssignmentNode* Parser::assignment(const MemberReferenceNode* assignee)
+const AssignmentNode* Parser::assignment(const VariableReferenceNode* assignee)
 {
     const auto first = require_token(TokenType::op_becomes);
     const auto expr = expression();
@@ -469,7 +468,7 @@ const AssignmentNode* Parser::assignment(const MemberReferenceNode* assignee)
     return new AssignmentNode(first->getPosition(), assignee, expr);
 }
 
-const ProcedureCallNode* Parser::procedure_call(const MemberReferenceNode* name)
+const ProcedureCallNode* Parser::procedure_call(const VariableReferenceNode* name)
 {
     const auto next = scanner_->peekToken();
     const ActualParameterNode* params = nullptr;
@@ -485,7 +484,8 @@ const StatementNode* Parser::procedure_call_or_assignment()
     const auto pos = scanner_->peekToken()->getPosition();
     const auto id = ident();
     const auto sel = selector();
-    const auto base = new MemberReferenceNode(pos, id, sel);
+    auto base = new VariableReferenceNode(pos, id);
+    base->setNext(sel);
 
     const auto next = scanner_->peekToken();
     if (next->getType() == TokenType::op_becomes) {
@@ -566,24 +566,24 @@ const ActualParameterNode* Parser::actual_parameters()
     return node;
 }
 
-const VariableReferenceNode* Parser::selector()
+const ChainedReferenceNode* Parser::selector()
 {
-    const VariableReferenceNode* node = nullptr;
-    VariableReferenceNode* currentNode = nullptr;
+    const ChainedReferenceNode* node = nullptr;
+    ChainedReferenceNode* currentNode = nullptr;
     auto next = scanner_->peekToken();
     while (true) {
-        VariableReferenceNode* nextNode;
+        ChainedReferenceNode* nextNode;
         if (next->getType() == TokenType::period) {
             const auto idToken = scanner_->nextToken();
             const auto name = ident();
 
-            nextNode = new MemberReferenceNode(idToken->getPosition(), name, nullptr);
+            nextNode = new VariableReferenceNode(idToken->getPosition(), name);
         } else if (next->getType() == TokenType::lbrack) {
             const auto openToken = scanner_->nextToken();
             const auto expr = expression();
-            require_token(TokenType::rbrack);
+            static_cast<void>(require_token(TokenType::rbrack));
 
-            nextNode = new ArrayReferenceNode(openToken->getPosition(), nullptr, expr);
+            nextNode = new ArrayReferenceNode(openToken->getPosition(), expr);
         } else {
             break;
         }

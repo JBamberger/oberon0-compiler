@@ -8,16 +8,16 @@
 #include "../scanner/Scanner.h"
 #include "ast/ArrayTypeNode.h"
 #include "ast/AssignmentNode.h"
+#include "ast/ChainedReferenceNode.h"
 #include "ast/ExpressionNode.h"
 #include "ast/IfStatementNode.h"
 #include "ast/Node.h"
 #include "ast/ProcedureCallNode.h"
 #include "ast/RecordTypeNode.h"
 #include "ast/TypeNode.h"
-#include "ast/VariableReferenceNode.h"
 #include "ast/WhileStatementNode.h"
 
-class MemberReferenceNode;
+class VariableReferenceNode;
 
 class Parser {
 
@@ -49,12 +49,12 @@ class Parser {
     const Node* fp_section();
     const StatementSequenceNode* statement_sequence();
     const StatementNode* statement();
-    const AssignmentNode* assignment(const MemberReferenceNode* assignee);
-    const ProcedureCallNode* procedure_call(const MemberReferenceNode* name);
+    const AssignmentNode* assignment(const VariableReferenceNode* assignee);
+    const ProcedureCallNode* procedure_call(const VariableReferenceNode* name);
     const IfStatementNode* if_statement();
     const WhileStatementNode* while_statement();
     const ActualParameterNode* actual_parameters();
-    const VariableReferenceNode* selector();
+    const ChainedReferenceNode* selector();
     const StatementNode* procedure_call_or_assignment();
 
   public:

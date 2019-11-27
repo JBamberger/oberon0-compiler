@@ -1,10 +1,8 @@
 #include "ArrayReferenceNode.h"
 #include <utility>
 
-ArrayReferenceNode::ArrayReferenceNode(const FilePos& pos,
-                                       const VariableReferenceNode* next,
-                                       const ExpressionNode* index)
-    : VariableReferenceNode(pos, next), index_(index)
+ArrayReferenceNode::ArrayReferenceNode(const FilePos& pos, const ExpressionNode* index)
+    : ChainedReferenceNode(pos), index_(index)
 {
 }
 

@@ -1,6 +1,6 @@
 #include "ProcedureCallNode.h"
 
-ProcedureCallNode::ProcedureCallNode(const MemberReferenceNode* name,
+ProcedureCallNode::ProcedureCallNode(const VariableReferenceNode* name,
                                      const ActualParameterNode* parameters)
     : StatementNode(NodeType::procedure_call, name->getFilePos()), name_(name),
       parameters_(parameters)

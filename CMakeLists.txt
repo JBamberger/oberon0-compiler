@@ -30,9 +30,9 @@ add_executable(oberon0c
     parser/ast/BinaryExpressionNode.cpp
     parser/ast/NumberConstantNode.h
     parser/ast/NumberConstantNode.cpp
+    parser/ast/ChainedReferenceNode.h
     parser/ast/VariableReferenceNode.h
-    parser/ast/MemberReferenceNode.h
-    parser/ast/MemberReferenceNode.cpp
+    parser/ast/VariableReferenceNode.cpp
     parser/ast/ArrayReferenceNode.h
     parser/ast/ArrayReferenceNode.cpp
     parser/ast/StatementNode.h

@@ -1,15 +1,15 @@
 #pragma once
-#include "MemberReferenceNode.h"
 #include "StatementNode.h"
+#include "VariableReferenceNode.h"
 
 class AssignmentNode : public StatementNode {
-    std::unique_ptr<const MemberReferenceNode> assignee_;
+    std::unique_ptr<const VariableReferenceNode> assignee_;
     std::unique_ptr<const ExpressionNode> value_;
 
   public:
     AssignmentNode(const FilePos& pos,
-                   const MemberReferenceNode* assignee,
+                   const VariableReferenceNode* assignee,
                    const ExpressionNode* value);
-    virtual ~AssignmentNode() override;
+    ~AssignmentNode() override;
     void print(std::ostream& stream) const override;
 };

@@ -1,17 +1,13 @@
 #pragma once
-#include "ExpressionNode.h"
+#include "ChainedReferenceNode.h"
 
-class VariableReferenceNode : public ExpressionNode {
-  protected:
-    std::unique_ptr<const VariableReferenceNode> next_;
+class VariableReferenceNode : public ChainedReferenceNode {
+
+    std::string name_;
 
   public:
-    VariableReferenceNode(const FilePos& pos, const VariableReferenceNode* next)
-        : ExpressionNode(NodeType::variable_reference, pos), next_(next)
-    {
-    }
-    void setNext(const VariableReferenceNode* next)
-    {
-        next_ = std::unique_ptr<const VariableReferenceNode>(next);
-    }
+    VariableReferenceNode(const FilePos& pos, std::string name);
+    ~VariableReferenceNode() override;
+
+    void print(std::ostream& stream) const override;
 };

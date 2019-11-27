@@ -1,7 +1,7 @@
 #include "AssignmentNode.h"
 
 AssignmentNode::AssignmentNode(const FilePos& pos,
-                               const MemberReferenceNode* assignee,
+                               const VariableReferenceNode* assignee,
                                const ExpressionNode* value)
     : StatementNode(NodeType::assignment, pos), assignee_(assignee), value_(value)
 {
