@@ -25,13 +25,13 @@ class DeclarationListNode : public Node {
 
     void print(std::ostream& stream) const override
     {
-        stream << DeclListTypeTraits<T>::name << "("; //
+        stream << DeclListTypeTraits<T>::name << "(";
         for (const auto& v : list_) stream << *v << " ";
         stream << ")";
     }
 };
 
 using ConstantDeclarationList = DeclarationListNode<ConstantDeclarationNode>;
-using VariableDeclarationList = DeclarationListNode<VariableListNode>;
+using VariableDeclarationList = DeclarationListNode<TypedIdentifierListNode<VariableNode>>;
 using TypeDeclarationList = DeclarationListNode<TypeDeclarationNode>;
-using FormalParameterList = DeclarationListNode<ParameterListNode>;
+using FormalParameterList = DeclarationListNode<TypedIdentifierListNode<ParameterNode>>;

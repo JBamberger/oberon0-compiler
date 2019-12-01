@@ -42,7 +42,7 @@ class Parser {
     const ProcedureHeadingNode* procedure_heading();
     const ProcedureBodyNode* procedure_body();
     const FormalParameterList* formal_parameters();
-    const ParameterListNode* fp_section();
+    const TypedIdentifierListNode<ParameterNode>* fp_section();
     const ExpressionNode* expression();
     const ExpressionNode* simple_expression();
     const ExpressionNode* term();
@@ -50,7 +50,7 @@ class Parser {
     const TypeNode* type();
     const ArrayTypeNode* array_type();
     const RecordTypeNode* record_type();
-    const FieldListNode* field_list();
+    const TypedIdentifierListNode<FieldNode>* field_list();
     const IdentifierListNode* ident_list();
     const StatementSequenceNode* statement_sequence();
     const StatementNode* statement();

@@ -163,7 +163,7 @@ const VariableDeclarationList* Parser::var_declarations()
 {
     auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
-    std::vector<std::unique_ptr<const VariableListNode>> nodes;
+    std::vector<std::unique_ptr<const TypedIdentifierListNode<VariableNode>>> nodes;
 
     if (next->getType() != TokenType::kw_var) {
         return new VariableDeclarationList(pos, std::move(nodes));
@@ -179,7 +179,7 @@ const VariableDeclarationList* Parser::var_declarations()
         const auto tp = type();
         static_cast<void>(require_token(TokenType::semicolon));
 
-        nodes.emplace_back(new VariableListNode(varPos, names, tp));
+        nodes.emplace_back(createVariableList(varPos, names, tp));
 
         next = scanner_->peekToken();
     }
@@ -422,7 +422,7 @@ const RecordTypeNode* Parser::record_type()
     return node;
 }
 
-const FieldListNode* Parser::field_list()
+const TypedIdentifierListNode<FieldNode>* Parser::field_list()
 {
     if (scanner_->peekToken()->getType() != TokenType::const_ident) {
         return nullptr;
@@ -432,7 +432,7 @@ const FieldListNode* Parser::field_list()
     static_cast<void>(require_token(TokenType::colon));
     const auto listType = type();
 
-    return new FieldListNode(identifiers->getFilePos(), identifiers, listType);
+    return createFieldList(identifiers->getFilePos(), identifiers, listType);
 }
 
 const IdentifierListNode* Parser::ident_list()
@@ -452,7 +452,7 @@ const FormalParameterList* Parser::formal_parameters()
 {
     const auto pos = require_token(TokenType::lparen)->getPosition();
 
-    std::vector<std::unique_ptr<const ParameterListNode>> nodes;
+    std::vector<std::unique_ptr<const TypedIdentifierListNode<ParameterNode>>> nodes;
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
 
@@ -470,7 +470,7 @@ const FormalParameterList* Parser::formal_parameters()
     return new FormalParameterList(pos, std::move(nodes));
 }
 
-const ParameterListNode* Parser::fp_section()
+const TypedIdentifierListNode<ParameterNode>* Parser::fp_section()
 {
     const auto next_token = scanner_->peekToken();
     const auto pos = next_token->getPosition();
@@ -485,7 +485,7 @@ const ParameterListNode* Parser::fp_section()
     static_cast<void>(require_token(TokenType::colon));
     const auto list_type = type();
 
-    return new ParameterListNode(pos, names, list_type, is_reference);
+    return createParameterList(pos, names, list_type, is_reference);
 }
 
 const StatementSequenceNode* Parser::statement_sequence()

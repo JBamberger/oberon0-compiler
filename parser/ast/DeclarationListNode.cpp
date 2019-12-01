@@ -10,10 +10,11 @@ struct DeclListTypeTraits<ConstantDeclarationNode> {
 const std::string DeclListTypeTraits<ConstantDeclarationNode>::name = "ConstantDeclarationList";
 
 template <>
-struct DeclListTypeTraits<VariableListNode> {
+struct DeclListTypeTraits<TypedIdentifierListNode<VariableNode>> {
     static const std::string name;
 };
-const std::string DeclListTypeTraits<VariableListNode>::name = "VariableDeclarationList";
+const std::string DeclListTypeTraits<TypedIdentifierListNode<VariableNode>>::name =
+    "VariableDeclarationList";
 
 template <>
 struct DeclListTypeTraits<TypeDeclarationNode> {
@@ -22,7 +23,8 @@ struct DeclListTypeTraits<TypeDeclarationNode> {
 const std::string DeclListTypeTraits<TypeDeclarationNode>::name = "TypeDeclarationList";
 
 template <>
-struct DeclListTypeTraits<ParameterListNode> {
+struct DeclListTypeTraits<TypedIdentifierListNode<ParameterNode>> {
     static const std::string name;
 };
-const std::string DeclListTypeTraits<ParameterListNode>::name = "FormalParameterList";
+const std::string DeclListTypeTraits<TypedIdentifierListNode<ParameterNode>>::name =
+    "FormalParameterList";

@@ -1,12 +1,11 @@
 #include "RecordTypeNode.h"
-#include "TypedIdentifierListNode.h"
 #include <cassert>
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos) : TypeNode(NodeType::record_type, pos) {}
 
 RecordTypeNode::~RecordTypeNode() = default;
 
-void RecordTypeNode::addFields(const FieldListNode* fields)
+void RecordTypeNode::addFields(const TypedIdentifierListNode<FieldNode>* fields)
 {
     assert(fields != nullptr);
 

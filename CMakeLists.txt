@@ -54,6 +54,12 @@ add_executable(oberon0c
     parser/ast/IdentifierListNode.h
     parser/ast/IdentifierListNode.cpp
     parser/ast/TypedIdentifierNode.h
+    parser/ast/VariableNode.h
+    parser/ast/VariableNode.cpp
+    parser/ast/FieldNode.h
+    parser/ast/FieldNode.cpp
+    parser/ast/ParameterNode.h
+    parser/ast/ParameterNode.cpp
     parser/ast/TypedIdentifierListNode.h
     parser/ast/TypeNode.h
     parser/ast/TypeReferenceNode.h
