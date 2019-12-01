@@ -19,6 +19,9 @@ class TypedIdentifierListNode : public Node {
           pairs_(std::make_shared<std::vector<std::unique_ptr<const TypedIdentifierNode<T>>>>()),
           type_(type)
     {
+        assert(names != nullptr);
+        assert(type_ != nullptr);
+
         for (const auto& name : names->getNames()) {
             const auto fieldType = new TypeReferenceNode(type->getFilePos(), type_);
             auto field = new TypedIdentifierNode<T>(fieldType->getFilePos(), name, fieldType);

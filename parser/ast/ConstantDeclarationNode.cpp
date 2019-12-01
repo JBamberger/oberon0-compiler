@@ -1,10 +1,12 @@
 #include "ConstantDeclarationNode.h"
+#include <cassert>
 
 ConstantDeclarationNode::ConstantDeclarationNode(const FilePos& pos,
                                                  std::string name,
                                                  const ExpressionNode* value)
     : Node(NodeType::constant_declaration, pos), name_(std::move(name)), value_(value)
 {
+    assert(value_ != nullptr);
 }
 
 ConstantDeclarationNode::~ConstantDeclarationNode() = default;

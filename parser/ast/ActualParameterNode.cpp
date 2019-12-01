@@ -1,8 +1,10 @@
 #include "ActualParameterNode.h"
+#include <cassert>
 
 ActualParameterNode::ActualParameterNode(const ExpressionNode* param)
     : Node(NodeType::parameter, param->getFilePos()), param_(param)
 {
+    assert(param_ != nullptr);
 }
 
 ActualParameterNode::~ActualParameterNode() = default;

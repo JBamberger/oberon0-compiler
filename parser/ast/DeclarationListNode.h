@@ -7,6 +7,11 @@
 #include <vector>
 
 template <class T>
+struct DeclListTypeTraits {
+    static const std::string name;
+};
+
+template <class T>
 class DeclarationListNode : public Node {
     std::vector<std::unique_ptr<const T>> list_;
 
@@ -15,11 +20,12 @@ class DeclarationListNode : public Node {
         : Node(NodeType::declaration_list, pos), list_(std::move(list))
     {
     }
+
     ~DeclarationListNode() override = default;
 
     void print(std::ostream& stream) const override
     {
-        stream << "DeclarationListNode(";
+        stream << DeclListTypeTraits<T>::name << "("; //
         for (const auto& v : list_) stream << *v << " ";
         stream << ")";
     }

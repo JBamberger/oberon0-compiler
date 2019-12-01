@@ -1,4 +1,5 @@
 #include "BinaryExpressionNode.h"
+#include <cassert>
 
 BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
                                            BinaryOperator op,
@@ -7,6 +8,8 @@ BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
     : ExpressionNode(NodeType::binary_expression, pos), op_(op), operand1_(operand1),
       operand2_(operand2)
 {
+    assert(operand1 != nullptr);
+    assert(operand2 != nullptr);
 }
 
 BinaryExpressionNode::~BinaryExpressionNode() = default;

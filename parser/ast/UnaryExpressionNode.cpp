@@ -1,10 +1,12 @@
 #include "UnaryExpressionNode.h"
+#include <cassert>
 
 UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
-                                         UnaryOperator operator_,
+                                         UnaryOperator op,
                                          const ExpressionNode* operand)
-    : ExpressionNode(NodeType::unary_expression, pos), operator_(operator_), operand_(operand)
+    : ExpressionNode(NodeType::unary_expression, pos), operator_(op), operand_(operand)
 {
+    assert(operand_ != nullptr);
 }
 
 UnaryExpressionNode::~UnaryExpressionNode() = default;

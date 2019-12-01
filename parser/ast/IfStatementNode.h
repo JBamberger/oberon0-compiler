@@ -12,7 +12,7 @@ class IfStatementNode : public StatementNode {
     IfStatementNode(const FilePos& pos,
                     const ExpressionNode* condition,
                     const StatementSequenceNode* thenPart);
-    virtual ~IfStatementNode() override;
+    ~IfStatementNode() override;
     void setElseBody(const StatementSequenceNode* elsePart);
     void print(std::ostream& stream) const override;
 };

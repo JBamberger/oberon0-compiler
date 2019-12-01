@@ -51,8 +51,8 @@ class Node {
     explicit Node(NodeType nodeType, FilePos pos);
     virtual ~Node() = 0;
 
-    const NodeType getNodeType() const;
-    const FilePos getFilePos() const;
+    NodeType getNodeType() const;
+    FilePos getFilePos() const;
 
     virtual void print(std::ostream& stream) const = 0;
     friend std::ostream& operator<<(std::ostream& stream, const Node& node);

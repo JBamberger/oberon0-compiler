@@ -1,5 +1,6 @@
 #include "DeclarationsNode.h"
 #include "ProcedureDeclarationList.h"
+#include <cassert>
 
 DeclarationsNode::DeclarationsNode(const FilePos& pos,
                                    const ConstantDeclarationList* constants,
@@ -10,21 +11,16 @@ DeclarationsNode::DeclarationsNode(const FilePos& pos,
     : Node(NodeType::declarations, pos), constants_(constants), variables_(vars), types_(types),
       procedures_(procedures, procDelete)
 {
+    assert(constants_ != nullptr);
+    assert(variables_ != nullptr);
+    assert(types_ != nullptr);
+    assert(procedures_ != nullptr);
 }
 
 DeclarationsNode::~DeclarationsNode() = default;
 
 void DeclarationsNode::print(std::ostream& stream) const
 {
-    stream << "Declarations(";
-    if (constants_ != nullptr)
-        stream << *constants_ << ", ";
-    if (variables_ != nullptr)
-        stream << *variables_ << ", ";
-    if (types_ != nullptr)
-        stream << *types_ << ", ";
-    if (procedures_ != nullptr)
-        stream << *procedures_;
-
-    stream << ")";
+    stream << "Declarations(" << *constants_ << ", " << *variables_ << ", " << *types_ << ", "
+           << *procedures_ << ")";
 }

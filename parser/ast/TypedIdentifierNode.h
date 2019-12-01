@@ -12,10 +12,13 @@ class TypedIdentifierNode : public Node {
     TypedIdentifierNode(const FilePos& pos, std::string name, const TypeReferenceNode* type)
         : Node(T, pos), name_(std::move(name)), type_(type)
     {
+        assert(type_ != nullptr);
     }
+
     ~TypedIdentifierNode() override = default;
 
     void makeReference() { isReference = true; }
+
     void print(std::ostream& stream) const override
     {
         stream << (isReference ? "FieldNodeRef(" : "FieldNode(") << name_ << ", " << *type_ << ")";

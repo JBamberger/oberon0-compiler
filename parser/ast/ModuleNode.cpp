@@ -1,4 +1,5 @@
 #include "ModuleNode.h"
+#include <cassert>
 #include <utility>
 
 ModuleNode::ModuleNode(const FilePos& pos,
@@ -8,6 +9,8 @@ ModuleNode::ModuleNode(const FilePos& pos,
     : Node(NodeType::module, pos), name_(std::move(name)), declarations_(declarations),
       statements_(statements)
 {
+    assert(declarations_ != nullptr);
+    assert(statements_ != nullptr);
 }
 
 ModuleNode::~ModuleNode() = default;

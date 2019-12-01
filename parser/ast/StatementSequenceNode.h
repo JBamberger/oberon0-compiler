@@ -8,7 +8,7 @@ class StatementSequenceNode : public Node {
 
   public:
     StatementSequenceNode(const FilePos& pos);
-    virtual ~StatementSequenceNode() override;
+    ~StatementSequenceNode() override;
 
     void pushStatement(const StatementNode* statement);
     void print(std::ostream& stream) const override;

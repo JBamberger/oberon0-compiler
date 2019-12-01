@@ -1,5 +1,6 @@
 #include "RecordTypeNode.h"
 #include "TypedIdentifierListNode.h"
+#include <cassert>
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos) : TypeNode(NodeType::record_type, pos) {}
 
@@ -7,6 +8,8 @@ RecordTypeNode::~RecordTypeNode() = default;
 
 void RecordTypeNode::addFields(const FieldListNode* fields)
 {
+    assert(fields != nullptr);
+
     const auto pairs = fields->getPairs();
     const auto type = fields->getType();
     types_.emplace_back(type);

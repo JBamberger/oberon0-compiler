@@ -7,7 +7,7 @@ class NumberConstantNode : public ExpressionNode {
 
   public:
     NumberConstantNode(const FilePos& pos, int value);
-    virtual ~NumberConstantNode() override;
+    ~NumberConstantNode() override;
 
     void print(std::ostream& stream) const override;
 };

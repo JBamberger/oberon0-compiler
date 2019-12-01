@@ -27,7 +27,7 @@ class BinaryExpressionNode : public ExpressionNode {
                          BinaryOperator op,
                          const ExpressionNode* operand1,
                          const ExpressionNode* operand2);
-    virtual ~BinaryExpressionNode() override;
+    ~BinaryExpressionNode() override;
 
     void print(std::ostream& stream) const override;
 };

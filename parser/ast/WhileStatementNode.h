@@ -1,8 +1,8 @@
 #pragma once
 #include "ExpressionNode.h"
 #include "StatementNode.h"
-#include <vector>
 #include "StatementSequenceNode.h"
+#include <vector>
 
 class WhileStatementNode : public StatementNode {
     std::unique_ptr<const ExpressionNode> condition_;
@@ -11,8 +11,8 @@ class WhileStatementNode : public StatementNode {
   public:
     WhileStatementNode(const FilePos& pos,
                        const ExpressionNode* condition,
-                       const StatementSequenceNode * body);
-    virtual ~WhileStatementNode() override;
+                       const StatementSequenceNode* body);
+    ~WhileStatementNode() override;
 
     void print(std::ostream& stream) const override;
 };

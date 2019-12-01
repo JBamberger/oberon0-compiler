@@ -1,4 +1,5 @@
 #include "ProcedureBodyNode.h"
+#include <cassert>
 
 ProcedureBodyNode::ProcedureBodyNode(const FilePos& pos,
                                      std::string name,
@@ -7,16 +8,14 @@ ProcedureBodyNode::ProcedureBodyNode(const FilePos& pos,
     : Node(NodeType::procedure_body, pos), name_(std::move(name)), declarations_(declarations),
       statements_(statements)
 {
+    assert(declarations_ != nullptr);
+    assert(statements_ != nullptr);
 }
 
 ProcedureBodyNode::~ProcedureBodyNode() = default;
 
 void ProcedureBodyNode::print(std::ostream& stream) const
 {
-    stream << "ProcedureBodyNode(" << name_;
-    if (declarations_ != nullptr)
-        stream << ", " << *declarations_;
-    if (statements_ != nullptr)
-        stream << ", " << *statements_;
-    stream << ")";
+    stream << "ProcedureBodyNode(" << name_ << ", " << *declarations_ << ", " << *statements_
+           << ")";
 }

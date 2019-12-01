@@ -28,7 +28,7 @@ inline std::string type_str(const TokenType& t) { return (std::stringstream() <<
 
 std::unique_ptr<const Node> Parser::parse() { return std::unique_ptr<const Node>(module()); }
 
-std::unique_ptr<const Token> Parser::require_token(const TokenType& type)
+std::unique_ptr<const Token> Parser::require_token(const TokenType& type) const
 {
     auto token = scanner_->nextToken();
     if (token->getType() != type) {
@@ -40,9 +40,9 @@ std::unique_ptr<const Token> Parser::require_token(const TokenType& type)
     return token;
 }
 
-std::string Parser::ident()
+std::string Parser::ident() const
 {
-    auto token = require_token(TokenType::const_ident);
+    const auto token = require_token(TokenType::const_ident);
     const auto ident_token = dynamic_cast<const IdentToken*>(token.get());
     assert(ident_token != nullptr);
 
@@ -106,76 +106,84 @@ const DeclarationsNode* Parser::declarations()
 const ConstantDeclarationList* Parser::const_declarations()
 {
     auto next = scanner_->peekToken();
+    const auto pos = next->getPosition();
+    std::vector<std::unique_ptr<const ConstantDeclarationNode>> nodes;
 
-    if (next->getType() == TokenType::kw_const) {
-        const auto pos = scanner_->nextToken()->getPosition();
-
-        next = scanner_->peekToken();
-        std::vector<std::unique_ptr<const ConstantDeclarationNode>> nodes;
-        while (next->getType() == TokenType::const_ident) {
-            const auto decPos = next->getPosition();
-            const auto name = ident();
-            static_cast<void>(require_token(TokenType::op_eq));
-            const auto value = expression();
-            static_cast<void>(require_token(TokenType::semicolon));
-
-            nodes.emplace_back(new ConstantDeclarationNode(decPos, name, value));
-
-            next = scanner_->peekToken();
-        }
-
+    if (next->getType() != TokenType::kw_const) {
         return new ConstantDeclarationList(pos, std::move(nodes));
     }
-    return nullptr;
+
+    static_cast<void>(scanner_->nextToken()); // const keyword
+
+    next = scanner_->peekToken();
+    while (next->getType() == TokenType::const_ident) {
+        const auto decPos = next->getPosition();
+        const auto name = ident();
+        static_cast<void>(require_token(TokenType::op_eq));
+        const auto value = expression();
+        static_cast<void>(require_token(TokenType::semicolon));
+
+        nodes.emplace_back(new ConstantDeclarationNode(decPos, name, value));
+
+        next = scanner_->peekToken();
+    }
+
+    return new ConstantDeclarationList(pos, std::move(nodes));
 }
 
 const TypeDeclarationList* Parser::type_declarations()
 {
+
     auto next = scanner_->peekToken();
+    const auto pos = next->getPosition();
+    std::vector<std::unique_ptr<const TypeDeclarationNode>> nodes;
 
-    if (next->getType() == TokenType::kw_type) {
-        const auto pos = scanner_->nextToken()->getPosition();
-        next = scanner_->peekToken();
-        std::vector<std::unique_ptr<const TypeDeclarationNode>> nodes;
-        while (next->getType() == TokenType::const_ident) {
-            const auto typePos = next->getPosition();
-            const auto name = ident();
-            static_cast<void>(require_token(TokenType::op_eq));
-            const auto tp = type();
-            static_cast<void>(require_token(TokenType::semicolon));
-
-            nodes.emplace_back(new TypeDeclarationNode(typePos, name, tp));
-
-            next = scanner_->peekToken();
-        }
+    if (next->getType() != TokenType::kw_type) {
         return new TypeDeclarationList(pos, std::move(nodes));
     }
 
-    return nullptr;
+    static_cast<void>(scanner_->nextToken()); // type keyword
+
+    next = scanner_->peekToken();
+    while (next->getType() == TokenType::const_ident) {
+        const auto typePos = next->getPosition();
+        const auto name = ident();
+        static_cast<void>(require_token(TokenType::op_eq));
+        const auto tp = type();
+        static_cast<void>(require_token(TokenType::semicolon));
+
+        nodes.emplace_back(new TypeDeclarationNode(typePos, name, tp));
+
+        next = scanner_->peekToken();
+    }
+    return new TypeDeclarationList(pos, std::move(nodes));
 }
 
 const VariableDeclarationList* Parser::var_declarations()
 {
     auto next = scanner_->peekToken();
+    const auto pos = next->getPosition();
+    std::vector<std::unique_ptr<const VariableListNode>> nodes;
 
-    if (next->getType() == TokenType::kw_var) {
-        const auto pos = scanner_->nextToken()->getPosition();
-        next = scanner_->peekToken();
-        std::vector<std::unique_ptr<const VariableListNode>> nodes;
-        while (next->getType() == TokenType::const_ident) {
-            const auto varPos = next->getPosition();
-            const auto names = ident_list();
-            static_cast<void>(require_token(TokenType::colon));
-            const auto tp = type();
-            static_cast<void>(require_token(TokenType::semicolon));
-
-            nodes.emplace_back(new VariableListNode(varPos, names, tp));
-
-            next = scanner_->peekToken();
-        }
+    if (next->getType() != TokenType::kw_var) {
         return new VariableDeclarationList(pos, std::move(nodes));
     }
-    return nullptr;
+
+    static_cast<void>(scanner_->nextToken()); // var keyword
+
+    next = scanner_->peekToken();
+    while (next->getType() == TokenType::const_ident) {
+        const auto varPos = next->getPosition();
+        const auto names = ident_list();
+        static_cast<void>(require_token(TokenType::colon));
+        const auto tp = type();
+        static_cast<void>(require_token(TokenType::semicolon));
+
+        nodes.emplace_back(new VariableListNode(varPos, names, tp));
+
+        next = scanner_->peekToken();
+    }
+    return new VariableDeclarationList(pos, std::move(nodes));
 }
 
 const ProcedureDeclarationNode* Parser::procedure_declaration()
@@ -493,7 +501,7 @@ const StatementSequenceNode* Parser::statement_sequence()
 
 const StatementNode* Parser::statement()
 {
-    auto next = scanner_->peekToken();
+    const auto next = scanner_->peekToken();
     if (next->getType() == TokenType::const_ident) {
         return procedure_call_or_assignment();
     }

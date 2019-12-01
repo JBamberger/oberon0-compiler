@@ -5,6 +5,8 @@ ProcedureCallNode::ProcedureCallNode(const VariableReferenceNode* name,
     : StatementNode(NodeType::procedure_call, name->getFilePos()), name_(name),
       parameters_(parameters)
 {
+    //TODO: enforce this
+    // assert(parameters_ != nullptr);
 }
 
 ProcedureCallNode::~ProcedureCallNode() = default;

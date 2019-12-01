@@ -30,8 +30,8 @@ class Parser {
     Scanner* scanner_;
     Logger* logger_;
 
-    std::unique_ptr<const Token> require_token(const TokenType& type);
-    std::string ident();
+    std::unique_ptr<const Token> require_token(const TokenType& type) const;
+    std::string ident() const;
 
     const ModuleNode* module();
     const DeclarationsNode* declarations();

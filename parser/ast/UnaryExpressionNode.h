@@ -13,7 +13,7 @@ class UnaryExpressionNode : public ExpressionNode {
     std::unique_ptr<const ExpressionNode> operand_;
 
   public:
-    UnaryExpressionNode(const FilePos& pos, UnaryOperator operator_, const ExpressionNode* operand);
+    UnaryExpressionNode(const FilePos& pos, UnaryOperator op, const ExpressionNode* operand);
     virtual ~UnaryExpressionNode() override;
 
     void print(std::ostream& stream) const override;
