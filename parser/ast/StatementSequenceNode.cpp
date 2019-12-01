@@ -18,6 +18,9 @@ void StatementSequenceNode::pushStatement(const StatementNode* statement)
 void StatementSequenceNode::print(std::ostream& stream) const
 {
     stream << "StatementSequence(";
-    for (const auto& statement_node : body_) { stream << *statement_node << ", "; }
+    if (!body_.empty()) {
+        stream << *body_.at(0);
+        for (auto i = 1; i < body_.size(); ++i) stream << ", " << *body_.at(i);
+    }
     stream << ")";
 }

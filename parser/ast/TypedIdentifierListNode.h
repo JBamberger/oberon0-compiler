@@ -29,9 +29,12 @@ class TypedIdentifierListNode : public Node {
 
     void print(std::ostream& stream) const override
     {
-        stream << "FieldListNode(";
-        for (const auto& p : *pairs_) { stream << *p << " "; }
-        stream << ", " << *type_ << ")";
+        stream << "FieldListNode({";
+        if (!pairs_->empty()) {
+            stream << *(pairs_->at(0));
+            for (auto i = 1; i < pairs_->size(); ++i) { stream << ", " << *(pairs_->at(i)); }
+        }
+        stream << "}, " << *type_ << ")";
     }
 
     friend const TypedIdentifierListNode<FieldNode>*

@@ -26,7 +26,10 @@ class DeclarationListNode : public Node {
     void print(std::ostream& stream) const override
     {
         stream << DeclListTypeTraits<T>::name << "(";
-        for (const auto& v : list_) stream << *v << " ";
+        if (!list_.empty()) {
+            stream << *list_.at(0);
+            for (auto i = 1; i < list_.size(); ++i) { stream << ", " << *list_.at(i); }
+        }
         stream << ")";
     }
 };
