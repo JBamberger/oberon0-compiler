@@ -4,11 +4,12 @@
  * Created by Michael Grossniklaus on 12/14/17.
  */
 
-#include <iostream>
-#include "scanner/Scanner.h"
 #include "parser/Parser.h"
+#include "scanner/Scanner.h"
+#include <iostream>
 
-int main(const int argc, const char *argv[]) {
+int main(const int argc, const char* argv[])
+{
     if (argc != 2) {
         std::cout << "Usage: oberon0c <filename>" << std::endl;
         return 1;
@@ -18,7 +19,11 @@ int main(const int argc, const char *argv[]) {
     logger->setLevel(LogLevel::DEBUG);
     auto scanner = std::make_unique<Scanner>(filename, logger.get());
     auto parser = std::make_unique<Parser>(scanner.get(), logger.get());
+
+    std::cout << "Parse Tree:" << std::endl;
     parser->parse()->print(std::cout);
+    std::cout << std::endl << std::endl;
+
     logger->info(filename, "Parsing complete.");
     exit(0);
 }

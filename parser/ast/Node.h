@@ -8,9 +8,7 @@
 #define OBERON0C_AST_H
 
 #include "../../util/Logger.h"
-#include <list>
 #include <ostream>
-#include <string>
 
 enum class NodeType : char {
     unary_expression,
@@ -46,8 +44,6 @@ enum class NodeType : char {
 };
 
 class Node {
-
-  private:
     NodeType nodeType_;
     FilePos pos_;
 

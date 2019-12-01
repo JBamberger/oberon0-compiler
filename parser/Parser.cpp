@@ -4,12 +4,14 @@
 
 #include "Parser.h"
 
+#include "StringToken.h"
 #include "ast/ArrayReferenceNode.h"
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
 #include "ast/ConstantDeclarationNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/ProcedureDeclarationList.h"
+#include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include <IdentToken.h>
@@ -330,7 +332,16 @@ const ExpressionNode* Parser::factor()
         return new NumberConstantNode(pos, value);
     }
 
-    // TODO: string constant here
+    // string constant
+    if (next->getType() == TokenType::const_string) {
+        const auto token = scanner_->nextToken();
+        const auto strToken = dynamic_cast<const StringToken*>(token.get());
+        assert(strToken != nullptr);
+        const auto value = strToken->getValue();
+
+        return new StringConstantNode(pos, value);
+    }
+
     // TODO: bool constant here
 
     // nested expression
