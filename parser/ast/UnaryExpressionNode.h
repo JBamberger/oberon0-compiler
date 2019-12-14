@@ -4,6 +4,8 @@
 
 enum class UnaryOperator : char { plus, minus, not};
 
+std::ostream& operator<<(std::ostream& out, const UnaryOperator& op);
+
 class UnaryExpressionNode : public ExpressionNode {
     UnaryOperator operator_;
     std::unique_ptr<const ExpressionNode> operand_;

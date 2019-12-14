@@ -8,6 +8,7 @@
 #include "scanner/Scanner.h"
 #include <iostream>
 #include "parser/ast/NodeVisitor.h"
+#include "parser/ast/PrintVisitor.h"
 
 int main(const int argc, const char* argv[])
 {
@@ -25,7 +26,7 @@ int main(const int argc, const char* argv[])
     const auto  tree = parser->parse();
     tree->print(std::cout);
     std::cout << std::endl << std::endl;
-    const auto visitor = std::make_unique<NodeVisitor>();
+    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
     tree->visit(visitor.get());
 
 

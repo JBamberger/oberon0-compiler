@@ -17,6 +17,8 @@ enum class BinaryOperator : char {
     geq
 };
 
+std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op);
+
 class BinaryExpressionNode : public ExpressionNode {
     BinaryOperator op_;
     std::unique_ptr<const ExpressionNode> operand1_;

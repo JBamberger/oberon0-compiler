@@ -5,6 +5,7 @@
 #include "AssignmentNode.h"
 #include "BasicTypeNode.h"
 #include "BinaryExpressionNode.h"
+#include "FieldReferenceNode.h"
 #include "IfStatementNode.h"
 #include "ModuleNode.h"
 #include "NumberConstantNode.h"
@@ -47,8 +48,6 @@ void NodeVisitor::visit(const BinaryExpressionNode* node)
     node->getOperand2()->visit(this);
 }
 
-void NodeVisitor::visit(const SelectorNode* node) {}
-
 void NodeVisitor::visit(const ConstantDeclarationNode* node) { node->getValue()->visit(this); }
 
 void NodeVisitor::visit(const ConstantDeclarationList* node)
@@ -69,6 +68,13 @@ void NodeVisitor::visit(const TypeDeclarationList* node)
 {
     for (const auto& decl : node->getList()) {
         decl->visit(this);
+    }
+}
+
+void NodeVisitor::visit(const FieldReferenceNode* node)
+{
+    if (node->getNext()) {
+        node->getNext()->visit(this);
     }
 }
 

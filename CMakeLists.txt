@@ -91,6 +91,8 @@ add_executable(oberon0c
     parser/ast/StringConstantNode.cpp
     parser/ast/NodeVisitor.h
     parser/ast/NodeVisitor.cpp
+    parser/ast/PrintVisitor.h
+    parser/ast/PrintVisitor.cpp
 
     main.cpp
 )
