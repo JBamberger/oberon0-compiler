@@ -1,7 +1,7 @@
 #pragma once
-#include "ChainedReferenceNode.h"
+#include "SelectorNode.h"
 
-class ArrayReferenceNode : public ChainedReferenceNode {
+class ArrayReferenceNode : public SelectorNode {
 
     std::unique_ptr<const ExpressionNode> index_;
 

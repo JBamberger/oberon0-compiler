@@ -33,7 +33,7 @@ add_executable(oberon0c
     parser/ast/BinaryExpressionNode.cpp
     parser/ast/NumberConstantNode.h
     parser/ast/NumberConstantNode.cpp
-    parser/ast/ChainedReferenceNode.h
+    parser/ast/SelectorNode.h
     parser/ast/VariableReferenceNode.h
     parser/ast/VariableReferenceNode.cpp
     parser/ast/ArrayReferenceNode.h
@@ -56,6 +56,8 @@ add_executable(oberon0c
     parser/ast/TypedIdentifierNode.h
     parser/ast/VariableNode.h
     parser/ast/VariableNode.cpp
+    parser/ast/FieldReferenceNode.h
+    parser/ast/FieldReferenceNode.cpp
     parser/ast/FieldNode.h
     parser/ast/FieldNode.cpp
     parser/ast/ParameterNode.h

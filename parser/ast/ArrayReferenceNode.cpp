@@ -3,7 +3,7 @@
 #include <utility>
 
 ArrayReferenceNode::ArrayReferenceNode(const FilePos& pos, const ExpressionNode* index)
-    : ChainedReferenceNode(pos), index_(index)
+    : SelectorNode(pos), index_(index)
 {
     assert(index_ != nullptr);
 }

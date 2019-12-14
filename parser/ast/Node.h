@@ -40,7 +40,8 @@ enum class NodeType : char {
     procedure_heading,
     procedure_body,
     procedure_declaration,
-    constant_declaration
+    constant_declaration,
+    selector
 };
 
 class Node {

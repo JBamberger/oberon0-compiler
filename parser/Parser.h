@@ -8,7 +8,6 @@
 #include "../scanner/Scanner.h"
 #include "ast/ArrayTypeNode.h"
 #include "ast/AssignmentNode.h"
-#include "ast/ChainedReferenceNode.h"
 #include "ast/DeclarationsNode.h"
 #include "ast/ExpressionNode.h"
 #include "ast/IfStatementNode.h"
@@ -19,6 +18,7 @@
 #include "ast/ProcedureDeclarationNode.h"
 #include "ast/ProcedureHeadingNode.h"
 #include "ast/RecordTypeNode.h"
+#include "ast/SelectorNode.h"
 #include "ast/TypeNode.h"
 #include "ast/WhileStatementNode.h"
 
@@ -55,11 +55,11 @@ class Parser {
     const StatementSequenceNode* statement_sequence();
     const StatementNode* statement();
     const AssignmentNode* assignment(const VariableReferenceNode* assignee);
-    const ProcedureCallNode* procedure_call(const VariableReferenceNode* name);
+    const ProcedureCallNode* procedure_call(const FilePos& pos, std::string name);
     const IfStatementNode* if_statement();
     const WhileStatementNode* while_statement();
     const ActualParameterNode* actual_parameters();
-    const ChainedReferenceNode* selector();
+    const SelectorNode* selector();
     const StatementNode* procedure_call_or_assignment();
 
   public:

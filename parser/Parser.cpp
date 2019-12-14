@@ -9,8 +9,10 @@
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
 #include "ast/ConstantDeclarationNode.h"
+#include "ast/FieldReferenceNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/ProcedureDeclarationList.h"
+#include "ast/SelectorNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
 #include "ast/UnaryExpressionNode.h"
@@ -326,7 +328,7 @@ const ExpressionNode* Parser::factor()
         const auto name = ident();
         const auto sel = selector();
         const auto variable = new VariableReferenceNode(pos, name);
-        variable->setNext(sel);
+        variable->setSelector(sel);
         return variable;
     }
 
@@ -525,7 +527,7 @@ const AssignmentNode* Parser::assignment(const VariableReferenceNode* assignee)
     return new AssignmentNode(first->getPosition(), assignee, expr);
 }
 
-const ProcedureCallNode* Parser::procedure_call(const VariableReferenceNode* name)
+const ProcedureCallNode* Parser::procedure_call(const FilePos& pos, const std::string name)
 {
     const auto next = scanner_->peekToken();
     const ActualParameterNode* params = nullptr;
@@ -533,22 +535,24 @@ const ProcedureCallNode* Parser::procedure_call(const VariableReferenceNode* nam
         params = actual_parameters();
     }
 
-    return new ProcedureCallNode(name, params);
+    return new ProcedureCallNode(pos, name, params);
 }
 
 const StatementNode* Parser::procedure_call_or_assignment()
 {
     const auto pos = scanner_->peekToken()->getPosition();
     const auto id = ident();
-    const auto sel = selector();
-    auto base = new VariableReferenceNode(pos, id);
-    base->setNext(sel);
 
-    const auto next = scanner_->peekToken();
-    if (next->getType() == TokenType::op_becomes) {
+    const auto nt = scanner_->peekToken()->getType();
+
+    if (nt == TokenType::period || nt == TokenType::lbrack || nt == TokenType::op_becomes) {
+        const auto sel = selector();
+        auto base = new VariableReferenceNode(pos, id);
+        base->setSelector(sel);
         return assignment(base);
     }
-    return procedure_call(base);
+
+    return procedure_call(pos, id);
 }
 
 const IfStatementNode* Parser::if_statement()
@@ -623,18 +627,18 @@ const ActualParameterNode* Parser::actual_parameters()
     return node;
 }
 
-const ChainedReferenceNode* Parser::selector()
+const SelectorNode* Parser::selector()
 {
-    const ChainedReferenceNode* node = nullptr;
-    ChainedReferenceNode* currentNode = nullptr;
+    const SelectorNode* node = nullptr;
+    SelectorNode* currentNode = nullptr;
     auto next = scanner_->peekToken();
     while (true) {
-        ChainedReferenceNode* nextNode;
+        SelectorNode* nextNode;
         if (next->getType() == TokenType::period) {
             const auto idToken = scanner_->nextToken();
             const auto name = ident();
 
-            nextNode = new VariableReferenceNode(idToken->getPosition(), name);
+            nextNode = new FieldReferenceNode(idToken->getPosition(), name);
         } else if (next->getType() == TokenType::lbrack) {
             const auto openToken = scanner_->nextToken();
             const auto expr = expression();
