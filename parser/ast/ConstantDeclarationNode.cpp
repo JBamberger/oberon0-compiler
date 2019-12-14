@@ -1,4 +1,5 @@
 #include "ConstantDeclarationNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 ConstantDeclarationNode::ConstantDeclarationNode(const FilePos& pos,
@@ -17,6 +18,7 @@ const std::unique_ptr<const ExpressionNode>& ConstantDeclarationNode::getValue()
 {
     return value_;
 }
+void ConstantDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ConstantDeclarationNode::print(std::ostream& stream) const
 {

@@ -11,5 +11,7 @@ class IdentifierListNode : public Node {
 
     const std::vector<std::string>& getNames() const;
     void addName(std::string name);
+
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

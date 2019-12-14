@@ -1,4 +1,5 @@
 #include "IfStatementNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 IfStatementNode::IfStatementNode(const FilePos& pos,
@@ -33,6 +34,7 @@ const std::unique_ptr<const StatementSequenceNode>& IfStatementNode::getElsePart
 {
     return elsePart_;
 }
+void IfStatementNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void IfStatementNode::print(std::ostream& stream) const
 {

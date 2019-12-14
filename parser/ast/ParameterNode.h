@@ -14,5 +14,6 @@ class ParameterNode : public TypedIdentifierNode {
     ~ParameterNode() override;
 
     bool isIsReference() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

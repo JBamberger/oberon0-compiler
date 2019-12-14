@@ -13,5 +13,6 @@ class StatementSequenceNode : public Node {
     void pushStatement(const StatementNode* statement);
 
     const std::vector<std::unique_ptr<const StatementNode>>& getBody() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

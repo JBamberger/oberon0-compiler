@@ -11,5 +11,6 @@ class StringConstantNode : public ExpressionNode {
     ~StringConstantNode() override = default;
 
     const std::string& getValue() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

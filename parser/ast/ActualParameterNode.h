@@ -9,8 +9,12 @@ class ActualParameterNode : public Node {
   public:
     explicit ActualParameterNode(const ExpressionNode* param);
     ~ActualParameterNode();
-    const std::unique_ptr<const ExpressionNode>& getParam();
-    const std::unique_ptr<const ActualParameterNode>& getNext();
+    const std::unique_ptr<const ExpressionNode>& getParam() const;
+    const std::unique_ptr<const ActualParameterNode>& getNext() const;
+
+    void visit(NodeVisitor* visitor) const override;
+
     void setNext(const ActualParameterNode* next);
+
     void print(std::ostream& stream) const override;
 };

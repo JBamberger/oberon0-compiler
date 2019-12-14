@@ -13,10 +13,16 @@ class ModuleNode : public Node {
                std::string name,
                const DeclarationsNode* declarations,
                const StatementSequenceNode* statements);
+
     ~ModuleNode() override;
 
     const std::string& getName() const;
+
     const std::unique_ptr<const DeclarationsNode>& getDeclarations() const;
+
     const std::unique_ptr<const StatementSequenceNode>& getStatements() const;
+
     void print(std::ostream& stream) const override;
+
+    void visit(NodeVisitor* visitor) const override;
 };

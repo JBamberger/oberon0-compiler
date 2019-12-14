@@ -29,5 +29,7 @@ class DeclarationsNode : public Node {
     const std::unique_ptr<const ProcedureDeclarationList,
                           void (*)(const ProcedureDeclarationList*)>&
     getProcedures() const;
+
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

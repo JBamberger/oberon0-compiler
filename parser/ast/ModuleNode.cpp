@@ -1,4 +1,5 @@
 #include "ModuleNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 #include <utility>
 
@@ -31,3 +32,5 @@ void ModuleNode::print(std::ostream& stream) const
 {
     stream << "Module(" << name_ << ", " << *declarations_ << ", " << *statements_ << ")";
 }
+
+void ModuleNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }

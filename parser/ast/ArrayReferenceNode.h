@@ -7,8 +7,11 @@ class ArrayReferenceNode : public SelectorNode {
 
   public:
     ArrayReferenceNode(const FilePos& pos, const ExpressionNode* index);
+
     ~ArrayReferenceNode() override;
 
     const std::unique_ptr<const ExpressionNode>& getIndex() const;
+    void visit(NodeVisitor* visitor) const override;
+
     void print(std::ostream& stream) const override;
 };

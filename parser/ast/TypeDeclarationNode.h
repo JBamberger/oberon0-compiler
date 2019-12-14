@@ -12,5 +12,6 @@ class TypeDeclarationNode : public Node {
 
     const std::string& getName() const;
     const std::shared_ptr<const TypeNode>& getType() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

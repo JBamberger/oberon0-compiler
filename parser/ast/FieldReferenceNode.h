@@ -10,5 +10,7 @@ class FieldReferenceNode : public SelectorNode {
     ~FieldReferenceNode() override;
 
     const std::string& getName() const;
+
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

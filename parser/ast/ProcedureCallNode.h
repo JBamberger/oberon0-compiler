@@ -13,5 +13,6 @@ class ProcedureCallNode : public StatementNode {
 
     const std::string& getName() const;
     const std::unique_ptr<const ActualParameterNode>& getParameters() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

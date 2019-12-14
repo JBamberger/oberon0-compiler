@@ -1,4 +1,5 @@
 #include "VariableNode.h"
+#include "NodeVisitor.h"
 #include <utility>
 
 VariableNode::VariableNode(const FilePos& pos, std::string name, const TypeReferenceNode* type)
@@ -8,6 +9,8 @@ VariableNode::VariableNode(const FilePos& pos, std::string name, const TypeRefer
 }
 
 VariableNode::~VariableNode() = default;
+
+void VariableNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void VariableNode::print(std::ostream& stream) const
 {

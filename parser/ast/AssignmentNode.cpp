@@ -1,4 +1,5 @@
 #include "AssignmentNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 AssignmentNode::AssignmentNode(const FilePos& pos,
@@ -18,6 +19,8 @@ const std::unique_ptr<const VariableReferenceNode>& AssignmentNode::getAssignee(
 }
 
 const std::unique_ptr<const ExpressionNode>& AssignmentNode::getValue() const { return value_; }
+
+void AssignmentNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void AssignmentNode::print(std::ostream& stream) const
 {

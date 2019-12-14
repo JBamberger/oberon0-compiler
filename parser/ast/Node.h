@@ -10,6 +10,8 @@
 #include "../../util/Logger.h"
 #include <ostream>
 
+class NodeVisitor;
+
 enum class NodeType : char {
     unary_expression,
     binary_expression,
@@ -50,13 +52,20 @@ class Node {
 
   public:
     explicit Node(NodeType nodeType, FilePos pos);
+
     virtual ~Node() = 0;
 
     NodeType getNodeType() const;
+
     FilePos getFilePos() const;
 
+    virtual void visit(NodeVisitor* visitor) const = 0;
+
     virtual void print(std::ostream& stream) const = 0;
+
     friend std::ostream& operator<<(std::ostream& stream, const Node& node);
 };
+
+std::ostream& operator<<(std::ostream& stream, const NodeType& nt);
 
 #endif // OBERON0C_AST_H

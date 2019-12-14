@@ -1,11 +1,12 @@
 #include "RecordTypeNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos) : TypeNode(NodeType::record_type, pos) {}
 
 RecordTypeNode::~RecordTypeNode() = default;
 
-void RecordTypeNode::addFields(const TypedIdentifierListNode<FieldNode>* fields)
+void RecordTypeNode::addFields(const FieldListNode* fields)
 {
     assert(fields != nullptr);
 
@@ -27,6 +28,7 @@ const std::vector<std::unique_ptr<const FieldNode>>& RecordTypeNode::getMembers(
 {
     return members_;
 }
+void RecordTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void RecordTypeNode::print(std::ostream& stream) const
 {

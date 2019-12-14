@@ -1,4 +1,5 @@
 #include "ProcedureCallNode.h"
+#include "NodeVisitor.h"
 
 ProcedureCallNode::ProcedureCallNode(const FilePos& pos,
                                      std::string name,
@@ -17,6 +18,7 @@ const std::unique_ptr<const ActualParameterNode>& ProcedureCallNode::getParamete
 {
     return parameters_;
 }
+void ProcedureCallNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ProcedureCallNode::print(std::ostream& stream) const
 {

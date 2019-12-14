@@ -1,4 +1,5 @@
 #include "NumberConstantNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value)
@@ -9,6 +10,7 @@ NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value)
 NumberConstantNode::~NumberConstantNode() = default;
 
 int NumberConstantNode::getValue() const { return value_; }
+void NumberConstantNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void NumberConstantNode::print(std::ostream& stream) const
 {

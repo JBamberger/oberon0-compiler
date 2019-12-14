@@ -1,4 +1,5 @@
 #include "UnaryExpressionNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
@@ -17,6 +18,7 @@ const std::unique_ptr<const ExpressionNode>& UnaryExpressionNode::getOperand() c
 {
     return operand_;
 }
+void UnaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
 {

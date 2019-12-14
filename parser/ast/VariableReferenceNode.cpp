@@ -1,5 +1,6 @@
 #include "VariableReferenceNode.h"
 
+#include "NodeVisitor.h"
 #include <utility>
 
 VariableReferenceNode::VariableReferenceNode(const FilePos& pos, std::string name)
@@ -20,6 +21,7 @@ const std::unique_ptr<const SelectorNode>& VariableReferenceNode::getSelector() 
 {
     return selector_;
 }
+void VariableReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void VariableReferenceNode::print(std::ostream& stream) const
 {

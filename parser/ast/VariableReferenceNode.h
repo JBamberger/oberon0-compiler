@@ -14,5 +14,6 @@ class VariableReferenceNode : public ExpressionNode {
 
     const std::string& getName() const;
     const std::unique_ptr<const SelectorNode>& getSelector() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

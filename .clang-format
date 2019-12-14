@@ -6,7 +6,7 @@ PointerAlignment: Left
 ColumnLimit: 100
 
 AlignOperands: true
-AllowShortBlocksOnASingleLine: true
+AllowShortBlocksOnASingleLine: false
 # AllowShortBlocksOnASingleLine: Empty
 # ShortBlockStyle: Empty
 BreakBeforeBraces: Custom

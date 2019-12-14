@@ -1,4 +1,5 @@
 #include "WhileStatementNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 WhileStatementNode::WhileStatementNode(const FilePos& pos,
@@ -21,6 +22,7 @@ const std::unique_ptr<const StatementSequenceNode>& WhileStatementNode::getBody(
 {
     return body_;
 }
+void WhileStatementNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void WhileStatementNode::print(std::ostream& stream) const
 {

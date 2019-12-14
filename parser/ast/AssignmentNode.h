@@ -17,5 +17,6 @@ class AssignmentNode : public StatementNode {
 
     const std::unique_ptr<const ExpressionNode>& getValue() const;
 
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

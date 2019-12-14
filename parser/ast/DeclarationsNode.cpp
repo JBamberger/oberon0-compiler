@@ -1,4 +1,5 @@
 #include "DeclarationsNode.h"
+#include "NodeVisitor.h"
 #include "ProcedureDeclarationList.h"
 #include <cassert>
 
@@ -39,6 +40,10 @@ DeclarationsNode::getProcedures() const
 {
     return procedures_;
 }
+
+
+
+void DeclarationsNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void DeclarationsNode::print(std::ostream& stream) const
 {

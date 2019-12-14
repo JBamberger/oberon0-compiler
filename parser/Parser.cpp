@@ -16,6 +16,7 @@
 #include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
 #include "ast/UnaryExpressionNode.h"
+#include "ast/TypedIdentifierListNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
 #include <cassert>
@@ -165,7 +166,7 @@ const VariableDeclarationList* Parser::var_declarations()
 {
     auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
-    std::vector<std::unique_ptr<const TypedIdentifierListNode<VariableNode>>> nodes;
+    std::vector<std::unique_ptr<const VariableListNode>> nodes;
 
     if (next->getType() != TokenType::kw_var) {
         return new VariableDeclarationList(pos, std::move(nodes));
@@ -424,7 +425,7 @@ const RecordTypeNode* Parser::record_type()
     return node;
 }
 
-const TypedIdentifierListNode<FieldNode>* Parser::field_list()
+const FieldListNode* Parser::field_list()
 {
     if (scanner_->peekToken()->getType() != TokenType::const_ident) {
         return nullptr;
@@ -454,7 +455,7 @@ const FormalParameterList* Parser::formal_parameters()
 {
     const auto pos = require_token(TokenType::lparen)->getPosition();
 
-    std::vector<std::unique_ptr<const TypedIdentifierListNode<ParameterNode>>> nodes;
+    std::vector<std::unique_ptr<const ParameterListNode>> nodes;
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
 
@@ -472,7 +473,7 @@ const FormalParameterList* Parser::formal_parameters()
     return new FormalParameterList(pos, std::move(nodes));
 }
 
-const TypedIdentifierListNode<ParameterNode>* Parser::fp_section()
+const ParameterListNode* Parser::fp_section()
 {
     const auto next_token = scanner_->peekToken();
     const auto pos = next_token->getPosition();

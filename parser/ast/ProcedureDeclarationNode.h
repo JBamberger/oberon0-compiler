@@ -15,5 +15,6 @@ class ProcedureDeclarationNode : public Node {
 
     const std::unique_ptr<const ProcedureHeadingNode>& getHeading() const;
     const std::unique_ptr<const ProcedureBodyNode>& getBody() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

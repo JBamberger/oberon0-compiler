@@ -1,4 +1,5 @@
 #include "ProcedureDeclarationNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos,
@@ -21,6 +22,7 @@ const std::unique_ptr<const ProcedureBodyNode>& ProcedureDeclarationNode::getBod
 {
     return body_;
 }
+void ProcedureDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ProcedureDeclarationNode::print(std::ostream& stream) const
 {

@@ -11,5 +11,7 @@ class ArrayTypeNode : public TypeNode {
     ~ArrayTypeNode() override;
     const std::unique_ptr<const ExpressionNode>& getValue() const;
     const std::unique_ptr<const TypeNode>& getType() const;
+
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

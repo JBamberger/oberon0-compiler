@@ -12,5 +12,6 @@ class ProcedureHeadingNode : public Node {
 
     const std::string& getName() const;
     const std::unique_ptr<const FormalParameterList>& getParams() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

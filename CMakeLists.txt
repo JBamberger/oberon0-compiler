@@ -75,7 +75,6 @@ add_executable(oberon0c
     parser/ast/ConstantDeclarationNode.h
     parser/ast/ConstantDeclarationNode.cpp
     parser/ast/DeclarationListNode.h
-    parser/ast/DeclarationListNode.cpp
     parser/ast/DeclarationsNode.h
     parser/ast/DeclarationsNode.cpp
     parser/ast/ModuleNode.h
@@ -90,6 +89,8 @@ add_executable(oberon0c
     parser/ast/TypeDeclarationNode.cpp
     parser/ast/StringConstantNode.h
     parser/ast/StringConstantNode.cpp
+    parser/ast/NodeVisitor.h
+    parser/ast/NodeVisitor.cpp
 
     main.cpp
 )

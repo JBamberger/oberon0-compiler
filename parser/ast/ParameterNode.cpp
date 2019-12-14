@@ -1,6 +1,7 @@
 #include "ParameterNode.h"
 #include <cassert>
 #include <utility>
+#include "NodeVisitor.h"
 
 ParameterNode::ParameterNode(const FilePos& pos,
                              std::string name,
@@ -15,6 +16,8 @@ ParameterNode::ParameterNode(const FilePos& pos,
 ParameterNode::~ParameterNode() = default;
 
 bool ParameterNode::isIsReference() const { return is_reference_; }
+void ParameterNode::visit(NodeVisitor* visitor) const
+{ visitor->visit(this); }
 
 void ParameterNode::print(std::ostream& stream) const
 {

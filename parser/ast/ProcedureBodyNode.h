@@ -18,5 +18,6 @@ class ProcedureBodyNode : public Node {
     const std::string& getName() const;
     const std::unique_ptr<const DeclarationsNode>& getDeclarations() const;
     const std::unique_ptr<const StatementSequenceNode>& getStatements() const;
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

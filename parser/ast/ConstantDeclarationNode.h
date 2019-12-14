@@ -12,5 +12,7 @@ class ConstantDeclarationNode : public Node {
 
     const std::string& getName() const;
     const std::unique_ptr<const ExpressionNode>& getValue() const;
+
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

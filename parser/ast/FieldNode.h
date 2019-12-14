@@ -8,5 +8,6 @@ class FieldNode : public TypedIdentifierNode {
 
     ~FieldNode() override;
 
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

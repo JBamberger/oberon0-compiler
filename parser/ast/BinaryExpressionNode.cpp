@@ -1,4 +1,5 @@
 #include "BinaryExpressionNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
@@ -25,6 +26,7 @@ const std::unique_ptr<const ExpressionNode>& BinaryExpressionNode::getOperand2()
 {
     return operand2_;
 }
+void BinaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
 {

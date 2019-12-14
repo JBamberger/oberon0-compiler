@@ -1,4 +1,5 @@
 #include "ActualParameterNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 ActualParameterNode::ActualParameterNode(const ExpressionNode* param)
@@ -9,15 +10,11 @@ ActualParameterNode::ActualParameterNode(const ExpressionNode* param)
 
 ActualParameterNode::~ActualParameterNode() = default;
 
-const std::unique_ptr<const ExpressionNode>& ActualParameterNode::getParam()
-{
-    return param_;
-}
+const std::unique_ptr<const ExpressionNode>& ActualParameterNode::getParam() const { return param_; }
 
-const std::unique_ptr<const ActualParameterNode>& ActualParameterNode::getNext()
-{
-    return next_;
-}
+const std::unique_ptr<const ActualParameterNode>& ActualParameterNode::getNext() const { return next_; }
+
+void ActualParameterNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ActualParameterNode::setNext(const ActualParameterNode* next)
 {

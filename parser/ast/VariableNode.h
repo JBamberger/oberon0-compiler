@@ -9,5 +9,6 @@ class VariableNode : public TypedIdentifierNode {
 
     ~VariableNode() override;
 
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

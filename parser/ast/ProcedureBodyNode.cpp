@@ -1,4 +1,5 @@
 #include "ProcedureBodyNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 ProcedureBodyNode::ProcedureBodyNode(const FilePos& pos,
@@ -25,6 +26,7 @@ const std::unique_ptr<const StatementSequenceNode>& ProcedureBodyNode::getStatem
 {
     return statements_;
 }
+void ProcedureBodyNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ProcedureBodyNode::print(std::ostream& stream) const
 {

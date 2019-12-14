@@ -1,4 +1,5 @@
 #include "ProcedureHeadingNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 ProcedureHeadingNode::ProcedureHeadingNode(const FilePos& pos,
@@ -18,6 +19,7 @@ const std::unique_ptr<const FormalParameterList>& ProcedureHeadingNode::getParam
 {
     return params_;
 }
+void ProcedureHeadingNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ProcedureHeadingNode::print(std::ostream& stream) const
 {

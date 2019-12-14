@@ -1,4 +1,5 @@
 #include "StatementSequenceNode.h"
+#include "NodeVisitor.h"
 #include <cassert>
 
 StatementSequenceNode::StatementSequenceNode(const FilePos& pos)
@@ -19,6 +20,7 @@ const std::vector<std::unique_ptr<const StatementNode>>& StatementSequenceNode::
 {
     return body_;
 }
+void StatementSequenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void StatementSequenceNode::print(std::ostream& stream) const
 {
