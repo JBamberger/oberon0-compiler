@@ -14,5 +14,7 @@ class WhileStatementNode : public StatementNode {
                        const StatementSequenceNode* body);
     ~WhileStatementNode() override;
 
+    const std::unique_ptr<const ExpressionNode>& getCondition() const;
+    const std::unique_ptr<const StatementSequenceNode>& getBody() const;
     void print(std::ostream& stream) const override;
 };

@@ -11,5 +11,7 @@ class StatementSequenceNode : public Node {
     ~StatementSequenceNode() override;
 
     void pushStatement(const StatementNode* statement);
+
+    const std::vector<std::unique_ptr<const StatementNode>>& getBody() const;
     void print(std::ostream& stream) const override;
 };

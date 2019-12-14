@@ -8,6 +8,8 @@ FieldReferenceNode::FieldReferenceNode(const FilePos& pos, std::string name)
 
 FieldReferenceNode::~FieldReferenceNode() = default;
 
+const std::string& FieldReferenceNode::getName() const { return name_; }
+
 void FieldReferenceNode::print(std::ostream& stream) const
 {
     stream << "VariableReferenceNode(" << name_;

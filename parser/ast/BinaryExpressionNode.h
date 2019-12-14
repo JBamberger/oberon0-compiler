@@ -29,5 +29,8 @@ class BinaryExpressionNode : public ExpressionNode {
                          const ExpressionNode* operand2);
     ~BinaryExpressionNode() override;
 
+    BinaryOperator getOperator() const;
+    const std::unique_ptr<const ExpressionNode>& getOperand1() const;
+    const std::unique_ptr<const ExpressionNode>& getOperand2() const;
     void print(std::ostream& stream) const override;
 };

@@ -18,6 +18,16 @@ void RecordTypeNode::addFields(const TypedIdentifierListNode<FieldNode>* fields)
     delete fields;
 }
 
+const std::vector<std::shared_ptr<const TypeNode>>& RecordTypeNode::getTypes() const
+{
+    return types_;
+}
+
+const std::vector<std::unique_ptr<const FieldNode>>& RecordTypeNode::getMembers() const
+{
+    return members_;
+}
+
 void RecordTypeNode::print(std::ostream& stream) const
 {
     stream << "RecordTypeNode(Types=(";

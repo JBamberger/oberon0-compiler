@@ -11,5 +11,8 @@ class VariableReferenceNode : public ExpressionNode {
     VariableReferenceNode(const FilePos& pos, std::string name);
     ~VariableReferenceNode() override;
     void setSelector(const SelectorNode* node);
+
+    const std::string& getName() const;
+    const std::unique_ptr<const SelectorNode>& getSelector() const;
     void print(std::ostream& stream) const override;
 };

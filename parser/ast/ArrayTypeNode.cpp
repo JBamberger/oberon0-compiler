@@ -10,6 +10,10 @@ ArrayTypeNode::ArrayTypeNode(const FilePos& pos, const ExpressionNode* value, co
 
 ArrayTypeNode::~ArrayTypeNode() = default;
 
+const std::unique_ptr<const ExpressionNode>& ArrayTypeNode::getValue() const { return value_; }
+
+const std::unique_ptr<const TypeNode>& ArrayTypeNode::getType() const { return type_; }
+
 void ArrayTypeNode::print(std::ostream& stream) const
 {
     stream << "ArrayTypeNode(" << *value_ << "," << *type_ << ")";

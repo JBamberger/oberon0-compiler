@@ -7,4 +7,6 @@ BasicTypeNode::BasicTypeNode(const FilePos& pos, std::string name)
 
 BasicTypeNode::~BasicTypeNode() = default;
 
+const std::string& BasicTypeNode::getName() const { return name_; }
+
 void BasicTypeNode::print(std::ostream& stream) const { stream << "BasicType(" << name_ << ")"; }

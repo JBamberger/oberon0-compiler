@@ -23,5 +23,11 @@ class DeclarationsNode : public Node {
                      void (*procDelete)(const ProcedureDeclarationList*));
     ~DeclarationsNode() override;
 
+    const std::unique_ptr<const ConstantDeclarationList>& getConstants() const;
+    const std::unique_ptr<const VariableDeclarationList>& getVariables() const;
+    const std::unique_ptr<const TypeDeclarationList>& getTypes() const;
+    const std::unique_ptr<const ProcedureDeclarationList,
+                          void (*)(const ProcedureDeclarationList*)>&
+    getProcedures() const;
     void print(std::ostream& stream) const override;
 };

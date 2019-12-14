@@ -13,5 +13,6 @@ class ParameterNode : public TypedIdentifierNode {
 
     ~ParameterNode() override;
 
+    bool isIsReference() const;
     void print(std::ostream& stream) const override;
 };

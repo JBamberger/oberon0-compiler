@@ -23,6 +23,8 @@ class DeclarationListNode : public Node {
 
     ~DeclarationListNode() override = default;
 
+    const std::vector<std::unique_ptr<const T>>& getList() const { return list_; }
+
     void print(std::ostream& stream) const override
     {
         stream << DeclListTypeTraits<T>::name << "(";

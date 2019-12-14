@@ -10,6 +10,12 @@ class AssignmentNode : public StatementNode {
     AssignmentNode(const FilePos& pos,
                    const VariableReferenceNode* assignee,
                    const ExpressionNode* value);
+
     ~AssignmentNode() override;
+
+    const std::unique_ptr<const VariableReferenceNode>& getAssignee() const;
+
+    const std::unique_ptr<const ExpressionNode>& getValue() const;
+
     void print(std::ostream& stream) const override;
 };

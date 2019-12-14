@@ -12,6 +12,16 @@ ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos,
 
 ProcedureDeclarationNode::~ProcedureDeclarationNode() = default;
 
+const std::unique_ptr<const ProcedureHeadingNode>& ProcedureDeclarationNode::getHeading() const
+{
+    return heading_;
+}
+
+const std::unique_ptr<const ProcedureBodyNode>& ProcedureDeclarationNode::getBody() const
+{
+    return body_;
+}
+
 void ProcedureDeclarationNode::print(std::ostream& stream) const
 {
     stream << "ProcedureDeclarationNode(" << *heading_ << ", " << *body_ << ")";

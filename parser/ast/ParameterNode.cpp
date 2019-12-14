@@ -14,6 +14,8 @@ ParameterNode::ParameterNode(const FilePos& pos,
 
 ParameterNode::~ParameterNode() = default;
 
+bool ParameterNode::isIsReference() const { return is_reference_; }
+
 void ParameterNode::print(std::ostream& stream) const
 {
     stream << "ParameterNode(" << name_ << ", " << *type_ << ", "

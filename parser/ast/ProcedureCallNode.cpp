@@ -11,6 +11,13 @@ ProcedureCallNode::ProcedureCallNode(const FilePos& pos,
 
 ProcedureCallNode::~ProcedureCallNode() = default;
 
+const std::string& ProcedureCallNode::getName() const { return name_; }
+
+const std::unique_ptr<const ActualParameterNode>& ProcedureCallNode::getParameters() const
+{
+    return parameters_;
+}
+
 void ProcedureCallNode::print(std::ostream& stream) const
 {
     stream << "ProcedureCall(" << name_;

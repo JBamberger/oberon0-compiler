@@ -8,6 +8,8 @@ NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value)
 
 NumberConstantNode::~NumberConstantNode() = default;
 
+int NumberConstantNode::getValue() const { return value_; }
+
 void NumberConstantNode::print(std::ostream& stream) const
 {
     stream << "NumberConstant(" << value_ << ")";

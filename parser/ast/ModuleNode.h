@@ -10,10 +10,13 @@ class ModuleNode : public Node {
 
   public:
     ModuleNode(const FilePos& pos,
-                      std::string name,
-                      const DeclarationsNode* declarations,
-                      const StatementSequenceNode* statements);
+               std::string name,
+               const DeclarationsNode* declarations,
+               const StatementSequenceNode* statements);
     ~ModuleNode() override;
 
+    const std::string& getName() const;
+    const std::unique_ptr<const DeclarationsNode>& getDeclarations() const;
+    const std::unique_ptr<const StatementSequenceNode>& getStatements() const;
     void print(std::ostream& stream) const override;
 };

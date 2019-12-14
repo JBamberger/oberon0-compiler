@@ -10,5 +10,8 @@ class ProcedureCallNode : public StatementNode {
   public:
     ProcedureCallNode(const FilePos& pos, std::string name, const ActualParameterNode* parameters);
     ~ProcedureCallNode() override;
+
+    const std::string& getName() const;
+    const std::unique_ptr<const ActualParameterNode>& getParameters() const;
     void print(std::ostream& stream) const override;
 };

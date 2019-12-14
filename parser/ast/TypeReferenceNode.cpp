@@ -10,6 +10,8 @@ TypeReferenceNode::TypeReferenceNode(const FilePos& pos, std::shared_ptr<const T
 
 TypeReferenceNode::~TypeReferenceNode() = default;
 
+const std::shared_ptr<const TypeNode>& TypeReferenceNode::getType() const { return type_; }
+
 void TypeReferenceNode::print(std::ostream& stream) const
 {
     stream << "TypeReferenceNode(" << *type_ << ")";

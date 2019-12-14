@@ -11,6 +11,13 @@ ConstantDeclarationNode::ConstantDeclarationNode(const FilePos& pos,
 
 ConstantDeclarationNode::~ConstantDeclarationNode() = default;
 
+const std::string& ConstantDeclarationNode::getName() const { return name_; }
+
+const std::unique_ptr<const ExpressionNode>& ConstantDeclarationNode::getValue() const
+{
+    return value_;
+}
+
 void ConstantDeclarationNode::print(std::ostream& stream) const
 {
     stream << "ConstantDeclarationNode(" << name_ << ", " << *value_ << ")";

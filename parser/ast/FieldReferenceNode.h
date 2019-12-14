@@ -9,5 +9,6 @@ class FieldReferenceNode : public SelectorNode {
     FieldReferenceNode(const FilePos& pos, std::string name);
     ~FieldReferenceNode() override;
 
+    const std::string& getName() const;
     void print(std::ostream& stream) const override;
 };

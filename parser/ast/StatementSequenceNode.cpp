@@ -15,6 +15,11 @@ void StatementSequenceNode::pushStatement(const StatementNode* statement)
     body_.emplace_back(statement);
 }
 
+const std::vector<std::unique_ptr<const StatementNode>>& StatementSequenceNode::getBody() const
+{
+    return body_;
+}
+
 void StatementSequenceNode::print(std::ostream& stream) const
 {
     stream << "StatementSequence(";

@@ -10,6 +10,8 @@ ArrayReferenceNode::ArrayReferenceNode(const FilePos& pos, const ExpressionNode*
 
 ArrayReferenceNode::~ArrayReferenceNode() = default;
 
+const std::unique_ptr<const ExpressionNode>& ArrayReferenceNode::getIndex() const { return index_; }
+
 void ArrayReferenceNode::print(std::ostream& stream) const
 {
     stream << "ArrayReferenceNode(" << *index_;

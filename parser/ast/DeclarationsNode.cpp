@@ -19,6 +19,27 @@ DeclarationsNode::DeclarationsNode(const FilePos& pos,
 
 DeclarationsNode::~DeclarationsNode() = default;
 
+const std::unique_ptr<const ConstantDeclarationList>& DeclarationsNode::getConstants() const
+{
+    return constants_;
+}
+
+const std::unique_ptr<const VariableDeclarationList>& DeclarationsNode::getVariables() const
+{
+    return variables_;
+}
+
+const std::unique_ptr<const TypeDeclarationList>& DeclarationsNode::getTypes() const
+{
+    return types_;
+}
+
+const std::unique_ptr<const ProcedureDeclarationList, void (*)(const ProcedureDeclarationList*)>&
+DeclarationsNode::getProcedures() const
+{
+    return procedures_;
+}
+
 void DeclarationsNode::print(std::ostream& stream) const
 {
     stream << "Declarations(" << *constants_ << ", " << *variables_ << ", " << *types_ << ", "

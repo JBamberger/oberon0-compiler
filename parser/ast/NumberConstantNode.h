@@ -9,5 +9,6 @@ class NumberConstantNode : public ExpressionNode {
     NumberConstantNode(const FilePos& pos, int value);
     ~NumberConstantNode() override;
 
+    int getValue() const;
     void print(std::ostream& stream) const override;
 };

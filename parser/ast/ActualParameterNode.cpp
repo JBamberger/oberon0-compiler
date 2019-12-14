@@ -9,6 +9,16 @@ ActualParameterNode::ActualParameterNode(const ExpressionNode* param)
 
 ActualParameterNode::~ActualParameterNode() = default;
 
+const std::unique_ptr<const ExpressionNode>& ActualParameterNode::getParam()
+{
+    return param_;
+}
+
+const std::unique_ptr<const ActualParameterNode>& ActualParameterNode::getNext()
+{
+    return next_;
+}
+
 void ActualParameterNode::setNext(const ActualParameterNode* next)
 {
     next_ = std::unique_ptr<const ActualParameterNode>(next);

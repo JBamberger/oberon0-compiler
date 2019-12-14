@@ -12,6 +12,16 @@ WhileStatementNode::WhileStatementNode(const FilePos& pos,
 
 WhileStatementNode::~WhileStatementNode() = default;
 
+const std::unique_ptr<const ExpressionNode>& WhileStatementNode::getCondition() const
+{
+    return condition_;
+}
+
+const std::unique_ptr<const StatementSequenceNode>& WhileStatementNode::getBody() const
+{
+    return body_;
+}
+
 void WhileStatementNode::print(std::ostream& stream) const
 {
     stream << "While(" << *condition_ << ", " << *body_ << ")";

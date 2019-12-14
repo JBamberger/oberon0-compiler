@@ -14,6 +14,18 @@ BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
 
 BinaryExpressionNode::~BinaryExpressionNode() = default;
 
+BinaryOperator BinaryExpressionNode::getOperator() const { return op_; }
+
+const std::unique_ptr<const ExpressionNode>& BinaryExpressionNode::getOperand1() const
+{
+    return operand1_;
+}
+
+const std::unique_ptr<const ExpressionNode>& BinaryExpressionNode::getOperand2() const
+{
+    return operand2_;
+}
+
 std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
 {
     // clang-format off

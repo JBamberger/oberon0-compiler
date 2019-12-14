@@ -7,10 +7,17 @@ ProcedureHeadingNode::ProcedureHeadingNode(const FilePos& pos,
     : Node(NodeType::procedure_heading, pos), name_(std::move(name)), params_(params)
 {
     // TODO: enforce
-    //assert(params_ != nullptr);
+    // assert(params_ != nullptr);
 }
 
 ProcedureHeadingNode::~ProcedureHeadingNode() = default;
+
+const std::string& ProcedureHeadingNode::getName() const { return name_; }
+
+const std::unique_ptr<const FormalParameterList>& ProcedureHeadingNode::getParams() const
+{
+    return params_;
+}
 
 void ProcedureHeadingNode::print(std::ostream& stream) const
 {

@@ -11,6 +11,13 @@ UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
 
 UnaryExpressionNode::~UnaryExpressionNode() = default;
 
+UnaryOperator UnaryExpressionNode::getOperator() const { return operator_; }
+
+const std::unique_ptr<const ExpressionNode>& UnaryExpressionNode::getOperand() const
+{
+    return operand_;
+}
+
 std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
 {
     switch (op) {

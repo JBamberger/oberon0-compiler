@@ -9,5 +9,6 @@ class ArrayReferenceNode : public SelectorNode {
     ArrayReferenceNode(const FilePos& pos, const ExpressionNode* index);
     ~ArrayReferenceNode() override;
 
+    const std::unique_ptr<const ExpressionNode>& getIndex() const;
     void print(std::ostream& stream) const override;
 };

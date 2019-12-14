@@ -9,6 +9,7 @@ class ArrayTypeNode : public TypeNode {
   public:
     ArrayTypeNode(const FilePos& pos, const ExpressionNode* value, const TypeNode* type);
     ~ArrayTypeNode() override;
-
+    const std::unique_ptr<const ExpressionNode>& getValue() const;
+    const std::unique_ptr<const TypeNode>& getType() const;
     void print(std::ostream& stream) const override;
 };

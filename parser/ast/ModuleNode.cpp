@@ -15,6 +15,18 @@ ModuleNode::ModuleNode(const FilePos& pos,
 
 ModuleNode::~ModuleNode() = default;
 
+const std::string& ModuleNode::getName() const { return name_; }
+
+const std::unique_ptr<const DeclarationsNode>& ModuleNode::getDeclarations() const
+{
+    return declarations_;
+}
+
+const std::unique_ptr<const StatementSequenceNode>& ModuleNode::getStatements() const
+{
+    return statements_;
+}
+
 void ModuleNode::print(std::ostream& stream) const
 {
     stream << "Module(" << name_ << ", " << *declarations_ << ", " << *statements_ << ")";

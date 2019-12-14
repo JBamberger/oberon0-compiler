@@ -15,5 +15,8 @@ class ProcedureBodyNode : public Node {
                       const StatementSequenceNode* statements);
     ~ProcedureBodyNode() override;
 
+    const std::string& getName() const;
+    const std::unique_ptr<const DeclarationsNode>& getDeclarations() const;
+    const std::unique_ptr<const StatementSequenceNode>& getStatements() const;
     void print(std::ostream& stream) const override;
 };

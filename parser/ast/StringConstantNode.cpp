@@ -5,6 +5,8 @@ StringConstantNode::StringConstantNode(const FilePos& pos, std::string value)
 {
 }
 
+const std::string& StringConstantNode::getValue() const { return value_; }
+
 void StringConstantNode::print(std::ostream& stream) const
 {
     stream << "StringConstant(" << value_ << ")";

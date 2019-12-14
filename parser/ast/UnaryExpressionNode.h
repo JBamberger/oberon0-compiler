@@ -2,11 +2,7 @@
 
 #include "ExpressionNode.h"
 
-enum class UnaryOperator : char {
-    plus,
-    minus,
-    not
-};
+enum class UnaryOperator : char { plus, minus, not};
 
 class UnaryExpressionNode : public ExpressionNode {
     UnaryOperator operator_;
@@ -14,7 +10,9 @@ class UnaryExpressionNode : public ExpressionNode {
 
   public:
     UnaryExpressionNode(const FilePos& pos, UnaryOperator op, const ExpressionNode* operand);
-    virtual ~UnaryExpressionNode() override;
+    ~UnaryExpressionNode() override;
 
+    UnaryOperator getOperator() const;
+    const std::unique_ptr<const ExpressionNode>& getOperand() const;
     void print(std::ostream& stream) const override;
 };

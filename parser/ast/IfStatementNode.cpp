@@ -19,6 +19,21 @@ void IfStatementNode::setElseBody(const StatementSequenceNode* elsePart)
     elsePart_ = std::unique_ptr<const StatementSequenceNode>(elsePart);
 }
 
+const std::unique_ptr<const ExpressionNode>& IfStatementNode::getCondition() const
+{
+    return condition_;
+}
+
+const std::unique_ptr<const StatementSequenceNode>& IfStatementNode::getThenPart() const
+{
+    return thenPart_;
+}
+
+const std::unique_ptr<const StatementSequenceNode>& IfStatementNode::getElsePart() const
+{
+    return elsePart_;
+}
+
 void IfStatementNode::print(std::ostream& stream) const
 {
     stream << "IfStatementNode(" << *condition_ << " then " << *thenPart_;

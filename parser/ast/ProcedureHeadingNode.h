@@ -10,5 +10,7 @@ class ProcedureHeadingNode : public Node {
     ProcedureHeadingNode(const FilePos& pos, std::string name, const FormalParameterList* params);
     ~ProcedureHeadingNode() override;
 
+    const std::string& getName() const;
+    const std::unique_ptr<const FormalParameterList>& getParams() const;
     void print(std::ostream& stream) const override;
 };

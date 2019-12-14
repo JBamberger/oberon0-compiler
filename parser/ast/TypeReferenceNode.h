@@ -7,7 +7,8 @@ class TypeReferenceNode : public Node {
 
   public:
     TypeReferenceNode(const FilePos& pos, std::shared_ptr<const TypeNode> type);
-    virtual ~TypeReferenceNode() override;
+    ~TypeReferenceNode() override;
 
+    const std::shared_ptr<const TypeNode>& getType() const;
     void print(std::ostream& stream) const override;
 };

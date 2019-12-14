@@ -12,5 +12,8 @@ class RecordTypeNode : public TypeNode {
     RecordTypeNode(const FilePos& pos);
     ~RecordTypeNode() override;
     void addFields(const TypedIdentifierListNode<FieldNode>* fields);
+
+    const std::vector<std::shared_ptr<const TypeNode>>& getTypes() const;
+    const std::vector<std::unique_ptr<const FieldNode>>& getMembers() const;
     void print(std::ostream& stream) const override;
 };

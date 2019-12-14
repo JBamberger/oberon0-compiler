@@ -10,6 +10,10 @@ TypeDeclarationNode::TypeDeclarationNode(const FilePos& pos, std::string name, c
 
 TypeDeclarationNode::~TypeDeclarationNode() = default;
 
+const std::string& TypeDeclarationNode::getName() const { return name_; }
+
+const std::shared_ptr<const TypeNode>& TypeDeclarationNode::getType() const { return type_; }
+
 void TypeDeclarationNode::print(std::ostream& stream) const
 {
     stream << "TypeDeclarationNode(" << name_ << ", " << *type_ << ")";

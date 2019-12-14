@@ -14,5 +14,8 @@ class IfStatementNode : public StatementNode {
                     const StatementSequenceNode* thenPart);
     ~IfStatementNode() override;
     void setElseBody(const StatementSequenceNode* elsePart);
+    const std::unique_ptr<const ExpressionNode>& getCondition() const;
+    const std::unique_ptr<const StatementSequenceNode>& getThenPart() const;
+    const std::unique_ptr<const StatementSequenceNode>& getElsePart() const;
     void print(std::ostream& stream) const override;
 };
