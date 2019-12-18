@@ -6,6 +6,7 @@
 #include "AssignmentNode.h"
 #include "BasicTypeNode.h"
 #include "BinaryExpressionNode.h"
+#include "FieldReferenceNode.h"
 #include "IfStatementNode.h"
 #include "ModuleNode.h"
 #include "NumberConstantNode.h"
@@ -15,7 +16,6 @@
 #include "StringConstantNode.h"
 #include "UnaryExpressionNode.h"
 #include "WhileStatementNode.h"
-#include "FieldReferenceNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
@@ -176,14 +176,6 @@ void PrintVisitor::visit(const ParameterNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const ProcedureBodyNode* node)
-{
-    line() << "ProcedureCall " << node->getName() << "\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
 void PrintVisitor::visit(const ProcedureCallNode* node)
 {
     line() << "ProcedureCall " << node->getName() << "\n";
@@ -194,15 +186,7 @@ void PrintVisitor::visit(const ProcedureCallNode* node)
 
 void PrintVisitor::visit(const ProcedureDeclarationNode* node)
 {
-    line() << "ProcedureDeclaration\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
-void PrintVisitor::visit(const ProcedureHeadingNode* node)
-{
-    line() << "ProcedureHeading " << node->getName() << "\n";
+    line() << "ProcedureDeclaration " << node->getName() << "\n";
     inc();
     NodeVisitor::visit(node);
     dec();

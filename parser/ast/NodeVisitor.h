@@ -63,10 +63,8 @@ public:
     virtual void visit(const ModuleNode* node) = 0;
     virtual void visit(const NumberConstantNode* node) = 0;
     virtual void visit(const ParameterNode* node) = 0;
-    virtual void visit(const ProcedureBodyNode* node) = 0;
     virtual void visit(const ProcedureCallNode* node) = 0;
     virtual void visit(const ProcedureDeclarationNode* node) = 0;
-    virtual void visit(const ProcedureHeadingNode* node) = 0;
     virtual void visit(const RecordTypeNode* node) = 0;
     virtual void visit(const StatementSequenceNode* node) = 0;
     virtual void visit(const StringConstantNode* node) = 0;

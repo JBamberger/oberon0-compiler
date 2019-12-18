@@ -15,8 +15,8 @@
 #include "ast/SelectorNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
-#include "ast/UnaryExpressionNode.h"
 #include "ast/TypedIdentifierListNode.h"
+#include "ast/UnaryExpressionNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
 #include <cassert>
@@ -191,15 +191,7 @@ const VariableDeclarationList* Parser::var_declarations()
 
 const ProcedureDeclarationNode* Parser::procedure_declaration()
 {
-    const auto pos = scanner_->peekToken()->getPosition();
-    const auto heading = procedure_heading();
-    static_cast<void>(require_token(TokenType::semicolon));
-    const auto body = procedure_body();
-    return new ProcedureDeclarationNode(pos, heading, body);
-}
-
-const ProcedureHeadingNode* Parser::procedure_heading()
-{
+    // procedure heading
     const auto pos = require_token(TokenType::kw_procedure)->getPosition();
     const auto name = ident();
 
@@ -207,14 +199,10 @@ const ProcedureHeadingNode* Parser::procedure_heading()
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
         params = formal_parameters();
     }
+    static_cast<void>(require_token(TokenType::semicolon));
 
-    return new ProcedureHeadingNode(pos, name, params);
-}
-
-const ProcedureBodyNode* Parser::procedure_body()
-{
+    // procedure body
     const auto decls = declarations();
-
     const StatementSequenceNode* statements = nullptr;
     if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
         static_cast<void>(scanner_->nextToken());
@@ -222,9 +210,15 @@ const ProcedureBodyNode* Parser::procedure_body()
     }
 
     static_cast<void>(require_token(TokenType::kw_end));
-    const auto name = ident();
+    const auto name2 = ident();
 
-    return new ProcedureBodyNode(decls->getFilePos(), name, decls, statements);
+    if (name != name2) {
+        logger_->error(pos, "Expected equal procedure names but got " + name + " and " +
+                                    name2 + ".");
+        exit(EXIT_FAILURE);
+    }
+
+    return new ProcedureDeclarationNode(pos, name, params, decls, statements);
 }
 
 const ExpressionNode* Parser::expression()

@@ -116,11 +116,6 @@ void NodeVisitor::visit(const NumberConstantNode* node) {}
 
 void NodeVisitor::visit(const ParameterNode* node) { node->getType()->visit(this); }
 
-void NodeVisitor::visit(const ProcedureBodyNode* node)
-{
-    node->getDeclarations()->visit(this);
-    node->getStatements()->visit(this);
-}
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
@@ -131,15 +126,11 @@ void NodeVisitor::visit(const ProcedureCallNode* node)
 
 void NodeVisitor::visit(const ProcedureDeclarationNode* node)
 {
-    node->getHeading()->visit(this);
-    node->getBody()->visit(this);
-}
-
-void NodeVisitor::visit(const ProcedureHeadingNode* node)
-{
     if (node->getParams() != nullptr) {
         node->getParams()->visit(this);
     }
+    node->getDeclarations()->visit(this);
+    node->getStatements()->visit(this);
 }
 
 void NodeVisitor::visit(const RecordTypeNode* node)

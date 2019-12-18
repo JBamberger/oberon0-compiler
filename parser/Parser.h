@@ -13,10 +13,8 @@
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
 #include "ast/Node.h"
-#include "ast/ProcedureBodyNode.h"
 #include "ast/ProcedureCallNode.h"
 #include "ast/ProcedureDeclarationNode.h"
-#include "ast/ProcedureHeadingNode.h"
 #include "ast/RecordTypeNode.h"
 #include "ast/SelectorNode.h"
 #include "ast/TypeNode.h"
@@ -39,8 +37,6 @@ class Parser {
     const TypeDeclarationList* type_declarations();
     const VariableDeclarationList* var_declarations();
     const ProcedureDeclarationNode* procedure_declaration();
-    const ProcedureHeadingNode* procedure_heading();
-    const ProcedureBodyNode* procedure_body();
     const FormalParameterList* formal_parameters();
     const ParameterListNode* fp_section();
     const ExpressionNode* expression();
