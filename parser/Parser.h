@@ -31,37 +31,37 @@ class Parser {
     std::unique_ptr<const Token> require_token(const TokenType& type) const;
     std::string ident() const;
 
-    const ModuleNode* module();
-    const DeclarationsNode* declarations();
-    const ConstantDeclarationList* const_declarations();
-    const TypeDeclarationList* type_declarations();
-    const VariableDeclarationList* var_declarations();
-    const ProcedureDeclarationNode* procedure_declaration();
-    const FormalParameterList* formal_parameters();
-    const ParameterListNode* fp_section();
-    const ExpressionNode* expression();
-    const ExpressionNode* simple_expression();
-    const ExpressionNode* term();
-    const ExpressionNode* factor();
-    const TypeNode* type();
-    const ArrayTypeNode* array_type();
-    const RecordTypeNode* record_type();
-    const FieldListNode* field_list();
-    const IdentifierListNode* ident_list();
-    const StatementSequenceNode* statement_sequence();
-    const StatementNode* statement();
-    const AssignmentNode* assignment(const VariableReferenceNode* assignee);
-    const ProcedureCallNode* procedure_call(const FilePos& pos, std::string name);
-    const IfStatementNode* if_statement();
-    const WhileStatementNode* while_statement();
-    const ActualParameterNode* actual_parameters();
-    const SelectorNode* selector();
-    const StatementNode* procedure_call_or_assignment();
+    ModuleNode* module();
+    DeclarationsNode* declarations();
+    ConstantDeclarationList* const_declarations();
+    TypeDeclarationList* type_declarations();
+    VariableDeclarationList* var_declarations();
+    ProcedureDeclarationNode* procedure_declaration();
+    FormalParameterList* formal_parameters();
+    ParameterListNode* fp_section();
+    ExpressionNode* expression();
+    ExpressionNode* simple_expression();
+    ExpressionNode* term();
+    ExpressionNode* factor();
+    TypeNode* type();
+    ArrayTypeNode* array_type();
+    RecordTypeNode* record_type();
+    FieldListNode* field_list();
+    IdentifierListNode* ident_list();
+    StatementSequenceNode* statement_sequence();
+    StatementNode* statement();
+    AssignmentNode* assignment(const VariableReferenceNode* assignee);
+    ProcedureCallNode* procedure_call(const FilePos& pos, std::string name);
+    IfStatementNode* if_statement();
+    WhileStatementNode* while_statement();
+    ActualParameterNode* actual_parameters();
+    SelectorNode* selector();
+    StatementNode* procedure_call_or_assignment();
 
   public:
     explicit Parser(Scanner* scanner, Logger* logger);
     ~Parser();
-    std::unique_ptr<const Node> parse();
+    std::unique_ptr<Node> parse();
 };
 
 #endif // OBERON0C_PARSER_H

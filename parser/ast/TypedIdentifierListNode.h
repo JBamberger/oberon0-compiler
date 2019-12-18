@@ -44,7 +44,7 @@ class FieldListNode : public Node {
         stream << "}, " << *type_ << ")";
     }
 
-    friend const FieldListNode*
+    friend FieldListNode*
     createFieldList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
     {
         auto list = new FieldListNode(pos, type);
@@ -93,7 +93,7 @@ class VariableListNode : public Node {
         stream << "}, " << *type_ << ")";
     }
 
-    friend const VariableListNode*
+    friend VariableListNode*
     createVariableList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
     {
         auto list = new VariableListNode(pos, type);
@@ -142,10 +142,10 @@ class ParameterListNode : public Node {
         stream << "}, " << *type_ << ")";
     }
 
-    friend const ParameterListNode* createParameterList(const FilePos& pos,
-                                                        const IdentifierListNode* names,
-                                                        const TypeNode* type,
-                                                        bool is_reference)
+    friend ParameterListNode* createParameterList(const FilePos& pos,
+                                                  const IdentifierListNode* names,
+                                                  const TypeNode* type,
+                                                  bool is_reference)
     {
         auto list = new ParameterListNode(pos, type);
         for (const auto& name : names->getNames()) {

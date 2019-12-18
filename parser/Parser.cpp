@@ -29,7 +29,7 @@ Parser::~Parser() = default;
 
 inline std::string type_str(const TokenType& t) { return (std::stringstream() << t).str(); }
 
-std::unique_ptr<const Node> Parser::parse() { return std::unique_ptr<const Node>(module()); }
+std::unique_ptr<Node> Parser::parse() { return std::unique_ptr<Node>(module()); }
 
 std::unique_ptr<const Token> Parser::require_token(const TokenType& type) const
 {
@@ -52,10 +52,10 @@ std::string Parser::ident() const
     return ident_token->getValue();
 }
 
-const ModuleNode* Parser::module()
+ModuleNode* Parser::module()
 {
     const auto pos = require_token(TokenType::kw_module)->getPosition();
-    const auto moduleName = ident();
+    const auto module_name = ident();
 
     static_cast<void>(require_token(TokenType::semicolon));
 
@@ -70,19 +70,19 @@ const ModuleNode* Parser::module()
 
     static_cast<void>(require_token(TokenType::kw_end));
 
-    const auto namePos = scanner_->peekToken()->getPosition();
-    const auto moduleName2 = ident();
-    if (moduleName != moduleName2) {
-        logger_->error(namePos, "Expected equal module names but got " + moduleName + " and " +
-                                    moduleName2 + ".");
+    const auto name_pos = scanner_->peekToken()->getPosition();
+    const auto module_name2 = ident();
+    if (module_name != module_name2) {
+        logger_->error(name_pos, "Expected equal module names but got " + module_name + " and " +
+                                     module_name2 + ".");
         exit(EXIT_FAILURE);
     }
     static_cast<void>(require_token(TokenType::period));
 
-    return new ModuleNode(pos, moduleName, decls, statements);
+    return new ModuleNode(pos, module_name, decls, statements);
 }
 
-const DeclarationsNode* Parser::declarations()
+DeclarationsNode* Parser::declarations()
 {
     const auto pos = scanner_->peekToken()->getPosition();
     const auto constDecls = const_declarations();
@@ -106,7 +106,7 @@ const DeclarationsNode* Parser::declarations()
                                 [](const ProcedureDeclarationList* l) { delete l; });
 }
 
-const ConstantDeclarationList* Parser::const_declarations()
+ConstantDeclarationList* Parser::const_declarations()
 {
     auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
@@ -134,7 +134,7 @@ const ConstantDeclarationList* Parser::const_declarations()
     return new ConstantDeclarationList(pos, std::move(nodes));
 }
 
-const TypeDeclarationList* Parser::type_declarations()
+TypeDeclarationList* Parser::type_declarations()
 {
 
     auto next = scanner_->peekToken();
@@ -162,7 +162,7 @@ const TypeDeclarationList* Parser::type_declarations()
     return new TypeDeclarationList(pos, std::move(nodes));
 }
 
-const VariableDeclarationList* Parser::var_declarations()
+VariableDeclarationList* Parser::var_declarations()
 {
     auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
@@ -189,7 +189,7 @@ const VariableDeclarationList* Parser::var_declarations()
     return new VariableDeclarationList(pos, std::move(nodes));
 }
 
-const ProcedureDeclarationNode* Parser::procedure_declaration()
+ProcedureDeclarationNode* Parser::procedure_declaration()
 {
     // procedure heading
     const auto pos = require_token(TokenType::kw_procedure)->getPosition();
@@ -213,15 +213,15 @@ const ProcedureDeclarationNode* Parser::procedure_declaration()
     const auto name2 = ident();
 
     if (name != name2) {
-        logger_->error(pos, "Expected equal procedure names but got " + name + " and " +
-                                    name2 + ".");
+        logger_->error(pos,
+                       "Expected equal procedure names but got " + name + " and " + name2 + ".");
         exit(EXIT_FAILURE);
     }
 
     return new ProcedureDeclarationNode(pos, name, params, decls, statements);
 }
 
-const ExpressionNode* Parser::expression()
+ExpressionNode* Parser::expression()
 {
     const auto node = simple_expression();
 
@@ -248,9 +248,9 @@ const ExpressionNode* Parser::expression()
     return new BinaryExpressionNode(next->getPosition(), op, node, second);
 }
 
-const ExpressionNode* Parser::simple_expression()
+ExpressionNode* Parser::simple_expression()
 {
-    const ExpressionNode* node;
+    ExpressionNode* node;
 
     auto next = scanner_->peekToken()->getType();
     if (next == TokenType::op_plus || next == TokenType::op_minus) {
@@ -283,9 +283,9 @@ const ExpressionNode* Parser::simple_expression()
     return node;
 }
 
-const ExpressionNode* Parser::term()
+ExpressionNode* Parser::term()
 {
-    auto node = dynamic_cast<const ExpressionNode*>(factor());
+    auto operand_1 = factor();
 
     auto next = scanner_->peekToken()->getType();
     while (true) {
@@ -303,17 +303,17 @@ const ExpressionNode* Parser::term()
         }
 
         const auto operation = scanner_->nextToken();
-        const auto operand = factor();
+        const auto operand_2 = factor();
 
-        node = new BinaryExpressionNode(operation->getPosition(), op, node, operand);
+        operand_1 = new BinaryExpressionNode(operation->getPosition(), op, operand_1, operand_2);
 
         next = scanner_->peekToken()->getType();
     }
 
-    return node;
+    return operand_1;
 }
 
-const ExpressionNode* Parser::factor()
+ExpressionNode* Parser::factor()
 {
     const auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
@@ -370,7 +370,7 @@ const ExpressionNode* Parser::factor()
     exit(EXIT_FAILURE);
 }
 
-const TypeNode* Parser::type()
+TypeNode* Parser::type()
 {
     const auto next = scanner_->peekToken();
 
@@ -392,7 +392,7 @@ const TypeNode* Parser::type()
     exit(EXIT_FAILURE);
 }
 
-const ArrayTypeNode* Parser::array_type()
+ArrayTypeNode* Parser::array_type()
 {
     const auto pos = require_token(TokenType::kw_array)->getPosition();
     const auto arrayValue = expression();
@@ -402,7 +402,7 @@ const ArrayTypeNode* Parser::array_type()
     return new ArrayTypeNode(pos, arrayValue, arrayType);
 }
 
-const RecordTypeNode* Parser::record_type()
+RecordTypeNode* Parser::record_type()
 {
     const auto pos = require_token(TokenType::kw_record)->getPosition();
 
@@ -419,7 +419,7 @@ const RecordTypeNode* Parser::record_type()
     return node;
 }
 
-const FieldListNode* Parser::field_list()
+FieldListNode* Parser::field_list()
 {
     if (scanner_->peekToken()->getType() != TokenType::const_ident) {
         return nullptr;
@@ -432,7 +432,7 @@ const FieldListNode* Parser::field_list()
     return createFieldList(identifiers->getFilePos(), identifiers, listType);
 }
 
-const IdentifierListNode* Parser::ident_list()
+IdentifierListNode* Parser::ident_list()
 {
     const auto pos = scanner_->peekToken()->getPosition();
     auto node = new IdentifierListNode(pos, ident());
@@ -445,7 +445,7 @@ const IdentifierListNode* Parser::ident_list()
     return node;
 }
 
-const FormalParameterList* Parser::formal_parameters()
+FormalParameterList* Parser::formal_parameters()
 {
     const auto pos = require_token(TokenType::lparen)->getPosition();
 
@@ -467,7 +467,7 @@ const FormalParameterList* Parser::formal_parameters()
     return new FormalParameterList(pos, std::move(nodes));
 }
 
-const ParameterListNode* Parser::fp_section()
+ParameterListNode* Parser::fp_section()
 {
     const auto next_token = scanner_->peekToken();
     const auto pos = next_token->getPosition();
@@ -485,7 +485,7 @@ const ParameterListNode* Parser::fp_section()
     return createParameterList(pos, names, list_type, is_reference);
 }
 
-const StatementSequenceNode* Parser::statement_sequence()
+StatementSequenceNode* Parser::statement_sequence()
 {
     const auto node = new StatementSequenceNode(scanner_->peekToken()->getPosition());
     node->pushStatement(statement());
@@ -496,7 +496,7 @@ const StatementSequenceNode* Parser::statement_sequence()
     return node;
 }
 
-const StatementNode* Parser::statement()
+StatementNode* Parser::statement()
 {
     const auto next = scanner_->peekToken();
     if (next->getType() == TokenType::const_ident) {
@@ -514,7 +514,7 @@ const StatementNode* Parser::statement()
     exit(EXIT_FAILURE);
 }
 
-const AssignmentNode* Parser::assignment(const VariableReferenceNode* assignee)
+AssignmentNode* Parser::assignment(const VariableReferenceNode* assignee)
 {
     const auto first = require_token(TokenType::op_becomes);
     const auto expr = expression();
@@ -522,7 +522,7 @@ const AssignmentNode* Parser::assignment(const VariableReferenceNode* assignee)
     return new AssignmentNode(first->getPosition(), assignee, expr);
 }
 
-const ProcedureCallNode* Parser::procedure_call(const FilePos& pos, const std::string name)
+ProcedureCallNode* Parser::procedure_call(const FilePos& pos, const std::string name)
 {
     const auto next = scanner_->peekToken();
     const ActualParameterNode* params = nullptr;
@@ -533,7 +533,7 @@ const ProcedureCallNode* Parser::procedure_call(const FilePos& pos, const std::s
     return new ProcedureCallNode(pos, name, params);
 }
 
-const StatementNode* Parser::procedure_call_or_assignment()
+StatementNode* Parser::procedure_call_or_assignment()
 {
     const auto pos = scanner_->peekToken()->getPosition();
     const auto id = ident();
@@ -550,7 +550,7 @@ const StatementNode* Parser::procedure_call_or_assignment()
     return procedure_call(pos, id);
 }
 
-const IfStatementNode* Parser::if_statement()
+IfStatementNode* Parser::if_statement()
 {
     // if statement
     auto pos = require_token(TokenType::kw_if)->getPosition();
@@ -587,7 +587,7 @@ const IfStatementNode* Parser::if_statement()
     return node;
 }
 
-const WhileStatementNode* Parser::while_statement()
+WhileStatementNode* Parser::while_statement()
 {
     const auto token = require_token(TokenType::kw_while);
     const auto cond = expression();
@@ -598,7 +598,7 @@ const WhileStatementNode* Parser::while_statement()
     return new WhileStatementNode(token->getPosition(), cond, body);
 }
 
-const ActualParameterNode* Parser::actual_parameters()
+ActualParameterNode* Parser::actual_parameters()
 {
     ActualParameterNode* node = nullptr;
 
@@ -622,33 +622,33 @@ const ActualParameterNode* Parser::actual_parameters()
     return node;
 }
 
-const SelectorNode* Parser::selector()
+SelectorNode* Parser::selector()
 {
-    const SelectorNode* node = nullptr;
-    SelectorNode* currentNode = nullptr;
+    SelectorNode* node = nullptr;
+    SelectorNode* current_node = nullptr;
     auto next = scanner_->peekToken();
     while (true) {
-        SelectorNode* nextNode;
+        SelectorNode* next_node;
         if (next->getType() == TokenType::period) {
-            const auto idToken = scanner_->nextToken();
+            const auto id_token = scanner_->nextToken();
             const auto name = ident();
 
-            nextNode = new FieldReferenceNode(idToken->getPosition(), name);
+            next_node = new FieldReferenceNode(id_token->getPosition(), name);
         } else if (next->getType() == TokenType::lbrack) {
             const auto openToken = scanner_->nextToken();
             const auto expr = expression();
             static_cast<void>(require_token(TokenType::rbrack));
 
-            nextNode = new ArrayReferenceNode(openToken->getPosition(), expr);
+            next_node = new ArrayReferenceNode(openToken->getPosition(), expr);
         } else {
             break;
         }
 
         if (node == nullptr) {
-            node = nextNode;
-            currentNode = nextNode;
+            node = next_node;
+            current_node = next_node;
         } else {
-            currentNode->setNext(nextNode);
+            current_node->setNext(next_node);
         }
 
         next = scanner_->peekToken();
