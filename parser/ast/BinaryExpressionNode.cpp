@@ -26,6 +26,7 @@ const std::unique_ptr<const ExpressionNode>& BinaryExpressionNode::getOperand2()
 {
     return operand2_;
 }
+
 void BinaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
@@ -49,6 +50,40 @@ std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
     }
     // clang-format on
     return stream;
+}
+
+BinaryOperator toBinaryOperator(const TokenType& type)
+{
+    switch (type) {
+    case TokenType::op_eq:
+        return BinaryOperator::eq;
+    case TokenType::op_neq:
+        return BinaryOperator::neq;
+    case TokenType::op_lt:
+        return BinaryOperator::lt;
+    case TokenType::op_leq:
+        return BinaryOperator::leq;
+    case TokenType::op_gt:
+        return BinaryOperator::gt;
+    case TokenType::op_geq:
+        return BinaryOperator::geq;
+    case TokenType::op_plus:
+        return BinaryOperator::plus;
+    case TokenType::op_minus:
+        return BinaryOperator::minus;
+    case TokenType::op_or:
+        return BinaryOperator::logical_or;
+    case TokenType::op_times:
+        return BinaryOperator::times;
+    case TokenType::op_div:
+        return BinaryOperator::div;
+    case TokenType::op_mod:
+        return BinaryOperator::mod;
+    case TokenType::op_and:
+        return BinaryOperator::logical_and;
+    default:
+        throw std::runtime_error("Invalid binary token type.");
+    }
 }
 
 void BinaryExpressionNode::print(std::ostream& stream) const

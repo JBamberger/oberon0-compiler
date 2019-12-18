@@ -2,9 +2,13 @@
 
 #include "ExpressionNode.h"
 
+enum class TokenType : char;
+
 enum class UnaryOperator : char { plus, minus, not};
 
 std::ostream& operator<<(std::ostream& out, const UnaryOperator& op);
+
+UnaryOperator toUnaryOperator(const TokenType& type);
 
 class UnaryExpressionNode : public ExpressionNode {
     UnaryOperator operator_;
@@ -16,6 +20,7 @@ class UnaryExpressionNode : public ExpressionNode {
 
     UnaryOperator getOperator() const;
     const std::unique_ptr<const ExpressionNode>& getOperand() const;
+
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

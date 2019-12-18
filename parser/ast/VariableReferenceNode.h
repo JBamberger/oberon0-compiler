@@ -9,6 +9,7 @@ class VariableReferenceNode : public ExpressionNode {
 
   public:
     VariableReferenceNode(const FilePos& pos, std::string name);
+    VariableReferenceNode(const FilePos& pos, std::string name, SelectorNode * selector);
     ~VariableReferenceNode() override;
     void setSelector(const SelectorNode* node);
 

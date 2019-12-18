@@ -8,6 +8,11 @@ VariableReferenceNode::VariableReferenceNode(const FilePos& pos, std::string nam
 {
 }
 
+VariableReferenceNode::VariableReferenceNode(const FilePos& pos, std::string name, SelectorNode* selector)
+    : ExpressionNode(NodeType::variable_reference, pos), name_(std::move(name)), selector_(selector)
+{
+}
+
 VariableReferenceNode::~VariableReferenceNode() = default;
 
 void VariableReferenceNode::setSelector(const SelectorNode* node)

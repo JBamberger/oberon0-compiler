@@ -1,5 +1,6 @@
 #pragma once
 #include "ExpressionNode.h"
+#include "Token.h"
 
 enum class BinaryOperator : char {
     plus,
@@ -18,6 +19,10 @@ enum class BinaryOperator : char {
 };
 
 std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op);
+
+BinaryOperator toBinaryOperator(const TokenType& type);
+
+
 
 class BinaryExpressionNode : public ExpressionNode {
     BinaryOperator op_;

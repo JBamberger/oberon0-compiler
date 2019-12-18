@@ -1,5 +1,6 @@
 #include "UnaryExpressionNode.h"
 #include "NodeVisitor.h"
+#include "Token.h"
 #include <cassert>
 
 UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
@@ -18,6 +19,7 @@ const std::unique_ptr<const ExpressionNode>& UnaryExpressionNode::getOperand() c
 {
     return operand_;
 }
+
 void UnaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
@@ -36,6 +38,20 @@ std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
         std::terminate();
     }
     return stream;
+}
+
+UnaryOperator toUnaryOperator(const TokenType& type)
+{
+    switch (type) {
+    case TokenType::op_plus:
+        return UnaryOperator::plus;
+    case TokenType::op_minus:
+        return UnaryOperator::minus;
+    case TokenType::op_not:
+        return UnaryOperator::not;
+    default:
+        throw std::runtime_error("Invalid unary token type.");
+    }
 }
 
 void UnaryExpressionNode::print(std::ostream& stream) const

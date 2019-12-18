@@ -223,90 +223,51 @@ ProcedureDeclarationNode* Parser::procedure_declaration()
 
 ExpressionNode* Parser::expression()
 {
-    const auto node = simple_expression();
-
-    BinaryOperator op;
-    const auto nt = scanner_->peekToken()->getType();
-    if (nt == TokenType::op_eq) {
-        op = BinaryOperator::eq;
-    } else if (nt == TokenType::op_neq) {
-        op = BinaryOperator::neq;
-    } else if (nt == TokenType::op_lt) {
-        op = BinaryOperator::lt;
-    } else if (nt == TokenType::op_leq) {
-        op = BinaryOperator::leq;
-    } else if (nt == TokenType::op_gt) {
-        op = BinaryOperator::gt;
-    } else if (nt == TokenType::op_geq) {
-        op = BinaryOperator::geq;
-    } else {
-        return node;
+    const auto operand_1 = simple_expression();
+    const auto maybe_operand = scanner_->peekToken()->getType();
+    if (maybe_operand == TokenType::op_eq || maybe_operand == TokenType::op_neq ||
+        maybe_operand == TokenType::op_lt || maybe_operand == TokenType::op_leq ||
+        maybe_operand == TokenType::op_gt || maybe_operand == TokenType::op_geq) {
+        auto op = scanner_->nextToken();
+        const auto operand_2 = simple_expression();
+        return evaluateBinaryExpression(operand_1, operand_2, std::move(op));
     }
 
-    const auto next = scanner_->nextToken();
-    const auto second = simple_expression();
-    return new BinaryExpressionNode(next->getPosition(), op, node, second);
+    return operand_1;
 }
 
 ExpressionNode* Parser::simple_expression()
 {
-    ExpressionNode* node;
+    ExpressionNode* operand_1;
 
     auto next = scanner_->peekToken()->getType();
     if (next == TokenType::op_plus || next == TokenType::op_minus) {
-        const auto prefix = scanner_->nextToken();
+        auto op = scanner_->nextToken();
         const auto operand = term();
-        const auto op = next == TokenType::op_plus ? UnaryOperator::plus : UnaryOperator::minus;
-        node = new UnaryExpressionNode(prefix->getPosition(), op, operand);
+        operand_1 = evaluateUnaryExpression(operand, std::move(op));
     } else {
-        node = term();
+        operand_1 = term();
     }
 
     next = scanner_->peekToken()->getType();
-    while (true) {
-        BinaryOperator op;
-        if (next == TokenType::op_plus) {
-            op = BinaryOperator::plus;
-        } else if (next == TokenType::op_minus) {
-            op = BinaryOperator::minus;
-        } else if (next == TokenType::op_or) {
-            op = BinaryOperator::logical_or;
-        } else {
-            break;
-        }
-
-        const auto nextOp = scanner_->nextToken();
-        const auto otherNode = term();
-        node = new BinaryExpressionNode(nextOp->getPosition(), op, node, otherNode);
+    while (next == TokenType::op_plus || next == TokenType::op_minus || next == TokenType::op_or) {
+        auto op = scanner_->nextToken();
+        const auto operand_2 = term();
+        operand_1 = evaluateBinaryExpression(operand_1, operand_2, std::move(op));
         next = scanner_->peekToken()->getType();
     }
-    return node;
+    return operand_1;
 }
 
 ExpressionNode* Parser::term()
 {
     auto operand_1 = factor();
-
     auto next = scanner_->peekToken()->getType();
-    while (true) {
-        BinaryOperator op;
-        if (next == TokenType::op_times) {
-            op = BinaryOperator::times;
-        } else if (next == TokenType::op_div) {
-            op = BinaryOperator::div;
-        } else if (next == TokenType::op_mod) {
-            op = BinaryOperator::mod;
-        } else if (next == TokenType::op_and) {
-            op = BinaryOperator::logical_and;
-        } else {
-            break;
-        }
-
-        const auto operation = scanner_->nextToken();
+    while (next == TokenType::op_times || next == TokenType::op_div || next == TokenType::op_mod ||
+           next == TokenType::op_and) {
+        auto op = scanner_->nextToken();
         const auto operand_2 = factor();
-
-        operand_1 = new BinaryExpressionNode(operation->getPosition(), op, operand_1, operand_2);
-
+        operand_1 = evaluateBinaryExpression(operand_1, operand_2, std::move(op));
         next = scanner_->peekToken()->getType();
     }
 
@@ -318,56 +279,47 @@ ExpressionNode* Parser::factor()
     const auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
 
-    // variable access
-    if (next->getType() == TokenType::const_ident) {
+    switch (next->getType()) {
+    case TokenType::const_ident: {
         const auto name = ident();
         const auto sel = selector();
-        const auto variable = new VariableReferenceNode(pos, name);
-        variable->setSelector(sel);
-        return variable;
-    }
 
-    // number constant
-    if (next->getType() == TokenType::const_number) {
-        const auto num = scanner_->nextToken();
-        const auto numToken = dynamic_cast<const NumberToken*>(num.get());
-        assert(numToken != nullptr);
-        const auto value = numToken->getValue();
+        // TODO: perform lookup in symbol table and return value if constant
+
+        return new VariableReferenceNode(pos, name, sel);
+    }
+    case TokenType::const_number: {
+        const auto token = scanner_->nextToken();
+        const auto num_token = dynamic_cast<const NumberToken*>(token.get());
+        assert(num_token != nullptr);
+        const auto value = num_token->getValue();
 
         return new NumberConstantNode(pos, value);
     }
-
-    // string constant
-    if (next->getType() == TokenType::const_string) {
+    case TokenType::const_string: {
         const auto token = scanner_->nextToken();
-        const auto strToken = dynamic_cast<const StringToken*>(token.get());
-        assert(strToken != nullptr);
-        const auto value = strToken->getValue();
+        const auto str_token = dynamic_cast<const StringToken*>(token.get());
+        assert(str_token != nullptr);
+        const auto value = str_token->getValue();
 
         return new StringConstantNode(pos, value);
     }
-
-    // TODO: bool constant here
-
-    // nested expression
-    if (next->getType() == TokenType::lparen) {
+    case TokenType::lparen: {
         static_cast<void>(require_token(TokenType::lparen));
         const auto expr = expression();
         static_cast<void>(require_token(TokenType::rparen));
         return expr;
     }
-
-    // negation
-    if (next->getType() == TokenType::op_not) {
-        const auto op = require_token(TokenType::op_not);
+    case TokenType::op_not: {
+        auto op = require_token(TokenType::op_not);
         const auto value = factor();
-
-        return new UnaryExpressionNode(pos, UnaryOperator::not, value);
+        return evaluateUnaryExpression(value, std::move(op));
     }
-
-    logger_->error(next->getPosition(), "Expected Identifier, Number, lparen or ~ but got " +
-                                            (std::stringstream() << *next).str() + ".");
-    exit(EXIT_FAILURE);
+    default:
+        logger_->error(next->getPosition(), "Expected Identifier, Number, lparen or ~ but got " +
+                                                (std::stringstream() << *next).str() + ".");
+        exit(EXIT_FAILURE);
+    }
 }
 
 TypeNode* Parser::type()
@@ -654,4 +606,94 @@ SelectorNode* Parser::selector()
         next = scanner_->peekToken();
     }
     return node;
+}
+
+ExpressionNode* Parser::evaluateUnaryExpression(ExpressionNode* operand,
+                                                const std::unique_ptr<const Token> op)
+{
+    assert(operand != nullptr);
+    const auto unary_op = toUnaryOperator(op->getType());
+    auto first = dynamic_cast<NumberConstantNode*>(operand);
+    if (first != nullptr) {
+        switch (unary_op) {
+        case UnaryOperator::plus:
+            first->setValue(+first->getValue());
+            break;
+        case UnaryOperator::minus:
+            first->setValue(-first->getValue());
+            break;
+        case UnaryOperator::not:
+            first->setValue(!first->getValue());
+            break;
+        default:
+            std::cerr << "Invalid operator. This shouldn't be possible." << std::endl;
+            std::terminate();
+        }
+        return first;
+    }
+
+    return new UnaryExpressionNode(op->getPosition(), unary_op, operand);
+}
+
+ExpressionNode* Parser::evaluateBinaryExpression(ExpressionNode* operand_1,
+                                                 ExpressionNode* operand_2,
+                                                 const std::unique_ptr<const Token> op)
+{
+    assert(operand_1 != nullptr);
+    assert(operand_2 != nullptr);
+
+    const auto bin_op = toBinaryOperator(op->getType());
+    auto first = dynamic_cast<NumberConstantNode*>(operand_1);
+    const auto second = dynamic_cast<NumberConstantNode*>(operand_2);
+    if (first != nullptr && second != nullptr) {
+        switch (bin_op) {
+        case BinaryOperator::times:
+            first->setValue(first->getValue() * second->getValue());
+            break;
+        case BinaryOperator::div:
+            first->setValue(first->getValue() / second->getValue());
+            break;
+        case BinaryOperator::mod:
+            first->setValue(first->getValue() % second->getValue());
+            break;
+        case BinaryOperator::logical_and:
+            first->setValue(first->getValue() && second->getValue());
+            break;
+        case BinaryOperator::logical_or:
+            first->setValue(first->getValue() || second->getValue());
+            break;
+        case BinaryOperator::plus:
+            first->setValue(first->getValue() + second->getValue());
+            break;
+        case BinaryOperator::minus:
+            first->setValue(first->getValue() - second->getValue());
+            break;
+        case BinaryOperator::eq:
+            first->setValue(first->getValue() == second->getValue());
+            break;
+        case BinaryOperator::neq:
+            first->setValue(first->getValue() != second->getValue());
+            break;
+        case BinaryOperator::lt:
+            first->setValue(first->getValue() < second->getValue());
+            break;
+        case BinaryOperator::leq:
+            first->setValue(first->getValue() <= second->getValue());
+            break;
+        case BinaryOperator::gt:
+            first->setValue(first->getValue() > second->getValue());
+            break;
+        case BinaryOperator::geq:
+            first->setValue(first->getValue() >= second->getValue());
+            break;
+        default:
+            std::cerr << "Invalid operator. This shouldn't be possible." << std::endl;
+            std::terminate();
+        }
+
+        delete second;
+        return first;
+    }
+
+    return new BinaryExpressionNode(operand_1->getFilePos(), bin_op, operand_1, operand_2);
 }

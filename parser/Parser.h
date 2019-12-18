@@ -20,6 +20,8 @@
 #include "ast/TypeNode.h"
 #include "ast/WhileStatementNode.h"
 
+enum class UnaryOperator : char;
+enum class BinaryOperator : char;
 class VariableReferenceNode;
 
 class Parser {
@@ -57,6 +59,12 @@ class Parser {
     ActualParameterNode* actual_parameters();
     SelectorNode* selector();
     StatementNode* procedure_call_or_assignment();
+
+    static ExpressionNode* evaluateBinaryExpression(ExpressionNode* operand_1,
+                                                    ExpressionNode* operand_2,
+                                                    std::unique_ptr<const Token> op);
+    static ExpressionNode* evaluateUnaryExpression(ExpressionNode* operand,
+                                                   std::unique_ptr<const Token> op);
 
   public:
     explicit Parser(Scanner* scanner, Logger* logger);

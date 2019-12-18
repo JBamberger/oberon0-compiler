@@ -10,6 +10,7 @@ class NumberConstantNode : public ExpressionNode {
     ~NumberConstantNode() override;
 
     int getValue() const;
+    void setValue(int value);
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };
