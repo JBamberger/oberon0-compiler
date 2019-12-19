@@ -2,7 +2,7 @@
 #include "ExpressionNode.h"
 #include <string>
 
-class StringConstantNode : public ExpressionNode {
+class StringConstantNode : public ConstantNode {
 
     std::string value_;
 

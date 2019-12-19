@@ -92,6 +92,8 @@ add_executable(oberon0c
     parser/ast/TypeDeclarationNode.cpp
     parser/ast/StringConstantNode.h
     parser/ast/StringConstantNode.cpp
+    parser/ast/Scope.h
+    parser/ast/Scope.cpp
 
     main.cpp
 )

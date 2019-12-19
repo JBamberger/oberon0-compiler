@@ -3,7 +3,7 @@
 #include <cassert>
 
 NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value)
-    : ExpressionNode(NodeType::number_constant, pos), value_(value)
+    : ConstantNode(NodeType::number_constant, pos), value_(value)
 {
 }
 

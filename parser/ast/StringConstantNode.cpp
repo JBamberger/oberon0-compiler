@@ -2,7 +2,7 @@
 #include "NodeVisitor.h"
 
 StringConstantNode::StringConstantNode(const FilePos& pos, std::string value)
-    : ExpressionNode(NodeType::string_constant, pos), value_(value)
+    : ConstantNode(NodeType::string_constant, pos), value_(value)
 {
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "ExpressionNode.h"
 
-class NumberConstantNode : public ExpressionNode {
+class NumberConstantNode : public ConstantNode {
 
     int value_;
 

@@ -5,25 +5,41 @@
 #include <string>
 #include <vector>
 
+#include "ExpressionNode.h"
+#include "TypeNode.h"
+
 // resolve type names to type references
 
-struct Type {
-    // basic, array, record, function, pointer
-};
+// struct Type {
+//    // basic, array, record, function, pointer
+//};
+//
+// struct Constant {
+//    // string, number, boolean
+//    bool isString();
+//    bool isNumber();
+//};
 
-struct Constant {
-    // string, number, boolean
-    bool isString();
-    bool isNumber();
+struct Symbol {
 };
 
 class Scope {
     std::shared_ptr<Scope> parent_;
-    std::map<std::string, std::unique_ptr<Constant>> constants_;
-    std::vector<std::unique_ptr<Type>> types_;
-    std::map<std::string, Type*> identifier_map_;
+    std::map<std::string, std::unique_ptr<ConstantNode>> constants_;
+    std::vector<std::unique_ptr<TypeNode>> types_;
+    std::map<std::string, std::unique_ptr<Symbol>> identifier_map_;
 
   public:
+    /**
+     * \brief Creates a top-level scope initialized with all predefined types
+     */
+    explicit Scope();
+
+    /**
+     * \brief Creates a nested scope with the given parent. Name resolution will consider the
+     * parent. \param parent the parent scope
+     */
+    explicit Scope(std::shared_ptr<Scope> parent);
 
     /**
      * \brief Inserts a new constant into the scope.
@@ -32,7 +48,7 @@ class Scope {
      *
      * \param identifier constant name
      */
-    void declareConstant(const std::string& identifier /*constant node*/);
+    void declareConstant(const std::string& identifier, std::unique_ptr<ConstantNode> constant);
 
     /**
      * \brief Inserts a new type into the scope.
@@ -41,13 +57,13 @@ class Scope {
      *
      * \return the IR type representation
      */
-    Type* declareType(/*node type*/);
+    TypeNode* declareType(std::unique_ptr<TypeNode> type);
 
     /**
      * \brief Resolves the type reference and returns the type in the intermediate representation.
      * \return IR type or null if the type could not be resolved.
      */
-    Type* resolveType(/* type reference */);
+    TypeNode* resolveType(/* type reference */);
 
     /**
      * \brief Inserts a new identifier into the scope.
@@ -55,9 +71,9 @@ class Scope {
      * TODO: handle duplicate identifiers
      *
      * \param identifier the new identifier
-     * \param type the identifiers type
+     * \param symbol description of the identifier
      */
-    void declareIdentifier(const std::string& identifier, Type* type);
+    void declareIdentifier(const std::string& identifier, std::unique_ptr<Symbol> symbol);
 
     /**
      * \brief Searches the identifiers type and returns its type.
@@ -65,7 +81,7 @@ class Scope {
      *
      * \param identifier name of the object
      *
-     * \return The type of the identifier or null if the identifier is undeclared.
+     * \return The descriptor info of the identifier or null if the identifier is undeclared.
      */
-    Type* resolveIdentifier(const std::string& identifier);
+    Symbol* resolveIdentifier(const std::string& identifier);
 };
