@@ -1,7 +1,8 @@
 #pragma once
-#include "Node.h"
 #include "DeclarationsNode.h"
+#include "Node.h"
 #include "StatementSequenceNode.h"
+#include "TypedIdentifierListNode.h"
 
 class ProcedureDeclarationNode : public Node {
     std::string name_;
@@ -12,11 +13,10 @@ class ProcedureDeclarationNode : public Node {
   public:
     ProcedureDeclarationNode(const FilePos& pos,
                              std::string name,
-                             const FormalParameterList * params,
+                             const FormalParameterList* params,
                              const DeclarationsNode* declarations,
                              const StatementSequenceNode* statements);
     ~ProcedureDeclarationNode() override;
-
 
     const std::string& getName() const;
     const std::unique_ptr<const FormalParameterList>& getParams() const;

@@ -35,9 +35,9 @@ class Parser {
 
     ModuleNode* module();
     DeclarationsNode* declarations();
-    ConstantDeclarationList* const_declarations();
-    TypeDeclarationList* type_declarations();
-    VariableDeclarationList* var_declarations();
+    ConstantDeclarationNode* const_declaration();
+    TypeDeclarationNode* type_declaration();
+    VariableListNode* var_declaration();
     ProcedureDeclarationNode* procedure_declaration();
     FormalParameterList* formal_parameters();
     ParameterListNode* fp_section();

@@ -11,11 +11,11 @@
 #include "ModuleNode.h"
 #include "NumberConstantNode.h"
 #include "ProcedureCallNode.h"
-#include "ProcedureDeclarationList.h"
 #include "RecordTypeNode.h"
 #include "StringConstantNode.h"
 #include "UnaryExpressionNode.h"
 #include "WhileStatementNode.h"
+#include "ProcedureDeclarationNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
@@ -95,30 +95,6 @@ void PrintVisitor::visit(const ConstantDeclarationNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const ConstantDeclarationList* node)
-{
-    line() << "ConstantDeclarationList\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
-void PrintVisitor::visit(const VariableDeclarationList* node)
-{
-    line() << "VariableDeclarationList\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
-void PrintVisitor::visit(const TypeDeclarationList* node)
-{
-    line() << "TypeDeclarationList\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
 void PrintVisitor::visit(const FormalParameterList* node)
 {
     line() << "FormalParameterList\n";
@@ -127,7 +103,10 @@ void PrintVisitor::visit(const FormalParameterList* node)
     dec();
 }
 
-void PrintVisitor::visit(const DeclarationsNode* node) { NodeVisitor::visit(node); }
+void PrintVisitor::visit(const DeclarationsNode* node)
+{
+    NodeVisitor::visit(node);
+}
 
 void PrintVisitor::visit(const FieldNode* node)
 {
@@ -290,14 +269,6 @@ void PrintVisitor::visit(const VariableReferenceNode* node)
 void PrintVisitor::visit(const WhileStatementNode* node)
 {
     line() << "While\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
-void PrintVisitor::visit(const ProcedureDeclarationList* node)
-{
-    line() << "ProcedureDeclarations\n";
     inc();
     NodeVisitor::visit(node);
     dec();

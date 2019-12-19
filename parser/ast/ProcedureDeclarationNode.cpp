@@ -37,6 +37,6 @@ void ProcedureDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visi
 
 void ProcedureDeclarationNode::print(std::ostream& stream) const
 {
-    stream << "ProcedureDeclarationNode(" << name_ << ", " << *declarations_ << ", " << statements_
+    stream << "ProcedureDeclarationNode(" << name_ << ", " << *declarations_ << ", " << *statements_
            << ")";
 }

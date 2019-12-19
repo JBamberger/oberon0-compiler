@@ -5,15 +5,19 @@
 #include "AssignmentNode.h"
 #include "BasicTypeNode.h"
 #include "BinaryExpressionNode.h"
+#include "ConstantDeclarationNode.h"
 #include "FieldReferenceNode.h"
 #include "IfStatementNode.h"
 #include "ModuleNode.h"
 #include "NumberConstantNode.h"
 #include "ProcedureCallNode.h"
-#include "ProcedureDeclarationList.h"
+#include "ProcedureDeclarationNode.h"
 #include "RecordTypeNode.h"
 #include "StringConstantNode.h"
+#include "TypeDeclarationNode.h"
+#include "TypedIdentifierListNode.h"
 #include "UnaryExpressionNode.h"
+#include "VariableNode.h"
 #include "WhileStatementNode.h"
 
 NodeVisitor::~NodeVisitor() = default;
@@ -50,27 +54,6 @@ void NodeVisitor::visit(const BinaryExpressionNode* node)
 
 void NodeVisitor::visit(const ConstantDeclarationNode* node) { node->getValue()->visit(this); }
 
-void NodeVisitor::visit(const ConstantDeclarationList* node)
-{
-    for (const auto& decl : node->getList()) {
-        decl->visit(this);
-    }
-}
-
-void NodeVisitor::visit(const VariableDeclarationList* node)
-{
-    for (const auto& decl : node->getList()) {
-        decl->visit(this);
-    }
-}
-
-void NodeVisitor::visit(const TypeDeclarationList* node)
-{
-    for (const auto& decl : node->getList()) {
-        decl->visit(this);
-    }
-}
-
 void NodeVisitor::visit(const FieldReferenceNode* node)
 {
     if (node->getNext()) {
@@ -87,10 +70,19 @@ void NodeVisitor::visit(const FormalParameterList* node)
 
 void NodeVisitor::visit(const DeclarationsNode* node)
 {
-    node->getConstants()->visit(this);
-    node->getVariables()->visit(this);
-    node->getTypes()->visit(this);
-    node->getProcedures()->visit(this);
+
+    for (const auto& decl : *node->getConstants()) {
+        decl->visit(this);
+    }
+    for (const auto& decl : *node->getVariables()) {
+        decl->visit(this);
+    }
+    for (const auto& decl : *node->getTypes()) {
+        decl->visit(this);
+    }
+    for (const auto& decl : *node->getProcedures()) {
+        decl->visit(this);
+    }
 }
 
 void NodeVisitor::visit(const FieldNode* node) { node->getType()->visit(this); }
@@ -115,7 +107,6 @@ void NodeVisitor::visit(const ModuleNode* node)
 void NodeVisitor::visit(const NumberConstantNode* node) {}
 
 void NodeVisitor::visit(const ParameterNode* node) { node->getType()->visit(this); }
-
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
@@ -197,11 +188,4 @@ void NodeVisitor::visit(const WhileStatementNode* node)
 {
     node->getCondition()->visit(this);
     node->getBody()->visit(this);
-}
-
-void NodeVisitor::visit(const ProcedureDeclarationList* node)
-{
-    for (const auto& p : node->getList()) {
-        p->visit(this);
-    }
 }
