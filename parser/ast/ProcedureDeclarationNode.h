@@ -1,28 +1,20 @@
 #pragma once
-#include "DeclarationsNode.h"
-#include "Node.h"
-#include "StatementSequenceNode.h"
-#include "TypedIdentifierListNode.h"
+#include "BlockNode.h"
 
-class ProcedureDeclarationNode : public Node {
-    std::string name_;
-    std::unique_ptr<const FormalParameterList> params_;
-    std::unique_ptr<const DeclarationsNode> declarations_;
-    std::unique_ptr<const StatementSequenceNode> statements_;
+using ParamList = std::vector<std::unique_ptr<const ParameterListNode>>;
+
+class ProcedureDeclarationNode : public BlockNode {
+    std::unique_ptr<ParamList> params_;
+    std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>> procedures_;
 
   public:
-    ProcedureDeclarationNode(const FilePos& pos,
-                             std::string name,
-                             const FormalParameterList* params,
-                             const DeclarationsNode* declarations,
-                             const StatementSequenceNode* statements);
+    ProcedureDeclarationNode(const FilePos& pos, std::string name);
     ~ProcedureDeclarationNode() override;
 
-    const std::string& getName() const;
-    const std::unique_ptr<const FormalParameterList>& getParams() const;
-    const std::unique_ptr<const DeclarationsNode>& getDeclarations() const;
-    const std::unique_ptr<const StatementSequenceNode>& getStatements() const;
-    void visit(NodeVisitor* visitor) const override;
+    const std::unique_ptr<ParamList>& getParams() const;
+    const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
+    getProcedures() const override;
 
+    void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

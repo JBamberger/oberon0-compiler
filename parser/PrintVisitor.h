@@ -22,7 +22,6 @@ class PrintVisitor : public NodeVisitor {
     void visit(const FieldReferenceNode* node) override;
     void visit(const ConstantDeclarationNode* node) override;
     void visit(const FormalParameterList* node) override;
-    void visit(const DeclarationsNode* node) override;
     void visit(const FieldNode* node) override;
     void visit(const IdentifierListNode* node) override;
     void visit(const IfStatementNode* node) override;

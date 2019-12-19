@@ -1,28 +1,15 @@
 #pragma once
-#include "DeclarationsNode.h"
-#include "Node.h"
-#include "StatementSequenceNode.h"
+#include "BlockNode.h"
+#include "ProcedureDeclarationNode.h"
 
-class ModuleNode : public Node {
-    std::string name_;
-    std::unique_ptr<const DeclarationsNode> declarations_;
-    std::unique_ptr<const StatementSequenceNode> statements_;
+class ModuleNode : public BlockNode {
+    std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>> procedures_;
 
   public:
-    ModuleNode(const FilePos& pos,
-               std::string name,
-               const DeclarationsNode* declarations,
-               const StatementSequenceNode* statements);
-
+    ModuleNode(const FilePos& pos, std::string name);
     ~ModuleNode() override;
-
-    const std::string& getName() const;
-
-    const std::unique_ptr<const DeclarationsNode>& getDeclarations() const;
-
-    const std::unique_ptr<const StatementSequenceNode>& getStatements() const;
-
+    const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
+    getProcedures() const override;
     void print(std::ostream& stream) const override;
-
     void visit(NodeVisitor* visitor) const override;
 };

@@ -2,35 +2,28 @@
 #include "NodeVisitor.h"
 #include <cassert>
 #include <utility>
+#include "PrintUtils.h"
 
-ModuleNode::ModuleNode(const FilePos& pos,
-                       std::string name,
-                       const DeclarationsNode* declarations,
-                       const StatementSequenceNode* statements)
-    : Node(NodeType::module, pos), name_(std::move(name)), declarations_(declarations),
-      statements_(statements)
+ModuleNode::ModuleNode(const FilePos& pos, std::string name)
+    : BlockNode(pos, std::move(name)),
+      procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())
 {
-    assert(declarations_ != nullptr);
-    assert(statements_ != nullptr);
 }
 
 ModuleNode::~ModuleNode() = default;
 
-const std::string& ModuleNode::getName() const { return name_; }
-
-const std::unique_ptr<const DeclarationsNode>& ModuleNode::getDeclarations() const
+const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
+ModuleNode::getProcedures() const
 {
-    return declarations_;
-}
-
-const std::unique_ptr<const StatementSequenceNode>& ModuleNode::getStatements() const
-{
-    return statements_;
+    return procedures_;
 }
 
 void ModuleNode::print(std::ostream& stream) const
 {
-    stream << "Module(" << name_ << ", " << *declarations_ << ", " << *statements_ << ")";
+    stream << "Module(";
+    BlockNode::print(stream);
+    printList(stream, "ProcedureList", procedures_) << ")";
+    stream << ")";
 }
 
 void ModuleNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }

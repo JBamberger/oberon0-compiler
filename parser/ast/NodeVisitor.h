@@ -1,5 +1,6 @@
 #pragma once
 
+class BlockNode;
 class FieldReferenceNode;
 class FieldListNode;
 class ParameterListNode;
@@ -34,7 +35,6 @@ class ArrayReferenceNode;
 class ActualParameterNode;
 class StatementSequenceNode;
 class ModuleNode;
-class DeclarationsNode;
 
 class NodeVisitor {
 
@@ -56,7 +56,6 @@ class NodeVisitor {
 
     virtual void visit(const FieldReferenceNode* node) = 0;
     virtual void visit(const FormalParameterList* node) = 0;
-    virtual void visit(const DeclarationsNode* node) = 0;
     virtual void visit(const FieldNode* node) = 0;
     virtual void visit(const IdentifierListNode* node) = 0;
     virtual void visit(const IfStatementNode* node) = 0;

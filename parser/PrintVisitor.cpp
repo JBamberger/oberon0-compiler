@@ -72,7 +72,7 @@ void PrintVisitor::visit(const BasicTypeNode* node)
 
 void PrintVisitor::visit(const BinaryExpressionNode* node)
 {
-    line() << "BinaryExpression" << node->getOperator() << "\n";
+    line() << "BinaryExpression " << node->getOperator() << "\n";
     inc();
     node->getOperand1()->visit(this);
     node->getOperand2()->visit(this);
@@ -102,8 +102,6 @@ void PrintVisitor::visit(const FormalParameterList* node)
     NodeVisitor::visit(node);
     dec();
 }
-
-void PrintVisitor::visit(const DeclarationsNode* node) { NodeVisitor::visit(node); }
 
 void PrintVisitor::visit(const FieldNode* node)
 {

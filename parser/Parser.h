@@ -8,7 +8,6 @@
 #include "../scanner/Scanner.h"
 #include "ast/ArrayTypeNode.h"
 #include "ast/AssignmentNode.h"
-#include "ast/DeclarationsNode.h"
 #include "ast/ExpressionNode.h"
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
@@ -34,12 +33,12 @@ class Parser {
     std::string ident() const;
 
     ModuleNode* module();
-    DeclarationsNode* declarations();
+    void declarations(BlockNode* block);
     ConstantDeclarationNode* const_declaration();
     TypeDeclarationNode* type_declaration();
     VariableListNode* var_declaration();
     ProcedureDeclarationNode* procedure_declaration();
-    FormalParameterList* formal_parameters();
+    void formal_parameters(ProcedureDeclarationNode* proc_decl);
     ParameterListNode* fp_section();
     ExpressionNode* expression();
     ExpressionNode* simple_expression();
@@ -50,7 +49,7 @@ class Parser {
     RecordTypeNode* record_type();
     FieldListNode* field_list();
     IdentifierListNode* ident_list();
-    StatementSequenceNode* statement_sequence();
+    void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
     StatementNode* statement();
     AssignmentNode* assignment(const VariableReferenceNode* assignee);
     ProcedureCallNode* procedure_call(const FilePos& pos, std::string name);

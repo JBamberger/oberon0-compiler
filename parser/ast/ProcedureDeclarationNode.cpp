@@ -1,42 +1,32 @@
 #include "ProcedureDeclarationNode.h"
 #include "NodeVisitor.h"
+#include "PrintUtils.h"
 #include <cassert>
+#include <utility>
 
-ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos,
-                                                   std::string name,
-                                                   const FormalParameterList* params,
-                                                   const DeclarationsNode* declarations,
-                                                   const StatementSequenceNode* statements)
-    : Node(NodeType::procedure_declaration, pos), name_(name), params_(params),
-      declarations_(declarations), statements_(statements)
+ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos, std::string name)
+    : BlockNode(pos, std::move(name)), params_(std::make_unique<ParamList>()),
+      procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())
 {
-    assert(declarations);
-    assert(statements);
 }
 
 ProcedureDeclarationNode::~ProcedureDeclarationNode() = default;
 
-const std::string& ProcedureDeclarationNode::getName() const { return name_; }
+const std::unique_ptr<ParamList>& ProcedureDeclarationNode::getParams() const { return params_; }
 
-const std::unique_ptr<const FormalParameterList>& ProcedureDeclarationNode::getParams() const
+const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
+ProcedureDeclarationNode::getProcedures() const
 {
-    return params_;
-}
-
-const std::unique_ptr<const DeclarationsNode>& ProcedureDeclarationNode::getDeclarations() const
-{
-    return declarations_;
-}
-
-const std::unique_ptr<const StatementSequenceNode>& ProcedureDeclarationNode::getStatements() const
-{
-    return statements_;
+    return procedures_;
 }
 
 void ProcedureDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ProcedureDeclarationNode::print(std::ostream& stream) const
 {
-    stream << "ProcedureDeclarationNode(" << name_ << ", " << *declarations_ << ", " << *statements_
-           << ")";
+    stream << "ProcedureDeclarationNode(";
+    printList(stream, "Params", params_);
+    printList(stream, "Procedures", procedures_) << ")";
+    BlockNode::print(stream);
+    stream << ")";
 }
