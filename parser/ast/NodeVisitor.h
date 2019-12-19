@@ -1,4 +1,5 @@
 #pragma once
+
 class FieldReferenceNode;
 class FieldListNode;
 class ParameterListNode;
@@ -37,7 +38,7 @@ class DeclarationsNode;
 
 class NodeVisitor {
 
-public:
+  public:
     virtual ~NodeVisitor() = 0;
 
     virtual void visit(const ActualParameterNode* node) = 0;

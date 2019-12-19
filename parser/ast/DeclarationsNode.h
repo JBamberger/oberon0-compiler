@@ -36,6 +36,7 @@ class DeclarationsNode : public Node {
     const std::unique_ptr<VarDeclList>& getVariables() const;
     const std::unique_ptr<TypeDeclList>& getTypes() const;
     const std::unique_ptr<ProcDeclList>& getProcedures() const;
+
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

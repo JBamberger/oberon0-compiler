@@ -3,6 +3,9 @@ project(oberon0c)
 
 set(CMAKE_CXX_STANDARD 14)
 
+add_subdirectory(3rdparty/fmt)
+
+
 include_directories(scanner)
 include_directories(util)
 
@@ -23,7 +26,12 @@ add_executable(oberon0c
 
     parser/Parser.h
     parser/Parser.cpp
+    parser/PrintVisitor.h
+    parser/PrintVisitor.cpp
+    parser/ElaborationErrors.h
 
+    parser/ast/NodeVisitor.h
+    parser/ast/NodeVisitor.cpp
     parser/ast/Node.h
     parser/ast/Node.cpp
     parser/ast/ExpressionNode.h
@@ -74,7 +82,6 @@ add_executable(oberon0c
     parser/ast/RecordTypeNode.cpp
     parser/ast/ConstantDeclarationNode.h
     parser/ast/ConstantDeclarationNode.cpp
-    parser/ast/DeclarationListNode.h
     parser/ast/DeclarationsNode.h
     parser/ast/DeclarationsNode.cpp
     parser/ast/ModuleNode.h
@@ -85,10 +92,8 @@ add_executable(oberon0c
     parser/ast/TypeDeclarationNode.cpp
     parser/ast/StringConstantNode.h
     parser/ast/StringConstantNode.cpp
-    parser/ast/NodeVisitor.h
-    parser/ast/NodeVisitor.cpp
-    parser/ast/PrintVisitor.h
-    parser/ast/PrintVisitor.cpp
 
     main.cpp
 )
+
+target_link_libraries(oberon0c fmt::fmt)

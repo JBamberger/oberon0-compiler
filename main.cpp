@@ -5,10 +5,9 @@
  */
 
 #include "parser/Parser.h"
+#include "parser/PrintVisitor.h"
 #include "scanner/Scanner.h"
 #include <iostream>
-#include "parser/ast/NodeVisitor.h"
-#include "parser/ast/PrintVisitor.h"
 
 int main(const int argc, const char* argv[])
 {
@@ -23,12 +22,11 @@ int main(const int argc, const char* argv[])
     auto parser = std::make_unique<Parser>(scanner.get(), logger.get());
 
     std::cout << "Parse Tree:" << std::endl;
-    const auto  tree = parser->parse();
-    tree->print(std::cout);
-    std::cout << std::endl << std::endl;
-    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
-    tree->visit(visitor.get());
+    const auto tree = parser->parse();
 
+    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
+
+    tree->visit(visitor.get());
 
     logger->info(filename, "Parsing complete.");
     exit(0);

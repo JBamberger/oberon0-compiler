@@ -1,21 +1,21 @@
 #include "PrintVisitor.h"
 
-#include "ActualParameterNode.h"
-#include "ArrayReferenceNode.h"
-#include "ArrayTypeNode.h"
-#include "AssignmentNode.h"
-#include "BasicTypeNode.h"
-#include "BinaryExpressionNode.h"
-#include "FieldReferenceNode.h"
-#include "IfStatementNode.h"
-#include "ModuleNode.h"
-#include "NumberConstantNode.h"
-#include "ProcedureCallNode.h"
-#include "RecordTypeNode.h"
-#include "StringConstantNode.h"
-#include "UnaryExpressionNode.h"
-#include "WhileStatementNode.h"
-#include "ProcedureDeclarationNode.h"
+#include "ast/ActualParameterNode.h"
+#include "ast/ArrayReferenceNode.h"
+#include "ast/ArrayTypeNode.h"
+#include "ast/AssignmentNode.h"
+#include "ast/BasicTypeNode.h"
+#include "ast/BinaryExpressionNode.h"
+#include "ast/FieldReferenceNode.h"
+#include "ast/IfStatementNode.h"
+#include "ast/ModuleNode.h"
+#include "ast/NumberConstantNode.h"
+#include "ast/ProcedureCallNode.h"
+#include "ast/ProcedureDeclarationNode.h"
+#include "ast/RecordTypeNode.h"
+#include "ast/StringConstantNode.h"
+#include "ast/UnaryExpressionNode.h"
+#include "ast/WhileStatementNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
@@ -103,10 +103,7 @@ void PrintVisitor::visit(const FormalParameterList* node)
     dec();
 }
 
-void PrintVisitor::visit(const DeclarationsNode* node)
-{
-    NodeVisitor::visit(node);
-}
+void PrintVisitor::visit(const DeclarationsNode* node) { NodeVisitor::visit(node); }
 
 void PrintVisitor::visit(const FieldNode* node)
 {
