@@ -62,13 +62,6 @@ void NodeVisitor::visit(const FieldReferenceNode* node)
     }
 }
 
-void NodeVisitor::visit(const FormalParameterList* node)
-{
-    for (const auto& decl : node->getList()) {
-        decl->visit(this);
-    }
-}
-
 void NodeVisitor::visit(const FieldNode* node) { node->getType()->visit(this); }
 
 void NodeVisitor::visit(const IdentifierListNode* node) {}

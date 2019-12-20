@@ -22,7 +22,3 @@ class TypedIdentifierNode : public Node {
     const std::string& getName() const { return name_; }
     const std::unique_ptr<const TypeReferenceNode>& getType() const { return type_; }
 };
-
-// using FieldNode = TypedIdentifierNode<NodeType::field>;
-// using VariableNode = TypedIdentifierNode<NodeType::variable>;
-// using ParameterNode = TypedIdentifierNode<NodeType::parameter>;

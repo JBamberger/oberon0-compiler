@@ -95,14 +95,6 @@ void PrintVisitor::visit(const ConstantDeclarationNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const FormalParameterList* node)
-{
-    line() << "FormalParameterList\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
 void PrintVisitor::visit(const FieldNode* node)
 {
     line() << "Field " << node->getName() << "\n";

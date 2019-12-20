@@ -5,7 +5,6 @@ class FieldReferenceNode;
 class FieldListNode;
 class ParameterListNode;
 class VariableListNode;
-class FormalParameterList;
 class SelectorNode;
 class FieldNode;
 class IdentifierListNode;
@@ -55,7 +54,6 @@ class NodeVisitor {
     virtual void visit(const ProcedureDeclarationNode* node) = 0;
 
     virtual void visit(const FieldReferenceNode* node) = 0;
-    virtual void visit(const FormalParameterList* node) = 0;
     virtual void visit(const FieldNode* node) = 0;
     virtual void visit(const IdentifierListNode* node) = 0;
     virtual void visit(const IfStatementNode* node) = 0;

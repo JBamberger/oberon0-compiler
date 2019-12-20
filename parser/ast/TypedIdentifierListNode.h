@@ -157,32 +157,3 @@ class ParameterListNode : public Node {
         return list;
     }
 };
-
-class FormalParameterList : public Node {
-    std::vector<std::unique_ptr<const ParameterListNode>> list_;
-
-  public:
-    FormalParameterList(const FilePos& pos,
-                        std::vector<std::unique_ptr<const ParameterListNode>> list)
-        : Node(NodeType::declaration_list, pos), list_(std::move(list))
-    {
-    }
-
-    ~FormalParameterList() override = default;
-
-    const std::vector<std::unique_ptr<const ParameterListNode>>& getList() const { return list_; }
-
-    void visit(NodeVisitor* visitor) const override { visitor->visit(this); }
-
-    void print(std::ostream& stream) const override
-    {
-        stream << "FormalParameterList(";
-        if (!list_.empty()) {
-            stream << *list_.at(0);
-            for (size_t i = 1; i < list_.size(); ++i) {
-                stream << ", " << *list_.at(i);
-            }
-        }
-        stream << ")";
-    }
-};
