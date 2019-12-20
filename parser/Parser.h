@@ -33,12 +33,12 @@ class Parser {
     std::unique_ptr<const Token> require_token(const TokenType& type) const;
     std::string ident() const;
 
-    ModuleNode* module();
+    std::unique_ptr<ModuleNode> module();
     void declarations(BlockNode* block);
-    ConstantDeclarationNode* const_declaration();
-    TypeDeclarationNode* type_declaration();
-    VariableListNode* var_declaration();
-    ProcedureDeclarationNode* procedure_declaration();
+    std::unique_ptr<ConstantDeclarationNode> const_declaration();
+    std::unique_ptr<TypeDeclarationNode> type_declaration();
+    std::unique_ptr<VariableListNode> var_declaration();
+    std::unique_ptr<ProcedureDeclarationNode> procedure_declaration();
     void formal_parameters(ProcedureDeclarationNode* proc_decl);
     ParameterListNode* fp_section();
     ExpressionNode* expression();
