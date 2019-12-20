@@ -14,7 +14,7 @@ using VarDeclList = std::vector<std::unique_ptr<VariableListNode>>;
 using TypeDeclList = std::vector<std::unique_ptr<TypeDeclarationNode>>;
 using StatementList = std::vector<std::unique_ptr<StatementNode>>;
 
-class ProcedureDeclarationNode;
+class ProcedureNode;
 
 class BlockNode : public Node {
     std::string name_;
@@ -33,7 +33,7 @@ class BlockNode : public Node {
     const std::unique_ptr<ConstDeclList>& getConstants() const;
     const std::unique_ptr<VarDeclList>& getVariables() const;
     const std::unique_ptr<TypeDeclList>& getTypes() const;
-    virtual const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
+    virtual const std::unique_ptr<std::vector<std::unique_ptr<ProcedureNode>>>&
     getProcedures() const = 0;
 
 

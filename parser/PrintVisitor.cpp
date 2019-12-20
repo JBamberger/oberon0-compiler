@@ -11,7 +11,7 @@
 #include "ast/ModuleNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/ProcedureCallNode.h"
-#include "ast/ProcedureDeclarationNode.h"
+#include "ast/ProcedureNode.h"
 #include "ast/RecordTypeNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
@@ -150,7 +150,7 @@ void PrintVisitor::visit(const ProcedureCallNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const ProcedureDeclarationNode* node)
+void PrintVisitor::visit(const ProcedureNode* node)
 {
     line() << "ProcedureDeclaration " << node->getName() << "\n";
     inc();

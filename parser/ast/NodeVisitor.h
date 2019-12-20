@@ -14,7 +14,7 @@ class IfStatementNode;
 class NumberConstantNode;
 class ProcedureBodyNode;
 class ProcedureCallNode;
-class ProcedureDeclarationNode;
+class ProcedureNode;
 class ProcedureHeadingNode;
 class RecordTypeNode;
 class StringConstantNode;
@@ -50,7 +50,7 @@ class NodeVisitor {
     virtual void visit(const ConstantDeclarationNode* node) = 0;
     virtual void visit(const TypeDeclarationNode* node) = 0;
     virtual void visit(const VariableNode* node) = 0;
-    virtual void visit(const ProcedureDeclarationNode* node) = 0;
+    virtual void visit(const ProcedureNode* node) = 0;
 
     virtual void visit(const FieldReferenceNode* node) = 0;
     virtual void visit(const FieldNode* node) = 0;

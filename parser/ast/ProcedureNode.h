@@ -3,16 +3,16 @@
 
 using ParamList = std::vector<std::unique_ptr<const ParameterListNode>>;
 
-class ProcedureDeclarationNode : public BlockNode {
+class ProcedureNode : public BlockNode {
     std::unique_ptr<ParamList> params_;
-    std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>> procedures_;
+    std::unique_ptr<std::vector<std::unique_ptr<ProcedureNode>>> procedures_;
 
   public:
-    ProcedureDeclarationNode(const FilePos& pos, std::string name, std::shared_ptr<Scope> parent);
-    ~ProcedureDeclarationNode() override;
+    ProcedureNode(const FilePos& pos, std::string name, std::shared_ptr<Scope> parent);
+    ~ProcedureNode() override;
 
     const std::unique_ptr<ParamList>& getParams() const;
-    const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
+    const std::unique_ptr<std::vector<std::unique_ptr<ProcedureNode>>>&
     getProcedures() const override;
 
     void visit(NodeVisitor* visitor) const override;

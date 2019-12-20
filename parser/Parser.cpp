@@ -155,13 +155,13 @@ std::unique_ptr<VariableListNode> Parser::var_declaration()
     return std::unique_ptr<VariableListNode>(createVariableList(pos, names, std::move(tp)));
 }
 
-std::unique_ptr<ProcedureDeclarationNode> Parser::procedure_declaration()
+std::unique_ptr<ProcedureNode> Parser::procedure_declaration()
 {
     // procedure heading
     const auto pos = require_token(TokenType::kw_procedure)->getPosition();
     const auto name = ident();
 
-    auto proc_node = std::make_unique<ProcedureDeclarationNode>(pos, name, current_scope_);
+    auto proc_node = std::make_unique<ProcedureNode>(pos, name, current_scope_);
     current_scope_ = proc_node->getScope();
 
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
@@ -370,7 +370,7 @@ IdentifierListNode* Parser::ident_list()
     return node;
 }
 
-void Parser::formal_parameters(ProcedureDeclarationNode* proc_decl)
+void Parser::formal_parameters(ProcedureNode* proc_decl)
 {
     const auto pos = require_token(TokenType::lparen)->getPosition();
 
