@@ -3,8 +3,8 @@
 #include <cassert>
 #include <utility>
 
-FieldNode::FieldNode(const FilePos& pos, std::string name, const TypeReferenceNode* type)
-    : TypedIdentifierNode(NodeType::field, pos, std::move(name), type)
+FieldNode::FieldNode(const FilePos& pos, std::string name, std::unique_ptr<TypeReferenceNode> type)
+    : TypedIdentifierNode(NodeType::field, pos, std::move(name), std::move(type))
 {
     assert(type_ != nullptr);
 }

@@ -4,7 +4,7 @@
 
 class FieldNode : public TypedIdentifierNode {
   public:
-    FieldNode(const FilePos& pos, std::string name, const TypeReferenceNode* type);
+    FieldNode(const FilePos& pos, std::string name, std::unique_ptr<TypeReferenceNode> type);
 
     ~FieldNode() override;
 

@@ -10,24 +10,27 @@
 #include <vector>
 
 class FieldListNode : public Node {
-    std::shared_ptr<std::vector<std::unique_ptr<const FieldNode>>> pairs_;
-    std::shared_ptr<const TypeNode> type_;
+    std::shared_ptr<std::vector<std::unique_ptr<FieldNode>>> pairs_;
+    std::shared_ptr<TypeNode> type_;
 
   public:
-    FieldListNode(const FilePos& pos, const TypeNode* type)
+    FieldListNode(const FilePos& pos, std::unique_ptr<TypeNode> type)
         : Node(NodeType::typed_id_list, pos),
-          pairs_(std::make_shared<std::vector<std::unique_ptr<const FieldNode>>>()), type_(type)
+          pairs_(std::make_shared<std::vector<std::unique_ptr<FieldNode>>>()),
+          type_(std::move(type))
     {
         assert(type_ != nullptr);
     }
 
     ~FieldListNode() override = default;
 
-    std::shared_ptr<const TypeNode> getType() const { return type_; }
+    std::shared_ptr<TypeNode> getType() const { return type_; }
 
-    std::shared_ptr<std::vector<std::unique_ptr<const FieldNode>>> getPairs() const
+    std::shared_ptr<std::vector<std::unique_ptr<FieldNode>>> getPairs() const { return pairs_; }
+
+    std::unique_ptr<TypeReferenceNode> getTypeRef() const
     {
-        return pairs_;
+        return std::make_unique<TypeReferenceNode>(type_->getFilePos(), type_);
     }
 
     void visit(NodeVisitor* visitor) const override { visitor->visit(this); }
@@ -43,30 +46,30 @@ class FieldListNode : public Node {
         }
         stream << "}, " << *type_ << ")";
     }
-
-    friend FieldListNode*
-    createFieldList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type);
 };
 
 class VariableListNode : public Node {
-    std::shared_ptr<std::vector<std::unique_ptr<const VariableNode>>> pairs_;
-    std::shared_ptr<const TypeNode> type_;
+    std::shared_ptr<std::vector<std::unique_ptr<VariableNode>>> pairs_;
+    std::shared_ptr<TypeNode> type_;
 
   public:
-    VariableListNode(const FilePos& pos, const TypeNode* type)
+    VariableListNode(const FilePos& pos, std::unique_ptr<TypeNode> type)
         : Node(NodeType::typed_id_list, pos),
-          pairs_(std::make_shared<std::vector<std::unique_ptr<const VariableNode>>>()), type_(type)
+          pairs_(std::make_shared<std::vector<std::unique_ptr<VariableNode>>>()),
+          type_(std::move(type))
     {
         assert(type_ != nullptr);
     }
 
     ~VariableListNode() override = default;
 
-    std::shared_ptr<const TypeNode> getType() const { return type_; }
+    std::shared_ptr<TypeNode> getType() const { return type_; }
 
-    std::shared_ptr<std::vector<std::unique_ptr<const VariableNode>>> getPairs() const
+    std::shared_ptr<std::vector<std::unique_ptr<VariableNode>>> getPairs() const { return pairs_; }
+
+    std::unique_ptr<TypeReferenceNode> getTypeRef() const
     {
-        return pairs_;
+        return std::make_unique<TypeReferenceNode>(type_->getFilePos(), type_);
     }
 
     void visit(NodeVisitor* visitor) const override { visitor->visit(this); }
@@ -82,30 +85,30 @@ class VariableListNode : public Node {
         }
         stream << "}, " << *type_ << ")";
     }
-
-    friend VariableListNode*
-    createVariableList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type);
 };
 
 class ParameterListNode : public Node {
-    std::shared_ptr<std::vector<std::unique_ptr<const ParameterNode>>> pairs_;
-    std::shared_ptr<const TypeNode> type_;
+    std::shared_ptr<std::vector<std::unique_ptr<ParameterNode>>> pairs_;
+    std::shared_ptr<TypeNode> type_;
 
   public:
-    ParameterListNode(const FilePos& pos, const TypeNode* type)
+    ParameterListNode(const FilePos& pos, std::unique_ptr<TypeNode> type)
         : Node(NodeType::typed_id_list, pos),
-          pairs_(std::make_shared<std::vector<std::unique_ptr<const ParameterNode>>>()), type_(type)
+          pairs_(std::make_shared<std::vector<std::unique_ptr<ParameterNode>>>()),
+          type_(std::move(type))
     {
         assert(type_ != nullptr);
     }
 
     ~ParameterListNode() override = default;
 
-    std::shared_ptr<const TypeNode> getType() const { return type_; }
+    std::shared_ptr<TypeNode> getType() const { return type_; }
 
-    std::shared_ptr<std::vector<std::unique_ptr<const ParameterNode>>> getPairs() const
+    std::shared_ptr<std::vector<std::unique_ptr<ParameterNode>>> getPairs() const { return pairs_; }
+
+    std::unique_ptr<TypeReferenceNode> getTypeRef() const
     {
-        return pairs_;
+        return std::make_unique<TypeReferenceNode>(type_->getFilePos(), type_);
     }
 
     void visit(NodeVisitor* visitor) const override { visitor->visit(this); }
@@ -121,34 +124,26 @@ class ParameterListNode : public Node {
         }
         stream << "}, " << *type_ << ")";
     }
-
-    friend ParameterListNode* createParameterList(const FilePos& pos,
-                                                  const IdentifierListNode* names,
-                                                  const TypeNode* type,
-                                                  bool is_reference);
 };
 
 inline FieldListNode*
-createFieldList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
+createFieldList(const FilePos& pos, const IdentifierListNode* names, std::unique_ptr<TypeNode> type)
 {
-    auto list = new FieldListNode(pos, type);
+    const auto list = new FieldListNode(pos, std::move(type));
     for (const auto& name : names->getNames()) {
-        const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
-        list->pairs_->push_back(
-            std::make_unique<FieldNode>(fieldType->getFilePos(), name, fieldType));
+        list->getPairs()->push_back(std::make_unique<FieldNode>(pos, name, list->getTypeRef()));
     }
 
     return list;
 }
 
-inline VariableListNode*
-createVariableList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
+inline VariableListNode* createVariableList(const FilePos& pos,
+                                            const IdentifierListNode* names,
+                                            std::unique_ptr<TypeNode> type)
 {
-    auto list = new VariableListNode(pos, type);
+    const auto list = new VariableListNode(pos, std::move(type));
     for (const auto& name : names->getNames()) {
-        const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
-        list->pairs_->push_back(
-            std::make_unique<VariableNode>(fieldType->getFilePos(), name, fieldType));
+        list->getPairs()->push_back(std::make_unique<VariableNode>(pos, name, list->getTypeRef()));
     }
 
     return list;
@@ -156,14 +151,13 @@ createVariableList(const FilePos& pos, const IdentifierListNode* names, const Ty
 
 inline ParameterListNode* createParameterList(const FilePos& pos,
                                               const IdentifierListNode* names,
-                                              const TypeNode* type,
+                                              std::unique_ptr<TypeNode> type,
                                               bool is_reference)
 {
-    auto list = new ParameterListNode(pos, type);
+    const auto list = new ParameterListNode(pos, std::move(type));
     for (const auto& name : names->getNames()) {
-        const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
-        list->pairs_->push_back(std::make_unique<ParameterNode>(fieldType->getFilePos(), name,
-                                                                fieldType, is_reference));
+        list->getPairs()->push_back(
+            std::make_unique<ParameterNode>(pos, name, list->getTypeRef(), is_reference));
     }
 
     return list;

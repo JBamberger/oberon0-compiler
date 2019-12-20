@@ -140,9 +140,9 @@ std::unique_ptr<TypeDeclarationNode> Parser::type_declaration()
     const auto pos = scanner_->peekToken()->getPosition();
     const auto name = ident();
     static_cast<void>(require_token(TokenType::op_eq));
-    const auto tp = type();
+    auto tp = type();
     static_cast<void>(require_token(TokenType::semicolon));
-    return std::make_unique<TypeDeclarationNode>(pos, name, tp);
+    return std::make_unique<TypeDeclarationNode>(pos, name, std::move(tp));
 }
 
 std::unique_ptr<VariableListNode> Parser::var_declaration()
@@ -150,9 +150,9 @@ std::unique_ptr<VariableListNode> Parser::var_declaration()
     const auto pos = scanner_->peekToken()->getPosition();
     const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    const auto tp = type();
+    auto tp = type();
     static_cast<void>(require_token(TokenType::semicolon));
-    return std::unique_ptr<VariableListNode>(createVariableList(pos, names, tp));
+    return std::unique_ptr<VariableListNode>(createVariableList(pos, names, std::move(tp)));
 }
 
 std::unique_ptr<ProcedureDeclarationNode> Parser::procedure_declaration()
@@ -293,13 +293,13 @@ std::unique_ptr<ExpressionNode> Parser::factor()
     }
 }
 
-TypeNode* Parser::type()
+std::unique_ptr<TypeNode> Parser::type()
 {
     const auto next = scanner_->peekToken();
 
     if (next->getType() == TokenType::const_ident) {
         const auto pos = next->getPosition();
-        return new BasicTypeNode(pos, ident());
+        return std::make_unique<BasicTypeNode>(pos, ident());
     }
 
     if (next->getType() == TokenType::kw_array) {
@@ -315,21 +315,21 @@ TypeNode* Parser::type()
     exit(EXIT_FAILURE);
 }
 
-ArrayTypeNode* Parser::array_type()
+std::unique_ptr<ArrayTypeNode> Parser::array_type()
 {
     const auto pos = require_token(TokenType::kw_array)->getPosition();
     auto arrayValue = expression();
     static_cast<void>(require_token(TokenType::kw_of));
-    const auto arrayType = type();
+    auto arrayType = type();
 
-    return new ArrayTypeNode(pos, std::move(arrayValue), arrayType);
+    return std::make_unique<ArrayTypeNode>(pos, std::move(arrayValue), std::move(arrayType));
 }
 
-RecordTypeNode* Parser::record_type()
+std::unique_ptr<RecordTypeNode> Parser::record_type()
 {
     const auto pos = require_token(TokenType::kw_record)->getPosition();
 
-    auto node = new RecordTypeNode(pos, current_scope_);
+    auto node = std::make_unique<RecordTypeNode>(pos, current_scope_);
     current_scope_ = node->getScope();
     node->addFields(field_list());
 
@@ -352,9 +352,9 @@ FieldListNode* Parser::field_list()
 
     const auto identifiers = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    const auto listType = type();
+    auto listType = type();
 
-    return createFieldList(identifiers->getFilePos(), identifiers, listType);
+    return createFieldList(identifiers->getFilePos(), identifiers, std::move(listType));
 }
 
 IdentifierListNode* Parser::ident_list()
@@ -402,10 +402,10 @@ std::unique_ptr<ParameterListNode> Parser::fp_section()
 
     const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    const auto list_type = type();
+    auto list_type = type();
 
     return std::unique_ptr<ParameterListNode>(
-        createParameterList(pos, names, list_type, is_reference));
+        createParameterList(pos, names, std::move(list_type), is_reference));
 }
 
 void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list)

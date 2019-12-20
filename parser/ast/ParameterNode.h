@@ -8,7 +8,7 @@ class ParameterNode : public TypedIdentifierNode {
   public:
     ParameterNode(const FilePos& pos,
                   std::string name,
-                  const TypeReferenceNode* type,
+                  std::unique_ptr<TypeReferenceNode> type,
                   bool is_reference);
 
     ~ParameterNode() override;

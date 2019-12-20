@@ -45,9 +45,9 @@ class Parser {
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
-    TypeNode* type();
-    ArrayTypeNode* array_type();
-    RecordTypeNode* record_type();
+    std::unique_ptr<TypeNode> type();
+    std::unique_ptr<ArrayTypeNode> array_type();
+    std::unique_ptr<RecordTypeNode> record_type();
     FieldListNode* field_list();
     IdentifierListNode* ident_list();
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);

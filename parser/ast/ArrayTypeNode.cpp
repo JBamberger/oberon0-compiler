@@ -4,8 +4,8 @@
 
 ArrayTypeNode::ArrayTypeNode(const FilePos& pos,
                              std::unique_ptr<ExpressionNode> value,
-                             TypeNode* type)
-    : TypeNode(NodeType::array_type, pos), value_(std::move(value)), type_(type)
+                             std::unique_ptr<TypeNode> type)
+    : TypeNode(NodeType::array_type, pos), value_(std::move(value)), type_(std::move(type))
 {
     assert(value_ != nullptr);
     assert(type_ != nullptr);

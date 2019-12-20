@@ -7,7 +7,9 @@ class ArrayTypeNode : public TypeNode {
     std::unique_ptr<TypeNode> type_;
 
   public:
-    ArrayTypeNode(const FilePos& pos, std::unique_ptr<ExpressionNode> value, TypeNode* type);
+    ArrayTypeNode(const FilePos& pos,
+                  std::unique_ptr<ExpressionNode> value,
+                  std::unique_ptr<TypeNode> type);
     ~ArrayTypeNode() override;
     const std::unique_ptr<ExpressionNode>& getValue() const;
     const std::unique_ptr<TypeNode>& getType() const;

@@ -2,8 +2,10 @@
 #include "NodeVisitor.h"
 #include <utility>
 
-VariableNode::VariableNode(const FilePos& pos, std::string name, const TypeReferenceNode* type)
-    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), type)
+VariableNode::VariableNode(const FilePos& pos,
+                           std::string name,
+                           std::unique_ptr<TypeReferenceNode> type)
+    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), std::move(type))
 {
     assert(type_ != nullptr);
 }

@@ -4,21 +4,20 @@
 #include <cassert>
 
 class TypedIdentifierNode : public Node {
-
   protected:
     std::string name_;
-    std::unique_ptr<const TypeReferenceNode> type_;
+    std::unique_ptr<TypeReferenceNode> type_;
 
   public:
     TypedIdentifierNode(const NodeType nodeType,
                         const FilePos& pos,
                         std::string name,
-                        const TypeReferenceNode* type)
-        : Node(nodeType, pos), name_(std::move(name)), type_(type)
+                        std::unique_ptr<TypeReferenceNode> type)
+        : Node(nodeType, pos), name_(std::move(name)), type_(std::move(type))
     {
         assert(type_ != nullptr);
     }
 
     const std::string& getName() const { return name_; }
-    const std::unique_ptr<const TypeReferenceNode>& getType() const { return type_; }
+    const std::unique_ptr<TypeReferenceNode>& getType() const { return type_; }
 };

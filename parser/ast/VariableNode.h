@@ -5,7 +5,7 @@
 
 class VariableNode : public TypedIdentifierNode {
   public:
-    VariableNode(const FilePos& pos, std::string name, const TypeReferenceNode* type);
+    VariableNode(const FilePos& pos, std::string name, std::unique_ptr<TypeReferenceNode> type);
 
     ~VariableNode() override;
 
