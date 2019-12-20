@@ -8,21 +8,24 @@ VariableReferenceNode::VariableReferenceNode(const FilePos& pos, std::string nam
 {
 }
 
-VariableReferenceNode::VariableReferenceNode(const FilePos& pos, std::string name, SelectorNode* selector)
-    : ExpressionNode(NodeType::variable_reference, pos), name_(std::move(name)), selector_(selector)
+VariableReferenceNode::VariableReferenceNode(const FilePos& pos,
+                                             std::string name,
+                                             std::unique_ptr<SelectorNode> selector)
+    : ExpressionNode(NodeType::variable_reference, pos), name_(std::move(name)),
+      selector_(std::move(selector))
 {
 }
 
 VariableReferenceNode::~VariableReferenceNode() = default;
 
-void VariableReferenceNode::setSelector(const SelectorNode* node)
+void VariableReferenceNode::setSelector(std::unique_ptr<SelectorNode> node)
 {
-    selector_ = std::unique_ptr<const SelectorNode>(node);
+    selector_ = std::move(node);
 }
 
 const std::string& VariableReferenceNode::getName() const { return name_; }
 
-const std::unique_ptr<const SelectorNode>& VariableReferenceNode::getSelector() const
+const std::unique_ptr<SelectorNode>& VariableReferenceNode::getSelector() const
 {
     return selector_;
 }

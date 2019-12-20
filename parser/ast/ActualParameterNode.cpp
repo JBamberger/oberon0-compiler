@@ -12,20 +12,9 @@ ActualParameterNode::~ActualParameterNode() = default;
 
 const std::unique_ptr<ExpressionNode>& ActualParameterNode::getParam() const { return param_; }
 
-const std::unique_ptr<ActualParameterNode>& ActualParameterNode::getNext() const { return next_; }
-
 void ActualParameterNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
-
-void ActualParameterNode::setNext(ActualParameterNode* next)
-{
-    next_ = std::unique_ptr<ActualParameterNode>(next);
-}
 
 void ActualParameterNode::print(std::ostream& stream) const
 {
-    stream << "ActualParameterNode(" << *param_;
-    if (next_ != nullptr) {
-        stream << ", " << *next_;
-    }
-    stream << ")";
+    stream << "ActualParameterNode(" << *param_ << ")";
 }

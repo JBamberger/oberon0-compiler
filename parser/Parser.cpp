@@ -253,11 +253,11 @@ std::unique_ptr<ExpressionNode> Parser::factor()
     switch (next->getType()) {
     case TokenType::const_ident: {
         const auto name = ident();
-        const auto sel = selector();
+        auto sel = selector();
 
         // TODO: perform lookup in symbol table and return value if constant
 
-        return std::make_unique<VariableReferenceNode>(pos, name, sel);
+        return std::make_unique<VariableReferenceNode>(pos, name, std::move(sel));
     }
     case TokenType::const_number: {
         const auto token = scanner_->nextToken();
@@ -417,7 +417,7 @@ void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* lis
     }
 }
 
-StatementNode* Parser::statement()
+std::unique_ptr<StatementNode> Parser::statement()
 {
     const auto next = scanner_->peekToken();
     if (next->getType() == TokenType::const_ident) {
@@ -435,26 +435,28 @@ StatementNode* Parser::statement()
     exit(EXIT_FAILURE);
 }
 
-AssignmentNode* Parser::assignment(VariableReferenceNode* assignee)
+std::unique_ptr<AssignmentNode> Parser::assignment(std::unique_ptr<VariableReferenceNode> assignee)
 {
     const auto first = require_token(TokenType::op_becomes);
     auto expr = expression();
 
-    return new AssignmentNode(first->getPosition(), assignee, std::move(expr));
+    return std::make_unique<AssignmentNode>(first->getPosition(), std::move(assignee),
+                                            std::move(expr));
 }
 
-ProcedureCallNode* Parser::procedure_call(const FilePos& pos, const std::string name)
+std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const FilePos& pos,
+                                                          const std::string name)
 {
     const auto next = scanner_->peekToken();
-    const ActualParameterNode* params = nullptr;
+    auto proc = std::make_unique<ProcedureCallNode>(pos, name);
     if (next->getType() == TokenType::lparen) {
-        params = actual_parameters();
+        actual_parameters(proc->getParameters().get());
     }
 
-    return new ProcedureCallNode(pos, name, params);
+    return proc;
 }
 
-StatementNode* Parser::procedure_call_or_assignment()
+std::unique_ptr<StatementNode> Parser::procedure_call_or_assignment()
 {
     const auto pos = scanner_->peekToken()->getPosition();
     const auto id = ident();
@@ -462,39 +464,40 @@ StatementNode* Parser::procedure_call_or_assignment()
     const auto nt = scanner_->peekToken()->getType();
 
     if (nt == TokenType::period || nt == TokenType::lbrack || nt == TokenType::op_becomes) {
-        const auto sel = selector();
-        auto base = new VariableReferenceNode(pos, id);
-        base->setSelector(sel);
-        return assignment(base);
+        auto sel = selector();
+        auto base = std::make_unique<VariableReferenceNode>(pos, id);
+        base->setSelector(std::move(sel));
+        return assignment(std::move(base));
     }
 
     return procedure_call(pos, id);
 }
 
-IfStatementNode* Parser::if_statement()
+std::unique_ptr<IfStatementNode> Parser::if_statement()
 {
     // if statement
     auto pos = require_token(TokenType::kw_if)->getPosition();
     auto cond = expression();
     static_cast<void>(require_token(TokenType::kw_then));
-    const auto node = new IfStatementNode(pos, std::move(cond));
+    auto node = std::make_unique<IfStatementNode>(pos, std::move(cond));
 
     statement_sequence(node->getThenPart().get());
 
     // this is the next node where the else body must be filled
-    auto nextNode = node;
+    auto nextNode = node.get();
 
     // elif statements
     while (scanner_->peekToken()->getType() == TokenType::kw_elsif) {
         pos = scanner_->nextToken()->getPosition();
         cond = expression();
-        auto tmp_node = new IfStatementNode(pos, std::move(cond));
+        auto tmp_node = std::make_unique<IfStatementNode>(pos, std::move(cond));
+        const auto tmp_ptr = tmp_node.get();
 
         static_cast<void>(require_token(TokenType::kw_then));
         statement_sequence(tmp_node->getThenPart().get());
 
-        nextNode->getElsePart()->emplace_back(tmp_node);
-        nextNode = tmp_node;
+        nextNode->getElsePart()->push_back(std::move(tmp_node));
+        nextNode = tmp_ptr;
     }
 
     // else statement
@@ -508,11 +511,11 @@ IfStatementNode* Parser::if_statement()
     return node;
 }
 
-WhileStatementNode* Parser::while_statement()
+std::unique_ptr<WhileStatementNode> Parser::while_statement()
 {
     const auto token = require_token(TokenType::kw_while);
     auto cond = expression();
-    auto stmt = new WhileStatementNode(token->getPosition(), std::move(cond));
+    auto stmt = std::make_unique<WhileStatementNode>(token->getPosition(), std::move(cond));
 
     static_cast<void>(require_token(TokenType::kw_do));
     statement_sequence(stmt->getBody().get());
@@ -521,55 +524,49 @@ WhileStatementNode* Parser::while_statement()
     return stmt;
 }
 
-ActualParameterNode* Parser::actual_parameters()
+void Parser::actual_parameters(std::vector<std::unique_ptr<ActualParameterNode>>* params)
 {
-    ActualParameterNode* node = nullptr;
-
     static_cast<void>(require_token(TokenType::lparen));
 
     if (scanner_->peekToken()->getType() != TokenType::rparen) {
-        node = new ActualParameterNode(expression());
-        auto nextNode = node;
+        params->push_back(std::make_unique<ActualParameterNode>(expression()));
 
         while (scanner_->peekToken()->getType() == TokenType::comma) {
             static_cast<void>(scanner_->nextToken());
 
-            auto next = new ActualParameterNode(expression());
-            nextNode->setNext(next);
-            nextNode = next;
+            params->push_back(std::make_unique<ActualParameterNode>(expression()));
         }
     }
 
     static_cast<void>(require_token(TokenType::rparen));
-
-    return node;
 }
 
-SelectorNode* Parser::selector()
+std::unique_ptr<SelectorNode> Parser::selector()
 {
-    SelectorNode* node = nullptr;
+    std::unique_ptr<SelectorNode> node = nullptr;
     SelectorNode* current_node = nullptr;
     auto next = scanner_->peekToken();
     while (true) {
-        SelectorNode* next_node;
+        std::unique_ptr<SelectorNode> next_node;
         if (next->getType() == TokenType::period) {
             const auto id_token = scanner_->nextToken();
             const auto name = ident();
 
-            next_node = new FieldReferenceNode(id_token->getPosition(), name);
+            next_node = std::make_unique<FieldReferenceNode>(id_token->getPosition(), name);
         } else if (next->getType() == TokenType::lbrack) {
-            const auto openToken = scanner_->nextToken();
-            next_node = new ArrayReferenceNode(openToken->getPosition(), expression());
+            const auto open_token = scanner_->nextToken();
+            next_node =
+                std::make_unique<ArrayReferenceNode>(open_token->getPosition(), expression());
             static_cast<void>(require_token(TokenType::rbrack));
         } else {
             break;
         }
 
         if (node == nullptr) {
-            node = next_node;
-            current_node = next_node;
+            node = std::move(next_node);
+            current_node = node.get();
         } else {
-            current_node->setNext(next_node);
+            current_node->setNext(std::move(next_node));
         }
 
         next = scanner_->peekToken();

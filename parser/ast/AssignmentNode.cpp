@@ -3,9 +3,10 @@
 #include <cassert>
 
 AssignmentNode::AssignmentNode(const FilePos& pos,
-                               VariableReferenceNode* assignee,
+                               std::unique_ptr<VariableReferenceNode> assignee,
                                std::unique_ptr<ExpressionNode> value)
-    : StatementNode(NodeType::assignment, pos), assignee_(assignee), value_(std::move(value))
+    : StatementNode(NodeType::assignment, pos), assignee_(std::move(assignee)),
+      value_(std::move(value))
 {
     assert(assignee_ != nullptr);
     assert(value_ != nullptr);

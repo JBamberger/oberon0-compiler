@@ -23,13 +23,7 @@
 
 NodeVisitor::~NodeVisitor() = default;
 
-void NodeVisitor::visit(const ActualParameterNode* node)
-{
-    node->getParam()->visit(this);
-    if (node->getNext() != nullptr) {
-        node->getNext()->visit(this);
-    }
-}
+void NodeVisitor::visit(const ActualParameterNode* node) { node->getParam()->visit(this); }
 
 void NodeVisitor::visit(const ArrayReferenceNode* node) { node->getIndex()->visit(this); }
 
@@ -104,8 +98,8 @@ void NodeVisitor::visit(const ParameterNode* node) { node->getType()->visit(this
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
-    if (node->getParameters() != nullptr) {
-        node->getParameters()->visit(this);
+    for (const auto& p : *node->getParameters()) {
+        p->visit(this);
     }
 }
 

@@ -8,7 +8,7 @@ class AssignmentNode : public StatementNode {
 
   public:
     AssignmentNode(const FilePos& pos,
-                   VariableReferenceNode* assignee,
+                   std::unique_ptr<VariableReferenceNode> assignee,
                    std::unique_ptr<ExpressionNode> value);
 
     ~AssignmentNode() override;

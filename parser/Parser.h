@@ -51,14 +51,14 @@ class Parser {
     FieldListNode* field_list();
     IdentifierListNode* ident_list();
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
-    StatementNode* statement();
-    AssignmentNode* assignment(VariableReferenceNode* assignee);
-    ProcedureCallNode* procedure_call(const FilePos& pos, std::string name);
-    IfStatementNode* if_statement();
-    WhileStatementNode* while_statement();
-    ActualParameterNode* actual_parameters();
-    SelectorNode* selector();
-    StatementNode* procedure_call_or_assignment();
+    std::unique_ptr<StatementNode> statement();
+    std::unique_ptr<AssignmentNode> assignment(std::unique_ptr<VariableReferenceNode> assignee);
+    std::unique_ptr<ProcedureCallNode> procedure_call(const FilePos& pos, std::string name);
+    std::unique_ptr<IfStatementNode> if_statement();
+    std::unique_ptr<WhileStatementNode> while_statement();
+    void actual_parameters(std::vector<std::unique_ptr<ActualParameterNode>>* params);
+    std::unique_ptr<SelectorNode> selector();
+    std::unique_ptr<StatementNode> procedure_call_or_assignment();
 
     static std::unique_ptr<ExpressionNode>
     evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
