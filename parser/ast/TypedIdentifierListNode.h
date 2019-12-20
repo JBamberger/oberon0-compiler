@@ -45,17 +45,7 @@ class FieldListNode : public Node {
     }
 
     friend FieldListNode*
-    createFieldList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
-    {
-        auto list = new FieldListNode(pos, type);
-        for (const auto& name : names->getNames()) {
-            const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
-            list->pairs_->push_back(
-                std::make_unique<FieldNode>(fieldType->getFilePos(), name, fieldType));
-        }
-
-        return list;
-    }
+    createFieldList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type);
 };
 
 class VariableListNode : public Node {
@@ -94,17 +84,7 @@ class VariableListNode : public Node {
     }
 
     friend VariableListNode*
-    createVariableList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
-    {
-        auto list = new VariableListNode(pos, type);
-        for (const auto& name : names->getNames()) {
-            const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
-            list->pairs_->push_back(
-                std::make_unique<VariableNode>(fieldType->getFilePos(), name, fieldType));
-        }
-
-        return list;
-    }
+    createVariableList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type);
 };
 
 class ParameterListNode : public Node {
@@ -145,15 +125,46 @@ class ParameterListNode : public Node {
     friend ParameterListNode* createParameterList(const FilePos& pos,
                                                   const IdentifierListNode* names,
                                                   const TypeNode* type,
-                                                  bool is_reference)
-    {
-        auto list = new ParameterListNode(pos, type);
-        for (const auto& name : names->getNames()) {
-            const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
-            list->pairs_->push_back(std::make_unique<ParameterNode>(fieldType->getFilePos(), name,
-                                                                    fieldType, is_reference));
-        }
-
-        return list;
-    }
+                                                  bool is_reference);
 };
+
+inline FieldListNode*
+createFieldList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
+{
+    auto list = new FieldListNode(pos, type);
+    for (const auto& name : names->getNames()) {
+        const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
+        list->pairs_->push_back(
+            std::make_unique<FieldNode>(fieldType->getFilePos(), name, fieldType));
+    }
+
+    return list;
+}
+
+inline VariableListNode*
+createVariableList(const FilePos& pos, const IdentifierListNode* names, const TypeNode* type)
+{
+    auto list = new VariableListNode(pos, type);
+    for (const auto& name : names->getNames()) {
+        const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
+        list->pairs_->push_back(
+            std::make_unique<VariableNode>(fieldType->getFilePos(), name, fieldType));
+    }
+
+    return list;
+}
+
+inline ParameterListNode* createParameterList(const FilePos& pos,
+                                              const IdentifierListNode* names,
+                                              const TypeNode* type,
+                                              bool is_reference)
+{
+    auto list = new ParameterListNode(pos, type);
+    for (const auto& name : names->getNames()) {
+        const auto fieldType = new TypeReferenceNode(type->getFilePos(), list->type_);
+        list->pairs_->push_back(std::make_unique<ParameterNode>(fieldType->getFilePos(), name,
+                                                                fieldType, is_reference));
+    }
+
+    return list;
+}
