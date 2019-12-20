@@ -1,6 +1,6 @@
 #include "Scope.h"
-#include <utility>
 #include "BasicTypeNode.h"
+#include <utility>
 
 Scope::Scope()
 {
@@ -56,3 +56,5 @@ Symbol* Scope::resolveIdentifier(const std::string& identifier)
     }
     return nullptr;
 }
+
+const std::shared_ptr<Scope>& Scope::getParent() const { return parent_; }

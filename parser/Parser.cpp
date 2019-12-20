@@ -57,6 +57,7 @@ ModuleNode* Parser::module()
     const auto module_name = ident();
 
     const auto module_node = new ModuleNode(pos, module_name);
+    current_scope_ = module_node->getScope();
 
     static_cast<void>(require_token(TokenType::semicolon));
 
@@ -160,7 +161,8 @@ ProcedureDeclarationNode* Parser::procedure_declaration()
     const auto pos = require_token(TokenType::kw_procedure)->getPosition();
     const auto name = ident();
 
-    auto proc_node = new ProcedureDeclarationNode(pos, name);
+    auto proc_node = new ProcedureDeclarationNode(pos, name, current_scope_);
+    current_scope_ = proc_node->getScope();
 
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
         formal_parameters(proc_node);
@@ -184,6 +186,7 @@ ProcedureDeclarationNode* Parser::procedure_declaration()
         exit(EXIT_FAILURE);
     }
 
+    current_scope_ = proc_node->getScope()->getParent();
     return proc_node;
 }
 
@@ -324,7 +327,8 @@ RecordTypeNode* Parser::record_type()
 {
     const auto pos = require_token(TokenType::kw_record)->getPosition();
 
-    auto node = new RecordTypeNode(pos);
+    auto node = new RecordTypeNode(pos, current_scope_);
+    current_scope_ = node->getScope();
     node->addFields(field_list());
 
     while (scanner_->peekToken()->getType() == TokenType::semicolon) {
@@ -334,6 +338,7 @@ RecordTypeNode* Parser::record_type()
 
     static_cast<void>(require_token(TokenType::kw_end));
 
+    current_scope_ = node->getScope()->getParent(); // reset scope
     return node;
 }
 

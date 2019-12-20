@@ -7,6 +7,7 @@
 
 #include "StatementNode.h"
 #include <vector>
+#include "Scope.h"
 
 using ConstDeclList = std::vector<std::unique_ptr<ConstantDeclarationNode>>;
 using VarDeclList = std::vector<std::unique_ptr<VariableListNode>>;
@@ -17,13 +18,14 @@ class ProcedureDeclarationNode;
 
 class BlockNode : public Node {
     std::string name_;
+    std::shared_ptr<Scope> scope_;
     std::unique_ptr<ConstDeclList> constants_;
     std::unique_ptr<VarDeclList> variables_;
     std::unique_ptr<TypeDeclList> types_;
     std::unique_ptr<StatementList> statements_;
 
   public:
-    BlockNode(const FilePos& pos, std::string name);
+    BlockNode(const FilePos& pos, std::string name, std::shared_ptr<Scope> scope);
     ~BlockNode() override;
 
     const std::string& getName() const;
@@ -34,5 +36,7 @@ class BlockNode : public Node {
     virtual const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
     getProcedures() const = 0;
 
+
+    const std::shared_ptr<Scope>& getScope() const;
     void print(std::ostream& stream) const override;
 };

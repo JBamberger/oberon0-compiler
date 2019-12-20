@@ -8,7 +8,7 @@ class ProcedureDeclarationNode : public BlockNode {
     std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>> procedures_;
 
   public:
-    ProcedureDeclarationNode(const FilePos& pos, std::string name);
+    ProcedureDeclarationNode(const FilePos& pos, std::string name, std::shared_ptr<Scope> parent);
     ~ProcedureDeclarationNode() override;
 
     const std::unique_ptr<ParamList>& getParams() const;

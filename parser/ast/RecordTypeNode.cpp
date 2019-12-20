@@ -2,7 +2,10 @@
 #include "NodeVisitor.h"
 #include <cassert>
 
-RecordTypeNode::RecordTypeNode(const FilePos& pos) : TypeNode(NodeType::record_type, pos) {}
+RecordTypeNode::RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent)
+    : TypeNode(NodeType::record_type, pos), scope_(std::make_shared<Scope>(parent))
+{
+}
 
 RecordTypeNode::~RecordTypeNode() = default;
 
@@ -38,3 +41,5 @@ void RecordTypeNode::print(std::ostream& stream) const
     for (const auto& field_node : members_) stream << *field_node << " ";
     stream << "))";
 }
+
+const std::shared_ptr<Scope>& RecordTypeNode::getScope() const { return scope_; }

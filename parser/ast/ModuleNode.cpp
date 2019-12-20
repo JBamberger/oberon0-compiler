@@ -5,7 +5,7 @@
 #include "PrintUtils.h"
 
 ModuleNode::ModuleNode(const FilePos& pos, std::string name)
-    : BlockNode(pos, std::move(name)),
+    : BlockNode(pos, std::move(name), std::make_shared<Scope>()),
       procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())
 {
 }

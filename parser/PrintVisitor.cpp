@@ -23,7 +23,7 @@ PrintVisitor::~PrintVisitor() {}
 
 std::ostream& PrintVisitor::line()
 {
-    for (int i = 0; i < indent_; ++i) {
+    for (auto i = 0; i < indent_; ++i) {
         out_ << "|   ";
     }
     return out_;

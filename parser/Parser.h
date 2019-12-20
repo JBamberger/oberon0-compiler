@@ -28,6 +28,7 @@ class Parser {
     // private:
     Scanner* scanner_;
     Logger* logger_;
+    std::shared_ptr<Scope> current_scope_;
 
     std::unique_ptr<const Token> require_token(const TokenType& type) const;
     std::string ident() const;
