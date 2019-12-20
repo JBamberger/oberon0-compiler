@@ -3,14 +3,15 @@
 
 class ArrayReferenceNode : public SelectorNode {
 
-    std::unique_ptr<const ExpressionNode> index_;
+    std::unique_ptr<ExpressionNode> index_;
 
   public:
-    ArrayReferenceNode(const FilePos& pos, const ExpressionNode* index);
+    ArrayReferenceNode(const FilePos& pos, std::unique_ptr<ExpressionNode> index);
 
     ~ArrayReferenceNode() override;
 
-    const std::unique_ptr<const ExpressionNode>& getIndex() const;
+    const std::unique_ptr<ExpressionNode>& getIndex() const;
+
     void visit(NodeVisitor* visitor) const override;
 
     void print(std::ostream& stream) const override;

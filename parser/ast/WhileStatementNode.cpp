@@ -3,8 +3,9 @@
 #include "PrintUtils.h"
 #include <cassert>
 
-WhileStatementNode::WhileStatementNode(const FilePos& pos, const ExpressionNode* condition)
-    : StatementNode(NodeType::while_statement, pos), condition_(condition),
+WhileStatementNode::WhileStatementNode(const FilePos& pos,
+                                       std::unique_ptr<ExpressionNode> condition)
+    : StatementNode(NodeType::while_statement, pos), condition_(std::move(condition)),
       body_(std::make_unique<std::vector<std::unique_ptr<StatementNode>>>())
 {
     assert(condition_ != nullptr);
@@ -13,7 +14,7 @@ WhileStatementNode::WhileStatementNode(const FilePos& pos, const ExpressionNode*
 
 WhileStatementNode::~WhileStatementNode() = default;
 
-const std::unique_ptr<const ExpressionNode>& WhileStatementNode::getCondition() const
+const std::unique_ptr<ExpressionNode>& WhileStatementNode::getCondition() const
 {
     return condition_;
 }

@@ -5,8 +5,8 @@
 
 UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
                                          UnaryOperator op,
-                                         const ExpressionNode* operand)
-    : ExpressionNode(NodeType::unary_expression, pos), operator_(op), operand_(operand)
+                                         std::unique_ptr<ExpressionNode> operand)
+    : ExpressionNode(NodeType::unary_expression, pos), operator_(op), operand_(std::move(operand))
 {
     assert(operand_ != nullptr);
 }
@@ -15,10 +15,7 @@ UnaryExpressionNode::~UnaryExpressionNode() = default;
 
 UnaryOperator UnaryExpressionNode::getOperator() const { return operator_; }
 
-const std::unique_ptr<const ExpressionNode>& UnaryExpressionNode::getOperand() const
-{
-    return operand_;
-}
+const std::unique_ptr<ExpressionNode>& UnaryExpressionNode::getOperand() const { return operand_; }
 
 void UnaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 

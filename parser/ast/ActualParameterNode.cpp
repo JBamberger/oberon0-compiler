@@ -2,23 +2,23 @@
 #include "NodeVisitor.h"
 #include <cassert>
 
-ActualParameterNode::ActualParameterNode(const ExpressionNode* param)
-    : Node(NodeType::parameter, param->getFilePos()), param_(param)
+ActualParameterNode::ActualParameterNode(std::unique_ptr<ExpressionNode> param)
+    : Node(NodeType::parameter, param->getFilePos()), param_(std::move(param))
 {
     assert(param_ != nullptr);
 }
 
 ActualParameterNode::~ActualParameterNode() = default;
 
-const std::unique_ptr<const ExpressionNode>& ActualParameterNode::getParam() const { return param_; }
+const std::unique_ptr<ExpressionNode>& ActualParameterNode::getParam() const { return param_; }
 
-const std::unique_ptr<const ActualParameterNode>& ActualParameterNode::getNext() const { return next_; }
+const std::unique_ptr<ActualParameterNode>& ActualParameterNode::getNext() const { return next_; }
 
 void ActualParameterNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
-void ActualParameterNode::setNext(const ActualParameterNode* next)
+void ActualParameterNode::setNext(ActualParameterNode* next)
 {
-    next_ = std::unique_ptr<const ActualParameterNode>(next);
+    next_ = std::unique_ptr<ActualParameterNode>(next);
 }
 
 void ActualParameterNode::print(std::ostream& stream) const

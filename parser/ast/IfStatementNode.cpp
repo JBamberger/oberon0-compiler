@@ -3,8 +3,8 @@
 #include "PrintUtils.h"
 #include <cassert>
 
-IfStatementNode::IfStatementNode(const FilePos& pos, const ExpressionNode* condition)
-    : StatementNode(NodeType::if_statement, pos), condition_(condition),
+IfStatementNode::IfStatementNode(const FilePos& pos, std::unique_ptr<ExpressionNode> condition)
+    : StatementNode(NodeType::if_statement, pos), condition_(std::move(condition)),
       thenPart_(std::make_unique<std::vector<std::unique_ptr<StatementNode>>>()),
       elsePart_(std::make_unique<std::vector<std::unique_ptr<StatementNode>>>())
 {
@@ -14,10 +14,7 @@ IfStatementNode::IfStatementNode(const FilePos& pos, const ExpressionNode* condi
 
 IfStatementNode::~IfStatementNode() = default;
 
-const std::unique_ptr<const ExpressionNode>& IfStatementNode::getCondition() const
-{
-    return condition_;
-}
+const std::unique_ptr<ExpressionNode>& IfStatementNode::getCondition() const { return condition_; }
 
 const std::unique_ptr<std::vector<std::unique_ptr<StatementNode>>>&
 IfStatementNode::getThenPart() const

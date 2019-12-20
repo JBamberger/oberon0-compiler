@@ -2,8 +2,10 @@
 #include "NodeVisitor.h"
 #include <cassert>
 
-ArrayTypeNode::ArrayTypeNode(const FilePos& pos, const ExpressionNode* value, const TypeNode* type)
-    : TypeNode(NodeType::array_type, pos), value_(value), type_(type)
+ArrayTypeNode::ArrayTypeNode(const FilePos& pos,
+                             std::unique_ptr<ExpressionNode> value,
+                             TypeNode* type)
+    : TypeNode(NodeType::array_type, pos), value_(std::move(value)), type_(type)
 {
     assert(value_ != nullptr);
     assert(type_ != nullptr);
@@ -11,9 +13,9 @@ ArrayTypeNode::ArrayTypeNode(const FilePos& pos, const ExpressionNode* value, co
 
 ArrayTypeNode::~ArrayTypeNode() = default;
 
-const std::unique_ptr<const ExpressionNode>& ArrayTypeNode::getValue() const { return value_; }
+const std::unique_ptr<ExpressionNode>& ArrayTypeNode::getValue() const { return value_; }
 
-const std::unique_ptr<const TypeNode>& ArrayTypeNode::getType() const { return type_; }
+const std::unique_ptr<TypeNode>& ArrayTypeNode::getType() const { return type_; }
 
 void ArrayTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 

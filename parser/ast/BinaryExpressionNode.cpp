@@ -4,25 +4,25 @@
 
 BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
                                            BinaryOperator op,
-                                           const ExpressionNode* operand1,
-                                           const ExpressionNode* operand2)
-    : ExpressionNode(NodeType::binary_expression, pos), op_(op), operand1_(operand1),
-      operand2_(operand2)
+                                           std::unique_ptr<ExpressionNode> operand1,
+                                           std::unique_ptr<ExpressionNode> operand2)
+    : ExpressionNode(NodeType::binary_expression, pos), op_(op), operand1_(std::move(operand1)),
+      operand2_(std::move(operand2))
 {
-    assert(operand1 != nullptr);
-    assert(operand2 != nullptr);
+    assert(operand1_ != nullptr);
+    assert(operand2_ != nullptr);
 }
 
 BinaryExpressionNode::~BinaryExpressionNode() = default;
 
 BinaryOperator BinaryExpressionNode::getOperator() const { return op_; }
 
-const std::unique_ptr<const ExpressionNode>& BinaryExpressionNode::getOperand1() const
+const std::unique_ptr<ExpressionNode>& BinaryExpressionNode::getOperand1() const
 {
     return operand1_;
 }
 
-const std::unique_ptr<const ExpressionNode>& BinaryExpressionNode::getOperand2() const
+const std::unique_ptr<ExpressionNode>& BinaryExpressionNode::getOperand2() const
 {
     return operand2_;
 }

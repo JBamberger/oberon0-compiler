@@ -40,11 +40,11 @@ class Parser {
     std::unique_ptr<VariableListNode> var_declaration();
     std::unique_ptr<ProcedureDeclarationNode> procedure_declaration();
     void formal_parameters(ProcedureDeclarationNode* proc_decl);
-    ParameterListNode* fp_section();
-    ExpressionNode* expression();
-    ExpressionNode* simple_expression();
-    ExpressionNode* term();
-    ExpressionNode* factor();
+    std::unique_ptr<ParameterListNode> fp_section();
+    std::unique_ptr<ExpressionNode> expression();
+    std::unique_ptr<ExpressionNode> simple_expression();
+    std::unique_ptr<ExpressionNode> term();
+    std::unique_ptr<ExpressionNode> factor();
     TypeNode* type();
     ArrayTypeNode* array_type();
     RecordTypeNode* record_type();
@@ -52,7 +52,7 @@ class Parser {
     IdentifierListNode* ident_list();
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
     StatementNode* statement();
-    AssignmentNode* assignment(const VariableReferenceNode* assignee);
+    AssignmentNode* assignment(VariableReferenceNode* assignee);
     ProcedureCallNode* procedure_call(const FilePos& pos, std::string name);
     IfStatementNode* if_statement();
     WhileStatementNode* while_statement();
@@ -60,11 +60,13 @@ class Parser {
     SelectorNode* selector();
     StatementNode* procedure_call_or_assignment();
 
-    static ExpressionNode* evaluateBinaryExpression(ExpressionNode* operand_1,
-                                                    ExpressionNode* operand_2,
-                                                    std::unique_ptr<const Token> op);
-    static ExpressionNode* evaluateUnaryExpression(ExpressionNode* operand,
-                                                   std::unique_ptr<const Token> op);
+    static std::unique_ptr<ExpressionNode>
+    evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
+                             std::unique_ptr<ExpressionNode> operand_2,
+                             std::unique_ptr<const Token> op);
+    static std::unique_ptr<ExpressionNode>
+    evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
+                            std::unique_ptr<const Token> op);
 
   public:
     explicit Parser(Scanner* scanner, Logger* logger);

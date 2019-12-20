@@ -22,23 +22,21 @@ std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op);
 
 BinaryOperator toBinaryOperator(const TokenType& type);
 
-
-
 class BinaryExpressionNode : public ExpressionNode {
     BinaryOperator op_;
-    std::unique_ptr<const ExpressionNode> operand1_;
-    std::unique_ptr<const ExpressionNode> operand2_;
+    std::unique_ptr<ExpressionNode> operand1_;
+    std::unique_ptr<ExpressionNode> operand2_;
 
   public:
     BinaryExpressionNode(const FilePos& pos,
                          BinaryOperator op,
-                         const ExpressionNode* operand1,
-                         const ExpressionNode* operand2);
+                         std::unique_ptr<ExpressionNode> operand1,
+                         std::unique_ptr<ExpressionNode> operand2);
     ~BinaryExpressionNode() override;
 
     BinaryOperator getOperator() const;
-    const std::unique_ptr<const ExpressionNode>& getOperand1() const;
-    const std::unique_ptr<const ExpressionNode>& getOperand2() const;
+    const std::unique_ptr<ExpressionNode>& getOperand1() const;
+    const std::unique_ptr<ExpressionNode>& getOperand2() const;
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

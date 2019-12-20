@@ -3,9 +3,9 @@
 #include <cassert>
 
 AssignmentNode::AssignmentNode(const FilePos& pos,
-                               const VariableReferenceNode* assignee,
-                               const ExpressionNode* value)
-    : StatementNode(NodeType::assignment, pos), assignee_(assignee), value_(value)
+                               VariableReferenceNode* assignee,
+                               std::unique_ptr<ExpressionNode> value)
+    : StatementNode(NodeType::assignment, pos), assignee_(assignee), value_(std::move(value))
 {
     assert(assignee_ != nullptr);
     assert(value_ != nullptr);
@@ -13,12 +13,12 @@ AssignmentNode::AssignmentNode(const FilePos& pos,
 
 AssignmentNode::~AssignmentNode() = default;
 
-const std::unique_ptr<const VariableReferenceNode>& AssignmentNode::getAssignee() const
+const std::unique_ptr<VariableReferenceNode>& AssignmentNode::getAssignee() const
 {
     return assignee_;
 }
 
-const std::unique_ptr<const ExpressionNode>& AssignmentNode::getValue() const { return value_; }
+const std::unique_ptr<ExpressionNode>& AssignmentNode::getValue() const { return value_; }
 
 void AssignmentNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 

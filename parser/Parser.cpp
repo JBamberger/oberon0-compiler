@@ -130,9 +130,9 @@ std::unique_ptr<ConstantDeclarationNode> Parser::const_declaration()
     const auto pos = scanner_->peekToken()->getPosition();
     const auto name = ident();
     static_cast<void>(require_token(TokenType::op_eq));
-    const auto value = expression();
+    auto value = expression();
     static_cast<void>(require_token(TokenType::semicolon));
-    return std::make_unique<ConstantDeclarationNode>(pos, name, value);
+    return std::make_unique<ConstantDeclarationNode>(pos, name, std::move(value));
 }
 
 std::unique_ptr<TypeDeclarationNode> Parser::type_declaration()
@@ -190,30 +190,30 @@ std::unique_ptr<ProcedureDeclarationNode> Parser::procedure_declaration()
     return proc_node;
 }
 
-ExpressionNode* Parser::expression()
+std::unique_ptr<ExpressionNode> Parser::expression()
 {
-    const auto operand_1 = simple_expression();
+    auto operand_1 = simple_expression();
     const auto maybe_operand = scanner_->peekToken()->getType();
     if (maybe_operand == TokenType::op_eq || maybe_operand == TokenType::op_neq ||
         maybe_operand == TokenType::op_lt || maybe_operand == TokenType::op_leq ||
         maybe_operand == TokenType::op_gt || maybe_operand == TokenType::op_geq) {
         auto op = scanner_->nextToken();
-        const auto operand_2 = simple_expression();
-        return evaluateBinaryExpression(operand_1, operand_2, std::move(op));
+        auto operand_2 = simple_expression();
+        return evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
     }
 
     return operand_1;
 }
 
-ExpressionNode* Parser::simple_expression()
+std::unique_ptr<ExpressionNode> Parser::simple_expression()
 {
-    ExpressionNode* operand_1;
+    std::unique_ptr<ExpressionNode> operand_1;
 
     auto next = scanner_->peekToken()->getType();
     if (next == TokenType::op_plus || next == TokenType::op_minus) {
         auto op = scanner_->nextToken();
-        const auto operand = term();
-        operand_1 = evaluateUnaryExpression(operand, std::move(op));
+        auto operand = term();
+        operand_1 = evaluateUnaryExpression(std::move(operand), std::move(op));
     } else {
         operand_1 = term();
     }
@@ -221,29 +221,31 @@ ExpressionNode* Parser::simple_expression()
     next = scanner_->peekToken()->getType();
     while (next == TokenType::op_plus || next == TokenType::op_minus || next == TokenType::op_or) {
         auto op = scanner_->nextToken();
-        const auto operand_2 = term();
-        operand_1 = evaluateBinaryExpression(operand_1, operand_2, std::move(op));
+        auto operand_2 = term();
+        operand_1 =
+            evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
         next = scanner_->peekToken()->getType();
     }
     return operand_1;
 }
 
-ExpressionNode* Parser::term()
+std::unique_ptr<ExpressionNode> Parser::term()
 {
     auto operand_1 = factor();
     auto next = scanner_->peekToken()->getType();
     while (next == TokenType::op_times || next == TokenType::op_div || next == TokenType::op_mod ||
            next == TokenType::op_and) {
         auto op = scanner_->nextToken();
-        const auto operand_2 = factor();
-        operand_1 = evaluateBinaryExpression(operand_1, operand_2, std::move(op));
+        auto operand_2 = factor();
+        operand_1 =
+            evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
         next = scanner_->peekToken()->getType();
     }
 
     return operand_1;
 }
 
-ExpressionNode* Parser::factor()
+std::unique_ptr<ExpressionNode> Parser::factor()
 {
     const auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
@@ -255,7 +257,7 @@ ExpressionNode* Parser::factor()
 
         // TODO: perform lookup in symbol table and return value if constant
 
-        return new VariableReferenceNode(pos, name, sel);
+        return std::make_unique<VariableReferenceNode>(pos, name, sel);
     }
     case TokenType::const_number: {
         const auto token = scanner_->nextToken();
@@ -263,7 +265,7 @@ ExpressionNode* Parser::factor()
         assert(num_token != nullptr);
         const auto value = num_token->getValue();
 
-        return new NumberConstantNode(pos, value);
+        return std::make_unique<NumberConstantNode>(pos, value);
     }
     case TokenType::const_string: {
         const auto token = scanner_->nextToken();
@@ -271,18 +273,18 @@ ExpressionNode* Parser::factor()
         assert(str_token != nullptr);
         const auto value = str_token->getValue();
 
-        return new StringConstantNode(pos, value);
+        return std::make_unique<StringConstantNode>(pos, value);
     }
     case TokenType::lparen: {
         static_cast<void>(require_token(TokenType::lparen));
-        const auto expr = expression();
+        auto expr = expression();
         static_cast<void>(require_token(TokenType::rparen));
         return expr;
     }
     case TokenType::op_not: {
         auto op = require_token(TokenType::op_not);
-        const auto value = factor();
-        return evaluateUnaryExpression(value, std::move(op));
+        auto value = factor();
+        return evaluateUnaryExpression(std::move(value), std::move(op));
     }
     default:
         logger_->error(next->getPosition(), "Expected Identifier, Number, lparen or ~ but got " +
@@ -316,11 +318,11 @@ TypeNode* Parser::type()
 ArrayTypeNode* Parser::array_type()
 {
     const auto pos = require_token(TokenType::kw_array)->getPosition();
-    const auto arrayValue = expression();
+    auto arrayValue = expression();
     static_cast<void>(require_token(TokenType::kw_of));
     const auto arrayType = type();
 
-    return new ArrayTypeNode(pos, arrayValue, arrayType);
+    return new ArrayTypeNode(pos, std::move(arrayValue), arrayType);
 }
 
 RecordTypeNode* Parser::record_type()
@@ -375,19 +377,19 @@ void Parser::formal_parameters(ProcedureDeclarationNode* proc_decl)
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
 
-        proc_decl->getParams()->emplace_back(fp_section());
+        proc_decl->getParams()->push_back(fp_section());
 
         while (scanner_->peekToken()->getType() == TokenType::semicolon) {
             static_cast<void>(scanner_->nextToken());
 
-            proc_decl->getParams()->emplace_back(fp_section());
+            proc_decl->getParams()->push_back(fp_section());
         }
     }
 
     static_cast<void>(require_token(TokenType::rparen));
 }
 
-ParameterListNode* Parser::fp_section()
+std::unique_ptr<ParameterListNode> Parser::fp_section()
 {
     const auto next_token = scanner_->peekToken();
     const auto pos = next_token->getPosition();
@@ -402,7 +404,8 @@ ParameterListNode* Parser::fp_section()
     static_cast<void>(require_token(TokenType::colon));
     const auto list_type = type();
 
-    return createParameterList(pos, names, list_type, is_reference);
+    return std::unique_ptr<ParameterListNode>(
+        createParameterList(pos, names, list_type, is_reference));
 }
 
 void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list)
@@ -432,12 +435,12 @@ StatementNode* Parser::statement()
     exit(EXIT_FAILURE);
 }
 
-AssignmentNode* Parser::assignment(const VariableReferenceNode* assignee)
+AssignmentNode* Parser::assignment(VariableReferenceNode* assignee)
 {
     const auto first = require_token(TokenType::op_becomes);
-    const auto expr = expression();
+    auto expr = expression();
 
-    return new AssignmentNode(first->getPosition(), assignee, expr);
+    return new AssignmentNode(first->getPosition(), assignee, std::move(expr));
 }
 
 ProcedureCallNode* Parser::procedure_call(const FilePos& pos, const std::string name)
@@ -474,7 +477,8 @@ IfStatementNode* Parser::if_statement()
     auto pos = require_token(TokenType::kw_if)->getPosition();
     auto cond = expression();
     static_cast<void>(require_token(TokenType::kw_then));
-    const auto node = new IfStatementNode(pos, cond);
+    const auto node = new IfStatementNode(pos, std::move(cond));
+
     statement_sequence(node->getThenPart().get());
 
     // this is the next node where the else body must be filled
@@ -484,7 +488,7 @@ IfStatementNode* Parser::if_statement()
     while (scanner_->peekToken()->getType() == TokenType::kw_elsif) {
         pos = scanner_->nextToken()->getPosition();
         cond = expression();
-        auto tmp_node = new IfStatementNode(pos, cond);
+        auto tmp_node = new IfStatementNode(pos, std::move(cond));
 
         static_cast<void>(require_token(TokenType::kw_then));
         statement_sequence(tmp_node->getThenPart().get());
@@ -507,8 +511,8 @@ IfStatementNode* Parser::if_statement()
 WhileStatementNode* Parser::while_statement()
 {
     const auto token = require_token(TokenType::kw_while);
-    const auto cond = expression();
-    auto stmt = new WhileStatementNode(token->getPosition(), cond);
+    auto cond = expression();
+    auto stmt = new WhileStatementNode(token->getPosition(), std::move(cond));
 
     static_cast<void>(require_token(TokenType::kw_do));
     statement_sequence(stmt->getBody().get());
@@ -555,10 +559,8 @@ SelectorNode* Parser::selector()
             next_node = new FieldReferenceNode(id_token->getPosition(), name);
         } else if (next->getType() == TokenType::lbrack) {
             const auto openToken = scanner_->nextToken();
-            const auto expr = expression();
+            next_node = new ArrayReferenceNode(openToken->getPosition(), expression());
             static_cast<void>(require_token(TokenType::rbrack));
-
-            next_node = new ArrayReferenceNode(openToken->getPosition(), expr);
         } else {
             break;
         }
@@ -575,12 +577,13 @@ SelectorNode* Parser::selector()
     return node;
 }
 
-ExpressionNode* Parser::evaluateUnaryExpression(ExpressionNode* operand,
-                                                const std::unique_ptr<const Token> op)
+std::unique_ptr<ExpressionNode>
+Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
+                                const std::unique_ptr<const Token> op)
 {
     assert(operand != nullptr);
     const auto unary_op = toUnaryOperator(op->getType());
-    auto first = dynamic_cast<NumberConstantNode*>(operand);
+    auto first = dynamic_cast<NumberConstantNode*>(operand.get());
     if (first != nullptr) {
         switch (unary_op) {
         case UnaryOperator::plus:
@@ -596,22 +599,23 @@ ExpressionNode* Parser::evaluateUnaryExpression(ExpressionNode* operand,
             std::cerr << "Invalid operator. This shouldn't be possible." << std::endl;
             std::terminate();
         }
-        return first;
+        return operand;
     }
 
-    return new UnaryExpressionNode(op->getPosition(), unary_op, operand);
+    return std::make_unique<UnaryExpressionNode>(op->getPosition(), unary_op, std::move(operand));
 }
 
-ExpressionNode* Parser::evaluateBinaryExpression(ExpressionNode* operand_1,
-                                                 ExpressionNode* operand_2,
-                                                 const std::unique_ptr<const Token> op)
+std::unique_ptr<ExpressionNode>
+Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
+                                 std::unique_ptr<ExpressionNode> operand_2,
+                                 const std::unique_ptr<const Token> op)
 {
     assert(operand_1 != nullptr);
     assert(operand_2 != nullptr);
 
     const auto bin_op = toBinaryOperator(op->getType());
-    auto first = dynamic_cast<NumberConstantNode*>(operand_1);
-    const auto second = dynamic_cast<NumberConstantNode*>(operand_2);
+    const auto first = dynamic_cast<NumberConstantNode*>(operand_1.get());
+    const auto second = dynamic_cast<NumberConstantNode*>(operand_2.get());
     if (first != nullptr && second != nullptr) {
         switch (bin_op) {
         case BinaryOperator::times:
@@ -658,9 +662,9 @@ ExpressionNode* Parser::evaluateBinaryExpression(ExpressionNode* operand_1,
             std::terminate();
         }
 
-        delete second;
-        return first;
+        return operand_1;
     }
 
-    return new BinaryExpressionNode(operand_1->getFilePos(), bin_op, operand_1, operand_2);
+    return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), bin_op,
+                                                  std::move(operand_1), std::move(operand_2));
 }
