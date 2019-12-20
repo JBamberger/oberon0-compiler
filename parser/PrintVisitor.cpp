@@ -166,14 +166,6 @@ void PrintVisitor::visit(const RecordTypeNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const StatementSequenceNode* node)
-{
-    line() << "StatementSequence\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
 void PrintVisitor::visit(const StringConstantNode* node)
 {
     line() << "String(" << node->getValue() << ")\n";

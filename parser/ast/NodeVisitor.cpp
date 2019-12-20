@@ -137,13 +137,6 @@ void NodeVisitor::visit(const RecordTypeNode* node)
     }
 }
 
-void NodeVisitor::visit(const StatementSequenceNode* node)
-{
-    for (const auto& s : node->getBody()) {
-        s->visit(this);
-    }
-}
-
 void NodeVisitor::visit(const StringConstantNode* node) {}
 
 void NodeVisitor::visit(const TypeDeclarationNode* node) { node->getType()->visit(this); }

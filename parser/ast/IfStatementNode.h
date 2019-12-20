@@ -1,7 +1,7 @@
 #pragma once
 #include "ExpressionNode.h"
 #include "StatementNode.h"
-#include "StatementSequenceNode.h"
+#include <vector>
 
 class IfStatementNode : public StatementNode {
     std::unique_ptr<ExpressionNode> condition_;

@@ -47,8 +47,6 @@ add_executable(oberon0c
     parser/ast/ArrayReferenceNode.h
     parser/ast/ArrayReferenceNode.cpp
     parser/ast/StatementNode.h
-    parser/ast/StatementSequenceNode.h
-    parser/ast/StatementSequenceNode.cpp
     parser/ast/WhileStatementNode.h
     parser/ast/WhileStatementNode.cpp
     parser/ast/IfStatementNode.h

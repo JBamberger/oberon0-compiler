@@ -1,7 +1,6 @@
 #pragma once
 #include "ExpressionNode.h"
 #include "StatementNode.h"
-#include "StatementSequenceNode.h"
 #include <vector>
 
 class WhileStatementNode : public StatementNode {

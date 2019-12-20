@@ -32,7 +32,6 @@ class AssignmentNode;
 class ArrayTypeNode;
 class ArrayReferenceNode;
 class ActualParameterNode;
-class StatementSequenceNode;
 class ModuleNode;
 
 class NodeVisitor {
@@ -62,7 +61,6 @@ class NodeVisitor {
     virtual void visit(const ParameterNode* node) = 0;
     virtual void visit(const ProcedureCallNode* node) = 0;
     virtual void visit(const RecordTypeNode* node) = 0;
-    virtual void visit(const StatementSequenceNode* node) = 0;
     virtual void visit(const StringConstantNode* node) = 0;
     virtual void visit(const FieldListNode* node) = 0;
     virtual void visit(const ParameterListNode* node) = 0;
