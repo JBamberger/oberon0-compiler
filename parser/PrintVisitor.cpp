@@ -7,6 +7,7 @@
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
 #include "ast/FieldReferenceNode.h"
+#include "ast/IdentifierListNode.h"
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
 #include "ast/NumberConstantNode.h"
@@ -16,7 +17,6 @@
 #include "ast/StringConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include "ast/WhileStatementNode.h"
-#include "ast/IdentifierListNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
@@ -126,7 +126,7 @@ void PrintVisitor::visit(const ModuleNode* node)
 {
     line() << "Module " << node->getName() << "\n";
     inc();
-    NodeVisitor::visit(node);
+    printBlock(node);
     dec();
 }
 
@@ -155,7 +155,16 @@ void PrintVisitor::visit(const ProcedureDeclarationNode* node)
 {
     line() << "ProcedureDeclaration " << node->getName() << "\n";
     inc();
-    NodeVisitor::visit(node);
+
+    if (!node->getParams()->empty()) {
+        line() << "Parameters:\n";
+        inc();
+        for (const auto& s : *node->getParams()) {
+            s->visit(this);
+        }
+        dec();
+    }
+    printBlock(node);
     dec();
 }
 
@@ -183,14 +192,6 @@ void PrintVisitor::visit(const TypeDeclarationNode* node)
 void PrintVisitor::visit(const TypedIdentifierNode* node)
 {
     line() << "TypedIdentifier " << node->getName() << "\n";
-    inc();
-    node->getType()->visit(this);
-    dec();
-}
-
-void PrintVisitor::visit(const TypeReferenceNode* node)
-{
-    line() << "TypeReference\n";
     inc();
     node->getType()->visit(this);
     dec();
@@ -228,4 +229,48 @@ void PrintVisitor::visit(const WhileStatementNode* node)
     inc();
     NodeVisitor::visit(node);
     dec();
+}
+
+void PrintVisitor::printBlock(const BlockNode* node)
+{
+    if (!node->getConstants()->empty()) {
+        line() << "Constants:\n";
+        inc();
+        for (const auto& decl : *node->getConstants()) {
+            decl->visit(this);
+        }
+        dec();
+    }
+    if (!node->getTypes()->empty()) {
+        line() << "Types:\n";
+        inc();
+        for (const auto& decl : *node->getTypes()) {
+            decl->visit(this);
+        }
+        dec();
+    }
+    if (!node->getVariables()->empty()) {
+        line() << "Variables:\n";
+        inc();
+        for (const auto& decl : *node->getVariables()) {
+            decl->visit(this);
+        }
+        dec();
+    }
+    if (!node->getProcedures()->empty()) {
+        line() << "Procedures:\n";
+        inc();
+        for (const auto& decl : *node->getProcedures()) {
+            decl->visit(this);
+        }
+        dec();
+    }
+    if (!node->getStatements()->empty()) {
+        line() << "Statements:\n";
+        inc();
+        for (const auto& s : *node->getStatements()) {
+            s->visit(this);
+        }
+        dec();
+    }
 }

@@ -154,9 +154,7 @@ void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode
     static_cast<void>(require_token(TokenType::semicolon));
 
     for (const auto& name : names->getNames()) {
-        auto type_ref = std::make_unique<TypeReferenceNode>(tp->getFilePos(), tp);
-        var_list->push_back(
-            std::make_unique<VariableDeclarationNode>(pos, name, std::move(type_ref)));
+        var_list->push_back(std::make_unique<VariableDeclarationNode>(pos, name, tp));
     }
 }
 
@@ -356,12 +354,11 @@ void Parser::field_list(RecordTypeNode* rec_decl)
     }
     const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto list_type = std::shared_ptr<TypeNode>(type());
+    auto tp = std::shared_ptr<TypeNode>(type());
 
     for (const auto& name : names->getNames()) {
-        auto type_ref = std::make_unique<TypeReferenceNode>(list_type->getFilePos(), list_type);
         rec_decl->getMembers()->push_back(
-            std::make_unique<FieldDeclarationNode>(names->getFilePos(), name, std::move(type_ref)));
+            std::make_unique<FieldDeclarationNode>(names->getFilePos(), name, tp));
     }
 }
 
@@ -410,12 +407,11 @@ void Parser::fp_section(ProcedureDeclarationNode* proc_decl)
 
     const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto list_type = std::shared_ptr<TypeNode>(type());
+    auto tp = std::shared_ptr<TypeNode>(type());
 
     for (const auto& name : names->getNames()) {
-        auto type_ref = std::make_unique<TypeReferenceNode>(list_type->getFilePos(), list_type);
-        proc_decl->getParams()->push_back(std::make_unique<ParameterDeclarationNode>(
-            pos, name, std::move(type_ref), is_reference));
+        proc_decl->getParams()->push_back(
+            std::make_unique<ParameterDeclarationNode>(pos, name, tp, is_reference));
     }
 }
 

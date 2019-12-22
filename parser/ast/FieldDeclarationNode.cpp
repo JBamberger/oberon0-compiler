@@ -6,7 +6,7 @@
 
 FieldDeclarationNode::FieldDeclarationNode(const FilePos& pos,
                                            std::string name,
-                                           std::unique_ptr<TypeReferenceNode> type)
+                                           std::shared_ptr<TypeNode> type)
     : TypedIdentifierNode(NodeType::field, pos, std::move(name), std::move(type))
 {
     assert(type_ != nullptr);

@@ -1,13 +1,11 @@
 #pragma once
-#include "TypeReferenceNode.h"
 #include "TypedIdentifierNode.h"
-#include <cassert>
 
 class VariableDeclarationNode : public TypedIdentifierNode {
   public:
     VariableDeclarationNode(const FilePos& pos,
                             std::string name,
-                            std::unique_ptr<TypeReferenceNode> type);
+                            std::shared_ptr<TypeNode> type);
 
     ~VariableDeclarationNode() override;
 

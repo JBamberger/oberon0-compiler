@@ -69,8 +69,6 @@ add_executable(oberon0c
     parser/ast/ParameterDeclarationNode.h
     parser/ast/ParameterDeclarationNode.cpp
     parser/ast/TypeNode.h
-    parser/ast/TypeReferenceNode.h
-    parser/ast/TypeReferenceNode.cpp
     parser/ast/BasicTypeNode.h
     parser/ast/BasicTypeNode.cpp
     parser/ast/ArrayTypeNode.h

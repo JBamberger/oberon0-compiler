@@ -1,12 +1,10 @@
 #pragma once
-#include "TypeReferenceNode.h"
 #include "TypedIdentifierNode.h"
 
 class FieldDeclarationNode : public TypedIdentifierNode {
   public:
     FieldDeclarationNode(const FilePos& pos,
-                         std::string name,
-                         std::unique_ptr<TypeReferenceNode> type);
+                         std::string name, std::shared_ptr<TypeNode> type);
 
     ~FieldDeclarationNode() override;
 

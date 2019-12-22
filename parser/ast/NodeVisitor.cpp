@@ -139,8 +139,6 @@ void NodeVisitor::visit(const TypeDeclarationNode* node) { node->getType()->visi
 
 void NodeVisitor::visit(const TypedIdentifierNode* node) { node->getType()->visit(this); }
 
-void NodeVisitor::visit(const TypeReferenceNode* node) { node->getType()->visit(this); }
-
 void NodeVisitor::visit(const UnaryExpressionNode* node) { node->getOperand()->visit(this); }
 
 void NodeVisitor::visit(const VariableDeclarationNode* node) { node->getType()->visit(this); }

@@ -1,5 +1,4 @@
 #pragma once
-#include "TypeReferenceNode.h"
 #include "TypedIdentifierNode.h"
 
 class ParameterDeclarationNode : public TypedIdentifierNode {
@@ -7,9 +6,9 @@ class ParameterDeclarationNode : public TypedIdentifierNode {
 
   public:
     ParameterDeclarationNode(const FilePos& pos,
-                  std::string name,
-                  std::unique_ptr<TypeReferenceNode> type,
-                  bool is_reference);
+                             std::string name,
+                             std::shared_ptr<TypeNode> type,
+                             bool is_reference);
 
     ~ParameterDeclarationNode() override;
 

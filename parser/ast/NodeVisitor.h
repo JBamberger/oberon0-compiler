@@ -17,7 +17,6 @@ class RecordTypeNode;
 class StringConstantNode;
 class TypeDeclarationNode;
 class TypedIdentifierNode;
-class TypeReferenceNode;
 class UnaryExpressionNode;
 class VariableDeclarationNode;
 class VariableReferenceNode;
@@ -60,7 +59,6 @@ class NodeVisitor {
     virtual void visit(const RecordTypeNode* node) = 0;
     virtual void visit(const StringConstantNode* node) = 0;
     virtual void visit(const TypedIdentifierNode* node) = 0;
-    virtual void visit(const TypeReferenceNode* node) = 0;
     virtual void visit(const BasicTypeNode* node) = 0;
     virtual void visit(const VariableReferenceNode* node) = 0;
     virtual void visit(const WhileStatementNode* node) = 0;

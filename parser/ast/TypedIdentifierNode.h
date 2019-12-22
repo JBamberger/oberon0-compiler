@@ -1,23 +1,23 @@
 #pragma once
 #include "Node.h"
-#include "TypeReferenceNode.h"
 #include <cassert>
+#include "TypeNode.h"
 
 class TypedIdentifierNode : public Node {
   protected:
     std::string name_;
-    std::unique_ptr<TypeReferenceNode> type_;
+    std::shared_ptr<TypeNode> type_;
 
   public:
     TypedIdentifierNode(const NodeType nodeType,
                         const FilePos& pos,
                         std::string name,
-                        std::unique_ptr<TypeReferenceNode> type)
+                        std::shared_ptr<TypeNode> type)
         : Node(nodeType, pos), name_(std::move(name)), type_(std::move(type))
     {
         assert(type_ != nullptr);
     }
 
     const std::string& getName() const { return name_; }
-    const std::unique_ptr<TypeReferenceNode>& getType() const { return type_; }
+    std::shared_ptr<TypeNode> getType() const { return type_; }
 };
