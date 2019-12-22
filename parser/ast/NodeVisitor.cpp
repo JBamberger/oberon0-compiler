@@ -12,7 +12,7 @@
 #include "ModuleNode.h"
 #include "NumberConstantNode.h"
 #include "ProcedureCallNode.h"
-#include "ProcedureNode.h"
+#include "ProcedureDeclarationNode.h"
 #include "RecordTypeNode.h"
 #include "StringConstantNode.h"
 #include "TypeDeclarationNode.h"
@@ -103,7 +103,7 @@ void NodeVisitor::visit(const ProcedureCallNode* node)
     }
 }
 
-void NodeVisitor::visit(const ProcedureNode* node)
+void NodeVisitor::visit(const ProcedureDeclarationNode* node)
 {
     if (node->getParams() != nullptr) {
         for (const auto& s : *node->getParams()) {

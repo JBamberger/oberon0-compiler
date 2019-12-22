@@ -13,7 +13,7 @@
 #include "ast/ModuleNode.h"
 #include "ast/Node.h"
 #include "ast/ProcedureCallNode.h"
-#include "ast/ProcedureNode.h"
+#include "ast/ProcedureDeclarationNode.h"
 #include "ast/RecordTypeNode.h"
 #include "ast/SelectorNode.h"
 #include "ast/TypeNode.h"
@@ -38,8 +38,8 @@ class Parser {
     std::unique_ptr<ConstantDeclarationNode> const_declaration();
     std::unique_ptr<TypeDeclarationNode> type_declaration();
     std::unique_ptr<VariableListNode> var_declaration();
-    std::unique_ptr<ProcedureNode> procedure_declaration();
-    void formal_parameters(ProcedureNode* proc_decl);
+    std::unique_ptr<ProcedureDeclarationNode> procedure_declaration();
+    void formal_parameters(ProcedureDeclarationNode* proc_decl);
     std::unique_ptr<ParameterListNode> fp_section();
     std::unique_ptr<ExpressionNode> expression();
     std::unique_ptr<ExpressionNode> simple_expression();

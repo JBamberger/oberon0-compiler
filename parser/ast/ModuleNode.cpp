@@ -6,13 +6,13 @@
 
 ModuleNode::ModuleNode(const FilePos& pos, std::string name)
     : BlockNode(pos, std::move(name), std::make_shared<Scope>()),
-      procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureNode>>>())
+      procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())
 {
 }
 
 ModuleNode::~ModuleNode() = default;
 
-const std::unique_ptr<std::vector<std::unique_ptr<ProcedureNode>>>&
+const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
 ModuleNode::getProcedures() const
 {
     return procedures_;
