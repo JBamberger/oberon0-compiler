@@ -1,7 +1,7 @@
 #pragma once
 #include "BlockNode.h"
 
-using ParamList = std::vector<std::unique_ptr<const ParameterListNode>>;
+using ParamList = std::vector<std::unique_ptr<const ParameterDeclarationNode>>;
 
 class ProcedureDeclarationNode : public BlockNode {
     std::unique_ptr<ParamList> params_;

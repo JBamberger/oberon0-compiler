@@ -40,7 +40,7 @@ class Parser {
     std::unique_ptr<VariableListNode> var_declaration();
     std::unique_ptr<ProcedureDeclarationNode> procedure_declaration();
     void formal_parameters(ProcedureDeclarationNode* proc_decl);
-    std::unique_ptr<ParameterListNode> fp_section();
+    void fp_section(ProcedureDeclarationNode* proc_decl);
     std::unique_ptr<ExpressionNode> expression();
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();

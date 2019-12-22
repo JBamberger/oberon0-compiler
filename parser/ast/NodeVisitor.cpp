@@ -149,14 +149,6 @@ void NodeVisitor::visit(const FieldListNode* node)
     }
 }
 
-void NodeVisitor::visit(const ParameterListNode* node)
-{
-    node->getType()->visit(this);
-    for (const auto& f : *node->getPairs()) {
-        f->visit(this);
-    }
-}
-
 void NodeVisitor::visit(const VariableListNode* node)
 {
     node->getType()->visit(this);

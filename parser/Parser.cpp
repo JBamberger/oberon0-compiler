@@ -377,19 +377,19 @@ void Parser::formal_parameters(ProcedureDeclarationNode* proc_decl)
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
 
-        proc_decl->getParams()->push_back(fp_section());
+        fp_section(proc_decl);
 
         while (scanner_->peekToken()->getType() == TokenType::semicolon) {
             static_cast<void>(scanner_->nextToken());
 
-            proc_decl->getParams()->push_back(fp_section());
+            fp_section(proc_decl);
         }
     }
 
     static_cast<void>(require_token(TokenType::rparen));
 }
 
-std::unique_ptr<ParameterListNode> Parser::fp_section()
+void Parser::fp_section(ProcedureDeclarationNode* proc_decl)
 {
     const auto next_token = scanner_->peekToken();
     const auto pos = next_token->getPosition();
@@ -402,10 +402,13 @@ std::unique_ptr<ParameterListNode> Parser::fp_section()
 
     const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto list_type = type();
+    auto list_type = std::shared_ptr<TypeNode>(type());
 
-    return std::unique_ptr<ParameterListNode>(
-        createParameterList(pos, names, std::move(list_type), is_reference));
+    for (const auto& name : names->getNames()) {
+        auto type_ref = std::make_unique<TypeReferenceNode>(list_type->getFilePos(), list_type);
+        proc_decl->getParams()->push_back(std::make_unique<ParameterDeclarationNode>(
+            pos, name, std::move(type_ref), is_reference));
+    }
 }
 
 void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list)
