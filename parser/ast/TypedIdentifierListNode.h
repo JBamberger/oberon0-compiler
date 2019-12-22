@@ -3,7 +3,7 @@
 #include "IdentifierListNode.h"
 #include "Node.h"
 #include "NodeVisitor.h"
-#include "ParameterNode.h"
+#include "ParameterDeclarationNode.h"
 #include "TypeNode.h"
 #include "TypedIdentifierNode.h"
 #include "VariableDeclarationNode.h"
@@ -88,13 +88,13 @@ class VariableListNode : public Node {
 };
 
 class ParameterListNode : public Node {
-    std::shared_ptr<std::vector<std::unique_ptr<ParameterNode>>> pairs_;
+    std::shared_ptr<std::vector<std::unique_ptr<ParameterDeclarationNode>>> pairs_;
     std::shared_ptr<TypeNode> type_;
 
   public:
     ParameterListNode(const FilePos& pos, std::unique_ptr<TypeNode> type)
         : Node(NodeType::typed_id_list, pos),
-          pairs_(std::make_shared<std::vector<std::unique_ptr<ParameterNode>>>()),
+          pairs_(std::make_shared<std::vector<std::unique_ptr<ParameterDeclarationNode>>>()),
           type_(std::move(type))
     {
         assert(type_ != nullptr);
@@ -104,7 +104,7 @@ class ParameterListNode : public Node {
 
     std::shared_ptr<TypeNode> getType() const { return type_; }
 
-    std::shared_ptr<std::vector<std::unique_ptr<ParameterNode>>> getPairs() const { return pairs_; }
+    std::shared_ptr<std::vector<std::unique_ptr<ParameterDeclarationNode>>> getPairs() const { return pairs_; }
 
     std::unique_ptr<TypeReferenceNode> getTypeRef() const
     {
@@ -157,7 +157,7 @@ inline ParameterListNode* createParameterList(const FilePos& pos,
     const auto list = new ParameterListNode(pos, std::move(type));
     for (const auto& name : names->getNames()) {
         list->getPairs()->push_back(
-            std::make_unique<ParameterNode>(pos, name, list->getTypeRef(), is_reference));
+            std::make_unique<ParameterDeclarationNode>(pos, name, list->getTypeRef(), is_reference));
     }
 
     return list;

@@ -8,7 +8,7 @@ class VariableListNode;
 class SelectorNode;
 class FieldNode;
 class IdentifierListNode;
-class ParameterNode;
+class ParameterDeclarationNode;
 class ConstantDeclarationNode;
 class IfStatementNode;
 class NumberConstantNode;
@@ -58,7 +58,7 @@ class NodeVisitor {
     virtual void visit(const IfStatementNode* node) = 0;
     virtual void visit(const ModuleNode* node) = 0;
     virtual void visit(const NumberConstantNode* node) = 0;
-    virtual void visit(const ParameterNode* node) = 0;
+    virtual void visit(const ParameterDeclarationNode* node) = 0;
     virtual void visit(const ProcedureCallNode* node) = 0;
     virtual void visit(const RecordTypeNode* node) = 0;
     virtual void visit(const StringConstantNode* node) = 0;

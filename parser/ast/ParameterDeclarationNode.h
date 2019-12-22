@@ -2,16 +2,16 @@
 #include "TypeReferenceNode.h"
 #include "TypedIdentifierNode.h"
 
-class ParameterNode : public TypedIdentifierNode {
+class ParameterDeclarationNode : public TypedIdentifierNode {
     bool is_reference_;
 
   public:
-    ParameterNode(const FilePos& pos,
+    ParameterDeclarationNode(const FilePos& pos,
                   std::string name,
                   std::unique_ptr<TypeReferenceNode> type,
                   bool is_reference);
 
-    ~ParameterNode() override;
+    ~ParameterDeclarationNode() override;
 
     bool isIsReference() const;
     void visit(NodeVisitor* visitor) const override;

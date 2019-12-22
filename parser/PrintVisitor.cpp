@@ -134,7 +134,7 @@ void PrintVisitor::visit(const NumberConstantNode* node)
     line() << "Number " << node->getValue() << "\n";
 }
 
-void PrintVisitor::visit(const ParameterNode* node)
+void PrintVisitor::visit(const ParameterDeclarationNode* node)
 {
     line() << "Parameter " << node->getName() << (node->isIsReference() ? "Ref\n" : "\n");
     inc();

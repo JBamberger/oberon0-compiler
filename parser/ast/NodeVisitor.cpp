@@ -94,7 +94,7 @@ void NodeVisitor::visit(const ModuleNode* node)
 
 void NodeVisitor::visit(const NumberConstantNode* node) {}
 
-void NodeVisitor::visit(const ParameterNode* node) { node->getType()->visit(this); }
+void NodeVisitor::visit(const ParameterDeclarationNode* node) { node->getType()->visit(this); }
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
