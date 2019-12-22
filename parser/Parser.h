@@ -18,6 +18,8 @@
 #include "ast/SelectorNode.h"
 #include "ast/TypeNode.h"
 #include "ast/WhileStatementNode.h"
+#include "ast/VariableDeclarationNode.h"
+#include "ast/IdentifierListNode.h"
 
 enum class UnaryOperator : char;
 enum class BinaryOperator : char;

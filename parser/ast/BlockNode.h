@@ -3,11 +3,11 @@
 
 #include "ConstantDeclarationNode.h"
 #include "TypeDeclarationNode.h"
-#include "TypedIdentifierListNode.h"
 
 #include "StatementNode.h"
 #include <vector>
 #include "Scope.h"
+#include "VariableDeclarationNode.h"
 
 using ConstDeclList = std::vector<std::unique_ptr<ConstantDeclarationNode>>;
 using VarDeclList = std::vector<std::unique_ptr<VariableDeclarationNode>>;

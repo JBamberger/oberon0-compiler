@@ -11,10 +11,10 @@
 #include "ast/ConstantDeclarationNode.h"
 #include "ast/FieldReferenceNode.h"
 #include "ast/NumberConstantNode.h"
+#include "ast/ParameterDeclarationNode.h"
 #include "ast/SelectorNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
-#include "ast/TypedIdentifierListNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include <IdentToken.h>
 #include <NumberToken.h>
@@ -155,7 +155,8 @@ void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode
 
     for (const auto& name : names->getNames()) {
         auto type_ref = std::make_unique<TypeReferenceNode>(tp->getFilePos(), tp);
-        var_list->push_back(std::make_unique<VariableDeclarationNode>(pos, name, std::move(type_ref)));
+        var_list->push_back(
+            std::make_unique<VariableDeclarationNode>(pos, name, std::move(type_ref)));
     }
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "BlockNode.h"
+#include "ParameterDeclarationNode.h"
 
 using ParamList = std::vector<std::unique_ptr<const ParameterDeclarationNode>>;
 

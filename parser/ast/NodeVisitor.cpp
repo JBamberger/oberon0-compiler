@@ -16,7 +16,6 @@
 #include "RecordTypeNode.h"
 #include "StringConstantNode.h"
 #include "TypeDeclarationNode.h"
-#include "TypedIdentifierListNode.h"
 #include "UnaryExpressionNode.h"
 #include "VariableDeclarationNode.h"
 #include "WhileStatementNode.h"

@@ -2,7 +2,6 @@
 #include "FieldDeclarationNode.h"
 #include "Scope.h"
 #include "TypeNode.h"
-#include "TypedIdentifierListNode.h"
 #include <vector>
 
 class RecordTypeNode : public TypeNode {

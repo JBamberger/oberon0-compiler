@@ -16,6 +16,7 @@
 #include "ast/StringConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include "ast/WhileStatementNode.h"
+#include "ast/IdentifierListNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
