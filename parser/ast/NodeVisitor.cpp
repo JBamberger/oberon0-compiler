@@ -78,10 +78,10 @@ void NodeVisitor::visit(const ModuleNode* node)
     for (const auto& decl : *node->getConstants()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getVariables()) {
+    for (const auto& decl : *node->getTypes()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getTypes()) {
+    for (const auto& decl : *node->getVariables()) {
         decl->visit(this);
     }
     for (const auto& decl : *node->getProcedures()) {
@@ -113,10 +113,10 @@ void NodeVisitor::visit(const ProcedureDeclarationNode* node)
     for (const auto& decl : *node->getConstants()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getVariables()) {
+    for (const auto& decl : *node->getTypes()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getTypes()) {
+    for (const auto& decl : *node->getVariables()) {
         decl->visit(this);
     }
     for (const auto& decl : *node->getProcedures()) {
@@ -137,14 +137,6 @@ void NodeVisitor::visit(const RecordTypeNode* node)
 void NodeVisitor::visit(const StringConstantNode* node) {}
 
 void NodeVisitor::visit(const TypeDeclarationNode* node) { node->getType()->visit(this); }
-
-void NodeVisitor::visit(const VariableListNode* node)
-{
-    node->getType()->visit(this);
-    for (const auto& f : *node->getPairs()) {
-        f->visit(this);
-    }
-}
 
 void NodeVisitor::visit(const TypedIdentifierNode* node) { node->getType()->visit(this); }
 

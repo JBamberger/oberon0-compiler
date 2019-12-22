@@ -113,7 +113,7 @@ void Parser::declarations(BlockNode* block)
 
         next = scanner_->peekToken();
         while (next->getType() == TokenType::const_ident) {
-            block->getVariables()->push_back(var_declaration());
+            var_declaration(block->getVariables().get());
             next = scanner_->peekToken();
         }
     }
@@ -145,14 +145,18 @@ std::unique_ptr<TypeDeclarationNode> Parser::type_declaration()
     return std::make_unique<TypeDeclarationNode>(pos, name, std::move(tp));
 }
 
-std::unique_ptr<VariableListNode> Parser::var_declaration()
+void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* var_list)
 {
     const auto pos = scanner_->peekToken()->getPosition();
     const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto tp = type();
+    auto tp = std::shared_ptr<TypeNode>(type());
     static_cast<void>(require_token(TokenType::semicolon));
-    return std::unique_ptr<VariableListNode>(createVariableList(pos, names, std::move(tp)));
+
+    for (const auto& name : names->getNames()) {
+        auto type_ref = std::make_unique<TypeReferenceNode>(tp->getFilePos(), tp);
+        var_list->push_back(std::make_unique<VariableDeclarationNode>(pos, name, std::move(type_ref)));
+    }
 }
 
 std::unique_ptr<ProcedureDeclarationNode> Parser::procedure_declaration()

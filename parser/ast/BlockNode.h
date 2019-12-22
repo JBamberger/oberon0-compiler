@@ -10,7 +10,7 @@
 #include "Scope.h"
 
 using ConstDeclList = std::vector<std::unique_ptr<ConstantDeclarationNode>>;
-using VarDeclList = std::vector<std::unique_ptr<VariableListNode>>;
+using VarDeclList = std::vector<std::unique_ptr<VariableDeclarationNode>>;
 using TypeDeclList = std::vector<std::unique_ptr<TypeDeclarationNode>>;
 using StatementList = std::vector<std::unique_ptr<StatementNode>>;
 

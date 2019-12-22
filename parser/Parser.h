@@ -37,7 +37,7 @@ class Parser {
     void declarations(BlockNode* block);
     std::unique_ptr<ConstantDeclarationNode> const_declaration();
     std::unique_ptr<TypeDeclarationNode> type_declaration();
-    std::unique_ptr<VariableListNode> var_declaration();
+    void var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* var_list);
     std::unique_ptr<ProcedureDeclarationNode> procedure_declaration();
     void formal_parameters(ProcedureDeclarationNode* proc_decl);
     void fp_section(ProcedureDeclarationNode* proc_decl);
