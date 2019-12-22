@@ -1,45 +1,27 @@
 #include "RecordTypeNode.h"
 #include "NodeVisitor.h"
 #include <cassert>
+#include <utility>
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent)
-    : TypeNode(NodeType::record_type, pos), scope_(std::make_shared<Scope>(parent))
+    : TypeNode(NodeType::record_type, pos), scope_(std::move(parent)),
+      members_(std::make_unique<std::vector<std::unique_ptr<FieldDeclarationNode>>>())
 {
 }
 
 RecordTypeNode::~RecordTypeNode() = default;
 
-void RecordTypeNode::addFields(const FieldListNode* fields)
+std::vector<std::unique_ptr<FieldDeclarationNode>>* RecordTypeNode::getMembers() const
 {
-    assert(fields != nullptr);
-
-    const auto pairs = fields->getPairs();
-    const auto type = fields->getType();
-    types_.emplace_back(type);
-
-    for (auto& pair : *pairs) members_.push_back(std::move(pair));
-
-    delete fields;
-}
-
-const std::vector<std::shared_ptr<const TypeNode>>& RecordTypeNode::getTypes() const
-{
-    return types_;
-}
-
-const std::vector<std::unique_ptr<const FieldDeclarationNode>>& RecordTypeNode::getMembers() const
-{
-    return members_;
+    return members_.get();
 }
 void RecordTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void RecordTypeNode::print(std::ostream& stream) const
 {
-    stream << "RecordTypeNode(Types=(";
-    for (const auto& type_node : types_) stream << *type_node << " ";
-    stream << "), Members=(";
-    for (const auto& field_node : members_) stream << *field_node << " ";
-    stream << "))";
+    stream << "RecordTypeNode(";
+    for (const auto& field_node : *members_) stream << *field_node << " ";
+    stream << ")";
 }
 
 const std::shared_ptr<Scope>& RecordTypeNode::getScope() const { return scope_; }

@@ -179,14 +179,6 @@ void PrintVisitor::visit(const TypeDeclarationNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const FieldListNode* node)
-{
-    line() << "FieldList\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
-
 void PrintVisitor::visit(const VariableListNode* node)
 {
     line() << "VariableList\n";

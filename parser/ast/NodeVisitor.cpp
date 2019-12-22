@@ -129,25 +129,14 @@ void NodeVisitor::visit(const ProcedureDeclarationNode* node)
 
 void NodeVisitor::visit(const RecordTypeNode* node)
 {
-    for (const auto& f : node->getMembers()) {
+    for (const auto& f : *node->getMembers()) {
         f->visit(this);
-    }
-    for (const auto& t : node->getTypes()) {
-        t->visit(this);
     }
 }
 
 void NodeVisitor::visit(const StringConstantNode* node) {}
 
 void NodeVisitor::visit(const TypeDeclarationNode* node) { node->getType()->visit(this); }
-
-void NodeVisitor::visit(const FieldListNode* node)
-{
-    node->getType()->visit(this);
-    for (const auto& f : *node->getPairs()) {
-        f->visit(this);
-    }
-}
 
 void NodeVisitor::visit(const VariableListNode* node)
 {

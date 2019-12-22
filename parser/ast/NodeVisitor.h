@@ -2,7 +2,6 @@
 
 class BlockNode;
 class FieldReferenceNode;
-class FieldListNode;
 class VariableListNode;
 class SelectorNode;
 class FieldDeclarationNode;
@@ -61,7 +60,6 @@ class NodeVisitor {
     virtual void visit(const ProcedureCallNode* node) = 0;
     virtual void visit(const RecordTypeNode* node) = 0;
     virtual void visit(const StringConstantNode* node) = 0;
-    virtual void visit(const FieldListNode* node) = 0;
     virtual void visit(const VariableListNode* node) = 0;
     virtual void visit(const TypedIdentifierNode* node) = 0;
     virtual void visit(const TypeReferenceNode* node) = 0;

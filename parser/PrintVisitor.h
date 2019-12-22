@@ -32,7 +32,6 @@ class PrintVisitor : public NodeVisitor {
     void visit(const RecordTypeNode* node) override;
     void visit(const StringConstantNode* node) override;
     void visit(const TypeDeclarationNode* node) override;
-    void visit(const FieldListNode* node) override;
     void visit(const VariableListNode* node) override;
     void visit(const TypedIdentifierNode* node) override;
     void visit(const TypeReferenceNode* node) override;

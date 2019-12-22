@@ -331,11 +331,11 @@ std::unique_ptr<RecordTypeNode> Parser::record_type()
 
     auto node = std::make_unique<RecordTypeNode>(pos, current_scope_);
     current_scope_ = node->getScope();
-    node->addFields(field_list());
+    field_list(node.get());
 
     while (scanner_->peekToken()->getType() == TokenType::semicolon) {
         static_cast<void>(require_token(TokenType::semicolon));
-        node->addFields(field_list());
+        field_list(node.get());
     }
 
     static_cast<void>(require_token(TokenType::kw_end));
@@ -344,17 +344,20 @@ std::unique_ptr<RecordTypeNode> Parser::record_type()
     return node;
 }
 
-FieldListNode* Parser::field_list()
+void Parser::field_list(RecordTypeNode* rec_decl)
 {
     if (scanner_->peekToken()->getType() != TokenType::const_ident) {
-        return nullptr;
+        return;
     }
-
-    const auto identifiers = ident_list();
+    const auto names = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto listType = type();
+    auto list_type = std::shared_ptr<TypeNode>(type());
 
-    return createFieldList(identifiers->getFilePos(), identifiers, std::move(listType));
+    for (const auto& name : names->getNames()) {
+        auto type_ref = std::make_unique<TypeReferenceNode>(list_type->getFilePos(), list_type);
+        rec_decl->getMembers()->push_back(
+            std::make_unique<FieldDeclarationNode>(names->getFilePos(), name, std::move(type_ref)));
+    }
 }
 
 IdentifierListNode* Parser::ident_list()
