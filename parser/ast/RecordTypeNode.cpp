@@ -27,7 +27,7 @@ const std::vector<std::shared_ptr<const TypeNode>>& RecordTypeNode::getTypes() c
     return types_;
 }
 
-const std::vector<std::unique_ptr<const FieldNode>>& RecordTypeNode::getMembers() const
+const std::vector<std::unique_ptr<const FieldDeclarationNode>>& RecordTypeNode::getMembers() const
 {
     return members_;
 }

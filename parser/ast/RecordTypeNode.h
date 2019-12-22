@@ -1,5 +1,5 @@
 #pragma once
-#include "FieldNode.h"
+#include "FieldDeclarationNode.h"
 #include "Scope.h"
 #include "TypeNode.h"
 #include "TypedIdentifierListNode.h"
@@ -8,7 +8,7 @@
 class RecordTypeNode : public TypeNode {
     std::shared_ptr<Scope> scope_;
     std::vector<std::shared_ptr<const TypeNode>> types_;
-    std::vector<std::unique_ptr<const FieldNode>> members_;
+    std::vector<std::unique_ptr<const FieldDeclarationNode>> members_;
 
   public:
     RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent);
@@ -16,7 +16,7 @@ class RecordTypeNode : public TypeNode {
     void addFields(const FieldListNode* fields);
 
     const std::vector<std::shared_ptr<const TypeNode>>& getTypes() const;
-    const std::vector<std::unique_ptr<const FieldNode>>& getMembers() const;
+    const std::vector<std::unique_ptr<const FieldDeclarationNode>>& getMembers() const;
     const std::shared_ptr<Scope>& getScope() const;
 
     void visit(NodeVisitor* visitor) const override;

@@ -1,5 +1,5 @@
 #pragma once
-#include "FieldNode.h"
+#include "FieldDeclarationNode.h"
 #include "IdentifierListNode.h"
 #include "Node.h"
 #include "NodeVisitor.h"
@@ -10,13 +10,13 @@
 #include <vector>
 
 class FieldListNode : public Node {
-    std::shared_ptr<std::vector<std::unique_ptr<FieldNode>>> pairs_;
+    std::shared_ptr<std::vector<std::unique_ptr<FieldDeclarationNode>>> pairs_;
     std::shared_ptr<TypeNode> type_;
 
   public:
     FieldListNode(const FilePos& pos, std::unique_ptr<TypeNode> type)
         : Node(NodeType::typed_id_list, pos),
-          pairs_(std::make_shared<std::vector<std::unique_ptr<FieldNode>>>()),
+          pairs_(std::make_shared<std::vector<std::unique_ptr<FieldDeclarationNode>>>()),
           type_(std::move(type))
     {
         assert(type_ != nullptr);
@@ -26,7 +26,7 @@ class FieldListNode : public Node {
 
     std::shared_ptr<TypeNode> getType() const { return type_; }
 
-    std::shared_ptr<std::vector<std::unique_ptr<FieldNode>>> getPairs() const { return pairs_; }
+    std::shared_ptr<std::vector<std::unique_ptr<FieldDeclarationNode>>> getPairs() const { return pairs_; }
 
     std::unique_ptr<TypeReferenceNode> getTypeRef() const
     {
@@ -131,7 +131,7 @@ createFieldList(const FilePos& pos, const IdentifierListNode* names, std::unique
 {
     const auto list = new FieldListNode(pos, std::move(type));
     for (const auto& name : names->getNames()) {
-        list->getPairs()->push_back(std::make_unique<FieldNode>(pos, name, list->getTypeRef()));
+        list->getPairs()->push_back(std::make_unique<FieldDeclarationNode>(pos, name, list->getTypeRef()));
     }
 
     return list;

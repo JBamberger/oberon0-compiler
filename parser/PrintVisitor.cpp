@@ -95,7 +95,7 @@ void PrintVisitor::visit(const ConstantDeclarationNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const FieldNode* node)
+void PrintVisitor::visit(const FieldDeclarationNode* node)
 {
     line() << "Field " << node->getName() << "\n";
     inc();
