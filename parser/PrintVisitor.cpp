@@ -227,7 +227,7 @@ void PrintVisitor::visit(const UnaryExpressionNode* node)
     dec();
 }
 
-void PrintVisitor::visit(const VariableNode* node)
+void PrintVisitor::visit(const VariableDeclarationNode* node)
 {
     line() << "VariableDeclaration " << node->getName() << "\n";
     inc();

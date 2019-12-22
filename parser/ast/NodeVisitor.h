@@ -22,7 +22,7 @@ class TypeDeclarationNode;
 class TypedIdentifierNode;
 class TypeReferenceNode;
 class UnaryExpressionNode;
-class VariableNode;
+class VariableDeclarationNode;
 class VariableReferenceNode;
 class WhileStatementNode;
 class BinaryExpressionNode;
@@ -49,7 +49,7 @@ class NodeVisitor {
 
     virtual void visit(const ConstantDeclarationNode* node) = 0;
     virtual void visit(const TypeDeclarationNode* node) = 0;
-    virtual void visit(const VariableNode* node) = 0;
+    virtual void visit(const VariableDeclarationNode* node) = 0;
     virtual void visit(const ProcedureDeclarationNode* node) = 0;
 
     virtual void visit(const FieldReferenceNode* node) = 0;

@@ -18,7 +18,7 @@
 #include "TypeDeclarationNode.h"
 #include "TypedIdentifierListNode.h"
 #include "UnaryExpressionNode.h"
-#include "VariableNode.h"
+#include "VariableDeclarationNode.h"
 #include "WhileStatementNode.h"
 
 NodeVisitor::~NodeVisitor() = default;
@@ -171,7 +171,7 @@ void NodeVisitor::visit(const TypeReferenceNode* node) { node->getType()->visit(
 
 void NodeVisitor::visit(const UnaryExpressionNode* node) { node->getOperand()->visit(this); }
 
-void NodeVisitor::visit(const VariableNode* node) { node->getType()->visit(this); }
+void NodeVisitor::visit(const VariableDeclarationNode* node) { node->getType()->visit(this); }
 
 void NodeVisitor::visit(const VariableReferenceNode* node)
 {

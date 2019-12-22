@@ -38,7 +38,7 @@ class PrintVisitor : public NodeVisitor {
     void visit(const TypedIdentifierNode* node) override;
     void visit(const TypeReferenceNode* node) override;
     void visit(const UnaryExpressionNode* node) override;
-    void visit(const VariableNode* node) override;
+    void visit(const VariableDeclarationNode* node) override;
     void visit(const VariableReferenceNode* node) override;
     void visit(const WhileStatementNode* node) override;
 };
