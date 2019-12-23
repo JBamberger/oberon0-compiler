@@ -9,6 +9,7 @@
 #include "ast/ArrayTypeNode.h"
 #include "ast/AssignmentNode.h"
 #include "ast/ExpressionNode.h"
+#include "ast/Identifier.h"
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
 #include "ast/Node.h"
@@ -17,9 +18,8 @@
 #include "ast/RecordTypeNode.h"
 #include "ast/SelectorNode.h"
 #include "ast/TypeNode.h"
-#include "ast/WhileStatementNode.h"
 #include "ast/VariableDeclarationNode.h"
-#include "ast/Identifier.h"
+#include "ast/WhileStatementNode.h"
 
 enum class UnaryOperator : char;
 enum class BinaryOperator : char;
@@ -54,13 +54,12 @@ class Parser {
     void field_list(RecordTypeNode* rec_decl);
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
     std::unique_ptr<StatementNode> statement();
-    std::unique_ptr<AssignmentNode> assignment(std::unique_ptr<VariableReferenceNode> assignee);
-    std::unique_ptr<ProcedureCallNode> procedure_call(const FilePos& pos, std::string name);
+    std::unique_ptr<AssignmentNode> assignment(const Identifier& id);
+    std::unique_ptr<ProcedureCallNode> procedure_call(const Identifier& id);
     std::unique_ptr<IfStatementNode> if_statement();
     std::unique_ptr<WhileStatementNode> while_statement();
     void actual_parameters(std::vector<std::unique_ptr<ActualParameterNode>>* params);
     std::unique_ptr<SelectorNode> selector();
-    std::unique_ptr<StatementNode> procedure_call_or_assignment();
 
     static std::unique_ptr<ExpressionNode>
     evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,

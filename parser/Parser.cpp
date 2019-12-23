@@ -422,57 +422,53 @@ void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* lis
 
 std::unique_ptr<StatementNode> Parser::statement()
 {
-    const auto next = scanner_->peekToken();
-    if (next->getType() == TokenType::const_ident) {
-        return procedure_call_or_assignment();
+    switch (scanner_->peekToken()->getType()) {
+    case TokenType::const_ident: {
+        const auto id = ident();
+
+        switch (scanner_->peekToken()->getType()) {
+        case TokenType::period:
+        case TokenType::lbrack:
+        case TokenType::op_becomes:
+            return assignment(id);
+        default:
+            return procedure_call(id);
+        }
     }
-    if (next->getType() == TokenType::kw_if) {
+    case TokenType::kw_if:
         return if_statement();
-    }
-    if (next->getType() == TokenType::kw_while) {
+    case TokenType::kw_while:
         return while_statement();
+    default: {
+        const auto next = scanner_->peekToken();
+        logger_->error(next->getPosition(), "Expected Identifier, IF or WHILE but got " +
+                                                (std::stringstream() << *next).str() + ".");
+        exit(EXIT_FAILURE);
     }
-
-    logger_->error(next->getPosition(), "Expected Identifier, IF or WHILE but got " +
-                                            (std::stringstream() << *next).str() + ".");
-    exit(EXIT_FAILURE);
+    }
 }
 
-std::unique_ptr<AssignmentNode> Parser::assignment(std::unique_ptr<VariableReferenceNode> assignee)
+std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 {
-    const auto first = require_token(TokenType::op_becomes);
-    auto expr = expression();
+    auto lhs = std::make_unique<VariableReferenceNode>(id.pos, id.name);
+    lhs->setSelector(selector());
 
-    return std::make_unique<AssignmentNode>(first->getPosition(), std::move(assignee),
-                                            std::move(expr));
+    static_cast<void>(require_token(TokenType::op_becomes));
+
+    auto rhs = expression();
+
+    return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
 }
 
-std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const FilePos& pos,
-                                                          const std::string name)
+std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 {
-    const auto next = scanner_->peekToken();
-    auto proc = std::make_unique<ProcedureCallNode>(pos, name);
-    if (next->getType() == TokenType::lparen) {
+    auto proc = std::make_unique<ProcedureCallNode>(id.pos, id.name);
+
+    if (scanner_->peekToken()->getType() == TokenType::lparen) {
         actual_parameters(proc->getParameters().get());
     }
 
     return proc;
-}
-
-std::unique_ptr<StatementNode> Parser::procedure_call_or_assignment()
-{
-    const auto id = ident();
-
-    const auto nt = scanner_->peekToken()->getType();
-
-    if (nt == TokenType::period || nt == TokenType::lbrack || nt == TokenType::op_becomes) {
-        auto sel = selector();
-        auto base = std::make_unique<VariableReferenceNode>(id.pos, id.name);
-        base->setSelector(std::move(sel));
-        return assignment(std::move(base));
-    }
-
-    return procedure_call(id.pos, id.name);
 }
 
 std::unique_ptr<IfStatementNode> Parser::if_statement()
