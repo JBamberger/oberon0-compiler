@@ -13,7 +13,6 @@ class PrintVisitor : public NodeVisitor {
   public:
     explicit PrintVisitor(std::ostream& out);
     ~PrintVisitor() override;
-    void visit(const ActualParameterNode* node) override;
     void visit(const ArrayReferenceNode* node) override;
     void visit(const ArrayTypeNode* node) override;
     void visit(const AssignmentNode* node) override;

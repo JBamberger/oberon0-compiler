@@ -3,7 +3,7 @@
 
 ProcedureCallNode::ProcedureCallNode(const FilePos& pos, std::string name)
     : StatementNode(NodeType::procedure_call, pos), name_(std::move(name)),
-      parameters_(std::make_unique<std::vector<std::unique_ptr<ActualParameterNode>>>())
+      parameters_(std::make_unique<std::vector<std::unique_ptr<ExpressionNode>>>())
 {
 }
 
@@ -11,7 +11,7 @@ ProcedureCallNode::~ProcedureCallNode() = default;
 
 const std::string& ProcedureCallNode::getName() const { return name_; }
 
-const std::unique_ptr<std::vector<std::unique_ptr<ActualParameterNode>>>&
+const std::unique_ptr<std::vector<std::unique_ptr<ExpressionNode>>>&
 ProcedureCallNode::getParameters() const
 {
     return parameters_;

@@ -26,7 +26,6 @@ class BasicTypeNode;
 class AssignmentNode;
 class ArrayTypeNode;
 class ArrayReferenceNode;
-class ActualParameterNode;
 class ModuleNode;
 
 class NodeVisitor {
@@ -34,7 +33,6 @@ class NodeVisitor {
   public:
     virtual ~NodeVisitor() = 0;
 
-    virtual void visit(const ActualParameterNode* node) = 0;
     virtual void visit(const ArrayReferenceNode* node) = 0;
     virtual void visit(const ArrayTypeNode* node) = 0;
     virtual void visit(const AssignmentNode* node) = 0;

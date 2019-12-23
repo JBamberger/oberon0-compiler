@@ -522,17 +522,17 @@ std::unique_ptr<WhileStatementNode> Parser::while_statement()
     return stmt;
 }
 
-void Parser::actual_parameters(std::vector<std::unique_ptr<ActualParameterNode>>* params)
+void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params)
 {
     static_cast<void>(require_token(TokenType::lparen));
 
     if (scanner_->peekToken()->getType() != TokenType::rparen) {
-        params->push_back(std::make_unique<ActualParameterNode>(expression()));
+        params->push_back(expression());
 
         while (scanner_->peekToken()->getType() == TokenType::comma) {
             static_cast<void>(scanner_->nextToken());
 
-            params->push_back(std::make_unique<ActualParameterNode>(expression()));
+            params->push_back(expression());
         }
     }
 

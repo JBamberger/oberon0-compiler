@@ -1,6 +1,5 @@
 #include "PrintVisitor.h"
 
-#include "ast/ActualParameterNode.h"
 #include "ast/ArrayReferenceNode.h"
 #include "ast/ArrayTypeNode.h"
 #include "ast/AssignmentNode.h"
@@ -32,14 +31,6 @@ std::ostream& PrintVisitor::line()
 void PrintVisitor::inc() { indent_++; }
 
 void PrintVisitor::dec() { indent_--; }
-
-void PrintVisitor::visit(const ActualParameterNode* node)
-{
-    line() << "ActualParameter\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
-}
 
 void PrintVisitor::visit(const ArrayReferenceNode* node)
 {

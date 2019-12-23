@@ -1,6 +1,5 @@
 #include "NodeVisitor.h"
 
-#include "ActualParameterNode.h"
 #include "ArrayReferenceNode.h"
 #include "ArrayTypeNode.h"
 #include "AssignmentNode.h"
@@ -21,8 +20,6 @@
 #include "WhileStatementNode.h"
 
 NodeVisitor::~NodeVisitor() = default;
-
-void NodeVisitor::visit(const ActualParameterNode* node) { node->getParam()->visit(this); }
 
 void NodeVisitor::visit(const ArrayReferenceNode* node) { node->getIndex()->visit(this); }
 

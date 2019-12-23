@@ -58,7 +58,7 @@ class Parser {
     std::unique_ptr<ProcedureCallNode> procedure_call(const Identifier& id);
     std::unique_ptr<IfStatementNode> if_statement();
     std::unique_ptr<WhileStatementNode> while_statement();
-    void actual_parameters(std::vector<std::unique_ptr<ActualParameterNode>>* params);
+    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params);
     std::unique_ptr<SelectorNode> selector();
 
     static std::unique_ptr<ExpressionNode>
