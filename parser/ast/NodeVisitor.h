@@ -4,7 +4,6 @@ class BlockNode;
 class FieldReferenceNode;
 class SelectorNode;
 class FieldDeclarationNode;
-class IdentifierListNode;
 class ParameterDeclarationNode;
 class ConstantDeclarationNode;
 class IfStatementNode;
@@ -50,7 +49,6 @@ class NodeVisitor {
 
     virtual void visit(const FieldReferenceNode* node) = 0;
     virtual void visit(const FieldDeclarationNode* node) = 0;
-    virtual void visit(const IdentifierListNode* node) = 0;
     virtual void visit(const IfStatementNode* node) = 0;
     virtual void visit(const ModuleNode* node) = 0;
     virtual void visit(const NumberConstantNode* node) = 0;

@@ -57,8 +57,7 @@ add_executable(oberon0c
     parser/ast/ProcedureCallNode.cpp
     parser/ast/ActualParameterNode.h
     parser/ast/ActualParameterNode.cpp
-    parser/ast/IdentifierListNode.h
-    parser/ast/IdentifierListNode.cpp
+    parser/ast/Identifier.h
     parser/ast/TypedIdentifierNode.h
     parser/ast/VariableDeclarationNode.h
     parser/ast/VariableDeclarationNode.cpp

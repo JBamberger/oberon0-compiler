@@ -7,7 +7,6 @@
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
 #include "ast/FieldReferenceNode.h"
-#include "ast/IdentifierListNode.h"
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
 #include "ast/NumberConstantNode.h"
@@ -101,16 +100,6 @@ void PrintVisitor::visit(const FieldDeclarationNode* node)
     line() << "Field " << node->getName() << "\n";
     inc();
     NodeVisitor::visit(node);
-    dec();
-}
-
-void PrintVisitor::visit(const IdentifierListNode* node)
-{
-    line() << "IdentifierList\n";
-    inc();
-    for (const auto& name : node->getNames()) {
-        line() << name << "\n";
-    }
     dec();
 }
 

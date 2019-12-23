@@ -57,8 +57,6 @@ void NodeVisitor::visit(const FieldReferenceNode* node)
 
 void NodeVisitor::visit(const FieldDeclarationNode* node) { node->getType()->visit(this); }
 
-void NodeVisitor::visit(const IdentifierListNode* node) {}
-
 void NodeVisitor::visit(const IfStatementNode* node)
 {
     node->getCondition()->visit(this);

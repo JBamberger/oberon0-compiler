@@ -19,7 +19,7 @@
 #include "ast/TypeNode.h"
 #include "ast/WhileStatementNode.h"
 #include "ast/VariableDeclarationNode.h"
-#include "ast/IdentifierListNode.h"
+#include "ast/Identifier.h"
 
 enum class UnaryOperator : char;
 enum class BinaryOperator : char;
@@ -33,7 +33,8 @@ class Parser {
     std::shared_ptr<Scope> current_scope_;
 
     std::unique_ptr<const Token> require_token(const TokenType& type) const;
-    std::string ident() const;
+    Identifier ident() const;
+    std::vector<Identifier> ident_list() const;
 
     std::unique_ptr<ModuleNode> module();
     void declarations(BlockNode* block);
@@ -51,7 +52,6 @@ class Parser {
     std::unique_ptr<ArrayTypeNode> array_type();
     std::unique_ptr<RecordTypeNode> record_type();
     void field_list(RecordTypeNode* rec_decl);
-    IdentifierListNode* ident_list();
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
     std::unique_ptr<StatementNode> statement();
     std::unique_ptr<AssignmentNode> assignment(std::unique_ptr<VariableReferenceNode> assignee);
