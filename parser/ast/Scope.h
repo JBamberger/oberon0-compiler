@@ -3,30 +3,25 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "BasicTypeNode.h"
 #include "ExpressionNode.h"
 #include "TypeNode.h"
 
 // resolve type names to type references
 
-// struct Type {
-//    // basic, array, record, function, pointer
-//};
-//
-// struct Constant {
-//    // string, number, boolean
-//    bool isString();
-//    bool isNumber();
-//};
-
 struct Symbol {
+    std::string identifier;
+    Node* value;
+
+    Symbol(std::string identifier, Node* value) : identifier(std::move(identifier)), value(value) {}
 };
 
 class Scope {
     std::shared_ptr<Scope> parent_;
-    std::map<std::string, std::unique_ptr<ConstantNode>> constants_;
-    std::vector<std::unique_ptr<TypeNode>> types_;
+    std::vector<std::unique_ptr<BasicTypeNode>> default_types_;
     std::map<std::string, std::unique_ptr<Symbol>> identifier_map_;
 
   public:
@@ -41,39 +36,18 @@ class Scope {
      */
     explicit Scope(std::shared_ptr<Scope> parent);
 
-    /**
-     * \brief Inserts a new constant into the scope.
-     *
-     * TODO: handle duplicate types
-     *
-     * \param identifier constant name
-     */
-    void declareConstant(const std::string& identifier, std::unique_ptr<ConstantNode> constant);
 
-    /**
-     * \brief Inserts a new type into the scope.
-     *
-     * TODO: handle duplicate types
-     *
-     * \return the IR type representation
-     */
-    TypeNode* declareType(std::unique_ptr<TypeNode> type);
 
-    /**
-     * \brief Resolves the type reference and returns the type in the intermediate representation.
-     * \return IR type or null if the type could not be resolved.
-     */
-    TypeNode* resolveType(/* type reference */);
-
+    [[nodiscard]] bool declareIdentifier(std::string name, Node* value);
     /**
      * \brief Inserts a new identifier into the scope.
      *
      * TODO: handle duplicate identifiers
      *
-     * \param identifier the new identifier
      * \param symbol description of the identifier
+     * \return true if the identifier was added successfully
      */
-    void declareIdentifier(const std::string& identifier, std::unique_ptr<Symbol> symbol);
+    [[nodiscard]] bool declareIdentifier(std::unique_ptr<Symbol> symbol);
 
     /**
      * \brief Searches the identifiers type and returns its type.
@@ -85,5 +59,10 @@ class Scope {
      */
     Symbol* resolveIdentifier(const std::string& identifier);
 
+    Symbol* resolveIdentifierLocally(const std::string& identifier);
+
     const std::shared_ptr<Scope>& getParent() const;
+
+  private:
+    void declareDefaultType(const std::string& name);
 };

@@ -6,7 +6,7 @@
 
 ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos,
                                                    std::string name,
-                                                   std::shared_ptr<Scope> parent)
+                                                   const std::shared_ptr<Scope>& parent)
     : BlockNode(pos, std::move(name), std::make_shared<Scope>(parent)),
       params_(std::make_unique<ParamList>()),
       procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())

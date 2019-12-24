@@ -1,9 +1,4 @@
-//
-// Created by Michael Grossniklaus on 2/2/18.
-//
-
-#ifndef OBERON0C_PARSER_H
-#define OBERON0C_PARSER_H
+#pragma once
 
 #include "../scanner/Scanner.h"
 #include "ast/ArrayTypeNode.h"
@@ -21,17 +16,18 @@
 #include "ast/VariableDeclarationNode.h"
 #include "ast/WhileStatementNode.h"
 
-enum class UnaryOperator : char;
-enum class BinaryOperator : char;
-class VariableReferenceNode;
-
 class Parser {
 
-    // private:
     Scanner* scanner_;
     Logger* logger_;
     std::shared_ptr<Scope> current_scope_;
 
+  public:
+    explicit Parser(Scanner* scanner, Logger* logger);
+    ~Parser();
+    std::unique_ptr<Node> parse();
+
+  private:
     std::unique_ptr<const Token> require_token(const TokenType& type) const;
     Identifier ident() const;
     std::vector<Identifier> ident_list() const;
@@ -52,14 +48,17 @@ class Parser {
     std::unique_ptr<ArrayTypeNode> array_type();
     std::unique_ptr<RecordTypeNode> record_type();
     void field_list(RecordTypeNode* rec_decl);
+    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params);
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
     std::unique_ptr<StatementNode> statement();
     std::unique_ptr<AssignmentNode> assignment(const Identifier& id);
     std::unique_ptr<ProcedureCallNode> procedure_call(const Identifier& id);
     std::unique_ptr<IfStatementNode> if_statement();
     std::unique_ptr<WhileStatementNode> while_statement();
-    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params);
     std::unique_ptr<SelectorNode> selector();
+
+
+
 
     static std::unique_ptr<ExpressionNode>
     evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
@@ -68,11 +67,4 @@ class Parser {
     static std::unique_ptr<ExpressionNode>
     evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
                             std::unique_ptr<const Token> op);
-
-  public:
-    explicit Parser(Scanner* scanner, Logger* logger);
-    ~Parser();
-    std::unique_ptr<Node> parse();
 };
-
-#endif // OBERON0C_PARSER_H

@@ -4,7 +4,7 @@
 #include <utility>
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent)
-    : TypeNode(NodeType::record_type, pos), scope_(std::move(parent)),
+    : TypeNode(NodeType::record_type, pos), scope_(std::make_shared<Scope>(std::move(parent))),
       members_(std::make_unique<std::vector<std::unique_ptr<FieldDeclarationNode>>>())
 {
 }
