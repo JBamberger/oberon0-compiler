@@ -24,6 +24,7 @@ class Scope {
     std::shared_ptr<Scope> parent_;
     std::vector<Scope*> children_;
 
+    std::string name_;
     std::vector<std::unique_ptr<BasicTypeNode>> default_types_;
     std::map<std::string, std::unique_ptr<Symbol>> identifier_map_;
 
@@ -31,13 +32,15 @@ class Scope {
     /**
      * \brief Creates a top-level scope initialized with all predefined types
      */
-    explicit Scope();
+    explicit Scope(std::string name);
 
     /**
      * \brief Creates a nested scope with the given parent. Name resolution will consider the
-     * parent. \param parent the parent scope
+     * parent.
+     * \param parent the parent scope
+     * \param name the name of the scope
      */
-    explicit Scope(std::shared_ptr<Scope> parent);
+    explicit Scope(std::string name, std::shared_ptr<Scope> parent);
 
     [[nodiscard]] bool declareIdentifier(std::string name, Node* value);
     /**

@@ -6,7 +6,7 @@ class ModuleNode : public BlockNode {
     std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>> procedures_;
 
   public:
-    ModuleNode(const FilePos& pos, std::string name);
+    ModuleNode(const FilePos& pos, const std::string& name);
     ~ModuleNode() override;
     const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
     getProcedures() const override;

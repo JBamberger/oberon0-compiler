@@ -4,8 +4,8 @@
 #include <utility>
 #include "PrintUtils.h"
 
-ModuleNode::ModuleNode(const FilePos& pos, std::string name)
-    : BlockNode(pos, std::move(name), std::make_shared<Scope>()),
+ModuleNode::ModuleNode(const FilePos& pos, const std::string& name)
+    : BlockNode(pos, name, std::make_shared<Scope>("ModuleScope " + name)),
       procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())
 {
 }

@@ -3,14 +3,15 @@
 #include <cassert>
 #include <utility>
 
-Scope::Scope()
+Scope::Scope(std::string name) : name_(std::move(name))
 {
     // Declare builtin types in the hightest level scope
     declareDefaultType("INTEGER");
     declareDefaultType("BOOLEAN");
 }
 
-Scope::Scope(std::shared_ptr<Scope> parent) : parent_(std::move(parent))
+Scope::Scope(std::string name, std::shared_ptr<Scope> parent)
+    : parent_(std::move(parent)), name_(std::move(name))
 {
     parent_->children_.push_back(this);
 }
@@ -63,7 +64,7 @@ void Scope::declareDefaultType(const std::string& name)
     assert(result);
 }
 
-void Scope::print(int indent, std::ostream& out) const
+void Scope::print(const int indent, std::ostream& out) const
 {
     for (auto i = 0; i < indent - 1; ++i) {
         out << "|   ";
@@ -71,7 +72,7 @@ void Scope::print(int indent, std::ostream& out) const
     if (indent >= 1) {
         out << "+---";
     }
-    out << "Scope\n";
+    out << "Scope " << name_ << "\n";
 
     for (const auto& pair : identifier_map_) {
         for (auto i = 0; i < indent + 1; ++i) {
@@ -87,7 +88,7 @@ void Scope::print(int indent, std::ostream& out) const
 
     for (auto child : children_) {
         child->print(indent + 1, out);
-        for (auto i = 0; i < indent+1; ++i) {
+        for (auto i = 0; i < indent + 1; ++i) {
             out << "|   ";
         }
         out << "\n";
