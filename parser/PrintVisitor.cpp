@@ -108,6 +108,8 @@ void PrintVisitor::visit(const ModuleNode* node)
     inc();
     printBlock(node);
     dec();
+
+    out_ << "\n" << *node->getScope() << std::endl;
 }
 
 void PrintVisitor::visit(const NumberConstantNode* node)

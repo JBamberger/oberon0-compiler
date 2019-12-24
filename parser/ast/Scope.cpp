@@ -10,7 +10,10 @@ Scope::Scope()
     declareDefaultType("BOOLEAN");
 }
 
-Scope::Scope(std::shared_ptr<Scope> parent) : parent_(std::move(parent)) {}
+Scope::Scope(std::shared_ptr<Scope> parent) : parent_(std::move(parent))
+{
+    parent_->children_.push_back(this);
+}
 
 bool Scope::declareIdentifier(std::string name, Node* value)
 {
@@ -58,4 +61,35 @@ void Scope::declareDefaultType(const std::string& name)
     default_types_.push_back(std::move(type));
     const auto result = declareIdentifier(std::make_unique<Symbol>(name, ptr));
     assert(result);
+}
+
+void Scope::print(int indent, std::ostream& out) const
+{
+    for (auto i = 0; i < indent - 1; ++i) {
+        out << "|   ";
+    }
+    if (indent >= 1) {
+        out << "+---";
+    }
+    out << "Scope\n";
+
+    for (const auto& pair : identifier_map_) {
+        for (auto i = 0; i < indent + 1; ++i) {
+            out << "|   ";
+        }
+        out << pair.first << "\n";
+    }
+
+    for (auto i = 0; i < indent + 1; ++i) {
+        out << "|   ";
+    }
+    out << "\n";
+
+    for (auto child : children_) {
+        child->print(indent + 1, out);
+        for (auto i = 0; i < indent+1; ++i) {
+            out << "|   ";
+        }
+        out << "\n";
+    }
 }

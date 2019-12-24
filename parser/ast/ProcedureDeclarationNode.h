@@ -2,7 +2,7 @@
 #include "BlockNode.h"
 #include "ParameterDeclarationNode.h"
 
-using ParamList = std::vector<std::unique_ptr<const ParameterDeclarationNode>>;
+using ParamList = std::vector<std::unique_ptr<ParameterDeclarationNode>>;
 
 class ProcedureDeclarationNode : public BlockNode {
     std::unique_ptr<ParamList> params_;

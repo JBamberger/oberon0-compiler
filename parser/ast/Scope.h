@@ -9,6 +9,7 @@
 #include "BasicTypeNode.h"
 #include "ExpressionNode.h"
 #include "TypeNode.h"
+#include <ostream>
 
 // resolve type names to type references
 
@@ -21,6 +22,8 @@ struct Symbol {
 
 class Scope {
     std::shared_ptr<Scope> parent_;
+    std::vector<Scope*> children_;
+
     std::vector<std::unique_ptr<BasicTypeNode>> default_types_;
     std::map<std::string, std::unique_ptr<Symbol>> identifier_map_;
 
@@ -35,8 +38,6 @@ class Scope {
      * parent. \param parent the parent scope
      */
     explicit Scope(std::shared_ptr<Scope> parent);
-
-
 
     [[nodiscard]] bool declareIdentifier(std::string name, Node* value);
     /**
@@ -63,6 +64,13 @@ class Scope {
 
     const std::shared_ptr<Scope>& getParent() const;
 
+    friend std::ostream& operator<<(std::ostream& os, const Scope& obj)
+    {
+        obj.print(0, os);
+        return os;
+    }
+
   private:
     void declareDefaultType(const std::string& name);
+    void print(int indent, std::ostream& out) const;
 };

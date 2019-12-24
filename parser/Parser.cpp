@@ -108,7 +108,7 @@ void Parser::declarations(BlockNode* block)
 
         next = scanner_->peekToken();
         while (next->getType() == TokenType::const_ident) {
-            block->getConstants()->push_back(const_declaration());
+            const_declaration(block->getConstants().get());
             next = scanner_->peekToken();
         }
     }
@@ -118,7 +118,7 @@ void Parser::declarations(BlockNode* block)
 
         next = scanner_->peekToken();
         while (next->getType() == TokenType::const_ident) {
-            block->getTypes()->push_back(type_declaration());
+            type_declaration(block->getTypes().get());
             next = scanner_->peekToken();
         }
     }
@@ -134,49 +134,35 @@ void Parser::declarations(BlockNode* block)
     }
 
     while (next->getType() == TokenType::kw_procedure) {
-        block->getProcedures()->push_back(procedure_declaration());
+        procedure_declaration(block->getProcedures().get());
         static_cast<void>(require_token(TokenType::semicolon));
         next = scanner_->peekToken();
     }
 }
 
-std::unique_ptr<ConstantDeclarationNode> Parser::const_declaration()
+void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>* list)
 {
-    // parsing
     const auto id = ident();
     static_cast<void>(require_token(TokenType::op_eq));
     auto value = expression();
     static_cast<void>(require_token(TokenType::semicolon));
 
     auto node = std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(value));
-
-    // name check
-    if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-        return node;
-    }
-    logger_->error(node->getFilePos(), errorDuplicateIdentifier(node->getName()));
-    exit(EXIT_FAILURE);
+    insertDeclaration(std::move(node), list);
 }
 
-std::unique_ptr<TypeDeclarationNode> Parser::type_declaration()
+void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>* list)
 {
-    // parsing
     const auto id = ident();
     static_cast<void>(require_token(TokenType::op_eq));
     auto tp = type();
     static_cast<void>(require_token(TokenType::semicolon));
 
     auto node = std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp));
-
-    // name check
-    if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-        return node;
-    }
-    logger_->error(node->getFilePos(), errorDuplicateIdentifier(node->getName()));
-    exit(EXIT_FAILURE);
+    insertDeclaration(std::move(node), list);
 }
 
-void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* var_list)
+void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* list)
 {
     const auto ids = ident_list();
     static_cast<void>(require_token(TokenType::colon));
@@ -185,36 +171,30 @@ void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode
 
     for (const auto& id : ids) {
         auto node = std::make_unique<VariableDeclarationNode>(id.pos, id.name, tp);
-
-        if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-            var_list->push_back(std::move(node));
-        } else {
-            logger_->error(node->getFilePos(), errorDuplicateIdentifier(node->getName()));
-            exit(EXIT_FAILURE);
-        }
+        insertDeclaration(std::move(node), list);
     }
 }
 
-std::unique_ptr<ProcedureDeclarationNode> Parser::procedure_declaration()
+void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>* list)
 {
     // procedure heading
     const auto pos = require_token(TokenType::kw_procedure)->getPosition();
     const auto id1 = ident();
 
-    auto proc_node = std::make_unique<ProcedureDeclarationNode>(pos, id1.name, current_scope_);
-    current_scope_ = proc_node->getScope(); // enter block scope
+    auto node = std::make_unique<ProcedureDeclarationNode>(pos, id1.name, current_scope_);
+    current_scope_ = node->getScope(); // enter block scope
 
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
-        formal_parameters(proc_node.get());
+        formal_parameters(node->getParams().get());
     }
     static_cast<void>(require_token(TokenType::semicolon));
 
     // procedure body
-    declarations(proc_node.get());
+    declarations(node.get());
 
     if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
         static_cast<void>(scanner_->nextToken());
-        statement_sequence(proc_node->getStatements().get());
+        statement_sequence(node->getStatements().get());
     }
 
     static_cast<void>(require_token(TokenType::kw_end));
@@ -225,14 +205,10 @@ std::unique_ptr<ProcedureDeclarationNode> Parser::procedure_declaration()
         exit(EXIT_FAILURE);
     }
 
-    current_scope_ = proc_node->getScope()->getParent(); // exit block scope
+    current_scope_ = node->getScope()->getParent(); // exit block scope
 
-    // TODO: is overloading allowed?
-    if (current_scope_->declareIdentifier(proc_node->getName(), proc_node.get())) {
-        return proc_node;
-    }
-    logger_->error(proc_node->getFilePos(), errorDuplicateIdentifier(proc_node->getName()));
-    exit(EXIT_FAILURE);
+    // TODO: is overloading allowed? Then the name must be augmented with the parameter types
+    insertDeclaration(std::move(node), list);
 }
 
 std::unique_ptr<ExpressionNode> Parser::expression()
@@ -377,11 +353,11 @@ std::unique_ptr<RecordTypeNode> Parser::record_type()
     auto node = std::make_unique<RecordTypeNode>(pos, current_scope_);
     current_scope_ = node->getScope(); // enter scope
 
-    field_list(node.get());
+    field_list(node->getMembers());
 
     while (scanner_->peekToken()->getType() == TokenType::semicolon) {
         static_cast<void>(require_token(TokenType::semicolon));
-        field_list(node.get());
+        field_list(node->getMembers());
     }
 
     static_cast<void>(require_token(TokenType::kw_end));
@@ -390,7 +366,7 @@ std::unique_ptr<RecordTypeNode> Parser::record_type()
     return node;
 }
 
-void Parser::field_list(RecordTypeNode* rec_decl)
+void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list)
 {
     if (scanner_->peekToken()->getType() != TokenType::const_ident) {
         return;
@@ -401,36 +377,30 @@ void Parser::field_list(RecordTypeNode* rec_decl)
 
     for (const auto& id : ids) {
         auto node = std::make_unique<FieldDeclarationNode>(id.pos, id.name, tp);
-
-        if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-            rec_decl->getMembers()->push_back(std::move(node));
-        } else {
-            logger_->error(node->getFilePos(), errorDuplicateIdentifier(node->getName()));
-            exit(EXIT_FAILURE);
-        }
+        insertDeclaration(std::move(node), list);
     }
 }
 
-void Parser::formal_parameters(ProcedureDeclarationNode* proc_decl)
+void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list)
 {
     const auto pos = require_token(TokenType::lparen)->getPosition();
 
     if (scanner_->peekToken()->getType() == TokenType::kw_var ||
         scanner_->peekToken()->getType() == TokenType::const_ident) {
 
-        fp_section(proc_decl);
+        fp_section(list);
 
         while (scanner_->peekToken()->getType() == TokenType::semicolon) {
             static_cast<void>(scanner_->nextToken());
 
-            fp_section(proc_decl);
+            fp_section(list);
         }
     }
 
     static_cast<void>(require_token(TokenType::rparen));
 }
 
-void Parser::fp_section(ProcedureDeclarationNode* proc_decl)
+void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list)
 {
     const auto next_token = scanner_->peekToken();
 
@@ -446,13 +416,7 @@ void Parser::fp_section(ProcedureDeclarationNode* proc_decl)
 
     for (const auto& id : ids) {
         auto node = std::make_unique<ParameterDeclarationNode>(id.pos, id.name, tp, is_reference);
-
-        if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-            proc_decl->getParams()->push_back(std::move(node));
-        } else {
-            logger_->error(node->getFilePos(), errorDuplicateIdentifier(node->getName()));
-            exit(EXIT_FAILURE);
-        }
+        insertDeclaration(std::move(node), list);
     }
 }
 
@@ -645,6 +609,7 @@ Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
     return std::make_unique<UnaryExpressionNode>(op->getPosition(), unary_op, std::move(operand));
 }
 
+
 std::unique_ptr<ExpressionNode>
 Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
                                  std::unique_ptr<ExpressionNode> operand_2,
@@ -708,3 +673,4 @@ Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
     return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), bin_op,
                                                   std::move(operand_1), std::move(operand_2));
 }
+
