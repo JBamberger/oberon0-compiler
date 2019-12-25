@@ -277,8 +277,26 @@ std::unique_ptr<ExpressionNode> Parser::factor()
         auto sel = selector();
 
         // TODO: perform lookup in symbol table and return value if constant
+        const auto resolved = current_scope_->resolveIdentifier(id.name);
+        if (resolved != nullptr) {
+            const auto const_decl = dynamic_cast<ConstantDeclarationNode*>(resolved->value);
 
-        return std::make_unique<VariableReferenceNode>(id.pos, id.name, std::move(sel));
+            if (const_decl != nullptr) {
+                const auto num_const = dynamic_cast<NumberConstantNode*>(const_decl->getValue().get());
+                if (num_const != nullptr) {
+                    return std::make_unique<NumberConstantNode>(id.pos, num_const->getValue());
+                }
+
+                const auto str_const = dynamic_cast<StringConstantNode*>(const_decl->getValue().get());
+                if (str_const != nullptr) {
+                    return std::make_unique<StringConstantNode>(id.pos, str_const->getValue());
+                }
+            }
+
+            return std::make_unique<VariableReferenceNode>(id.pos, id.name, std::move(sel));
+        }
+        logger_->error(id.pos, errorMissingDeclaration(id.name));
+        exit(EXIT_FAILURE);
     }
     case TokenType::const_number: {
         const auto token = scanner_->nextToken();
@@ -609,7 +627,6 @@ Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
     return std::make_unique<UnaryExpressionNode>(op->getPosition(), unary_op, std::move(operand));
 }
 
-
 std::unique_ptr<ExpressionNode>
 Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
                                  std::unique_ptr<ExpressionNode> operand_2,
@@ -673,4 +690,3 @@ Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
     return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), bin_op,
                                                   std::move(operand_1), std::move(operand_2));
 }
-

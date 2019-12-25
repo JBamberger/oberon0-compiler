@@ -36,8 +36,8 @@ bool Scope::declareIdentifier(std::unique_ptr<Symbol> symbol)
 Symbol* Scope::resolveIdentifier(const std::string& identifier)
 {
     for (auto next = this; next != nullptr; next = next->parent_.get()) {
-        const auto pair = identifier_map_.find(identifier);
-        if (pair != identifier_map_.end()) {
+        const auto pair = next->identifier_map_.find(identifier);
+        if (pair != next->identifier_map_.end()) {
             return pair->second.get();
         }
     }

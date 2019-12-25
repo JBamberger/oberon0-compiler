@@ -16,9 +16,9 @@ inline auto errorSizeLtZero(int size)
     return format(FMT_STRING("Array size must be >= 0 but is {:d}"), size);
 }
 
-inline auto errorMissingTypeDecl(const std::string& identifier)
+inline auto errorMissingDeclaration(const std::string& identifier)
 {
-    return format(FMT_STRING("Missing type declaration for '{:s}'."), identifier);
+    return format(FMT_STRING("Missing declaration for '{:s}'."), identifier);
 }
 
 inline auto errorStructuredTypeIsVar(const std::string& identifier)
