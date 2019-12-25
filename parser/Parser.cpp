@@ -282,12 +282,14 @@ std::unique_ptr<ExpressionNode> Parser::factor()
             const auto const_decl = dynamic_cast<ConstantDeclarationNode*>(resolved->value);
 
             if (const_decl != nullptr) {
-                const auto num_const = dynamic_cast<NumberConstantNode*>(const_decl->getValue().get());
+                const auto num_const =
+                    dynamic_cast<NumberConstantNode*>(const_decl->getValue().get());
                 if (num_const != nullptr) {
                     return std::make_unique<NumberConstantNode>(id.pos, num_const->getValue());
                 }
 
-                const auto str_const = dynamic_cast<StringConstantNode*>(const_decl->getValue().get());
+                const auto str_const =
+                    dynamic_cast<StringConstantNode*>(const_decl->getValue().get());
                 if (str_const != nullptr) {
                     return std::make_unique<StringConstantNode>(id.pos, str_const->getValue());
                 }
@@ -357,11 +359,16 @@ std::unique_ptr<TypeNode> Parser::type()
 std::unique_ptr<ArrayTypeNode> Parser::array_type()
 {
     const auto pos = require_token(TokenType::kw_array)->getPosition();
-    auto arrayValue = expression();
+    const auto array_value = expression();
     static_cast<void>(require_token(TokenType::kw_of));
-    auto arrayType = type();
+    auto array_type = type();
 
-    return std::make_unique<ArrayTypeNode>(pos, std::move(arrayValue), std::move(arrayType));
+    const auto constant = dynamic_cast<NumberConstantNode*>(array_value.get());
+    if (constant != nullptr) {
+        return std::make_unique<ArrayTypeNode>(pos, constant->getValue(), std::move(array_type));
+    }
+    logger_->error(array_value->getFilePos(), errorExpressionNotConst());
+    exit(EXIT_FAILURE);
 }
 
 std::unique_ptr<RecordTypeNode> Parser::record_type()

@@ -44,6 +44,7 @@ void PrintVisitor::visit(const ArrayTypeNode* node)
 {
     line() << "ArrayType\n";
     inc();
+    line() << node->getSize() << "\n";
     NodeVisitor::visit(node);
     dec();
 }
@@ -119,7 +120,7 @@ void PrintVisitor::visit(const NumberConstantNode* node)
 
 void PrintVisitor::visit(const ParameterDeclarationNode* node)
 {
-    line() << "Parameter " << node->getName() << (node->isIsReference() ? "Ref\n" : "\n");
+    line() << "Parameter " << (node->isIsReference() ? "*" : "") << node->getName() << "\n";
     inc();
     NodeVisitor::visit(node);
     dec();

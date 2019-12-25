@@ -3,15 +3,15 @@
 #include "TypeNode.h"
 
 class ArrayTypeNode : public TypeNode {
-    std::unique_ptr<ExpressionNode> value_;
+    int size_;
     std::unique_ptr<TypeNode> type_;
 
   public:
     ArrayTypeNode(const FilePos& pos,
-                  std::unique_ptr<ExpressionNode> value,
+                  int size,
                   std::unique_ptr<TypeNode> type);
     ~ArrayTypeNode() override;
-    const std::unique_ptr<ExpressionNode>& getValue() const;
+    int getSize() const;
     const std::unique_ptr<TypeNode>& getType() const;
 
     void visit(NodeVisitor* visitor) const override;

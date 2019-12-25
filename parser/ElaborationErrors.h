@@ -6,10 +6,7 @@ inline auto errorDuplicateIdentifier(const std::string& identifier)
     return format(FMT_STRING("Duplicate identifier '{:s}'."), identifier);
 }
 
-inline auto errorExpressionNotConst(const std::string& identifier)
-{
-    return format(FMT_STRING("Expression must be constant '{:s}'"), identifier);
-}
+inline auto errorExpressionNotConst() { return "Expression must be constant."; }
 
 inline auto errorSizeLtZero(int size)
 {
@@ -28,7 +25,8 @@ inline auto errorStructuredTypeIsVar(const std::string& identifier)
 
 inline auto errorTypeError(const std::string& expected_type, const std::string& actual_type)
 {
-    return format(FMT_STRING("Type error. Expected '{:s}', got '{:s}'."), expected_type, actual_type);
+    return format(FMT_STRING("Type error. Expected '{:s}', got '{:s}'."), expected_type,
+                  actual_type);
 }
 
 inline auto errorArraySelectorOnNonArray() { return "Array selector on non-array."; }

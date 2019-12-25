@@ -25,7 +25,6 @@ void NodeVisitor::visit(const ArrayReferenceNode* node) { node->getIndex()->visi
 
 void NodeVisitor::visit(const ArrayTypeNode* node)
 {
-    node->getValue()->visit(this);
     node->getType()->visit(this);
 }
 
