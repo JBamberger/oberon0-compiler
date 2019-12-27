@@ -1,14 +1,7 @@
 #pragma once
 
 #include "ExpressionNode.h"
-
-enum class TokenType : char;
-
-enum class UnaryOperator : char { plus, minus, not};
-
-std::ostream& operator<<(std::ostream& out, const UnaryOperator& op);
-
-UnaryOperator toUnaryOperator(const TokenType& type);
+#include "Operator.h"
 
 class UnaryExpressionNode : public ExpressionNode {
     UnaryOperator operator_;

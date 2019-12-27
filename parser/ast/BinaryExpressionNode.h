@@ -1,26 +1,7 @@
 #pragma once
 #include "ExpressionNode.h"
 #include "Token.h"
-
-enum class BinaryOperator : char {
-    plus,
-    minus,
-    times,
-    div,
-    mod,
-    logical_or,
-    logical_and,
-    eq,
-    neq,
-    lt,
-    leq,
-    gt,
-    geq
-};
-
-std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op);
-
-BinaryOperator toBinaryOperator(const TokenType& type);
+#include "Operator.h"
 
 class BinaryExpressionNode : public ExpressionNode {
     BinaryOperator op_;

@@ -3,11 +3,18 @@
 #include <cassert>
 #include <utility>
 
+std::shared_ptr<BasicTypeNode> Scope::INTEGER =
+    std::make_shared<BasicTypeNode>(FilePos(), "INTEGER");
+std::shared_ptr<BasicTypeNode> Scope::BOOLEAN =
+    std::make_shared<BasicTypeNode>(FilePos(), "BOOLEAN");
+std::shared_ptr<BasicTypeNode> Scope::STRING = std::make_shared<BasicTypeNode>(FilePos(), "STRING");
+
 Scope::Scope(std::string name) : name_(std::move(name))
 {
     // Declare builtin types in the hightest level scope
-    declareDefaultType("INTEGER");
-    declareDefaultType("BOOLEAN");
+    declareDefaultType(INTEGER);
+    declareDefaultType(BOOLEAN);
+    declareDefaultType(STRING);
 }
 
 Scope::Scope(std::string name, std::shared_ptr<Scope> parent)
@@ -55,12 +62,9 @@ Symbol* Scope::resolveIdentifierLocally(const std::string& identifier)
 
 const std::shared_ptr<Scope>& Scope::getParent() const { return parent_; }
 
-void Scope::declareDefaultType(const std::string& name)
+void Scope::declareDefaultType(const std::shared_ptr<BasicTypeNode>& type)
 {
-    auto type = std::make_unique<BasicTypeNode>(FilePos(), name);
-    const auto ptr = type.get();
-    default_types_.push_back(std::move(type));
-    const auto result = declareIdentifier(std::make_unique<Symbol>(name, ptr));
+    const auto result = declareIdentifier(std::make_unique<Symbol>(type->getName(), type.get()));
     assert(result);
 }
 

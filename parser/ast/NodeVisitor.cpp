@@ -21,7 +21,11 @@
 
 NodeVisitor::~NodeVisitor() = default;
 
-void NodeVisitor::visit(const ArrayReferenceNode* node) { node->getIndex()->visit(this); }
+void NodeVisitor::visit(const ArrayReferenceNode* node)
+{
+    node->getArrayRef()->visit(this);
+    node->getIndex()->visit(this);
+}
 
 void NodeVisitor::visit(const ArrayTypeNode* node)
 {
@@ -46,9 +50,7 @@ void NodeVisitor::visit(const ConstantDeclarationNode* node) { node->getValue()-
 
 void NodeVisitor::visit(const FieldReferenceNode* node)
 {
-    if (node->getNext()) {
-        node->getNext()->visit(this);
-    }
+    node->getRecordRef()->visit(this);
 }
 
 void NodeVisitor::visit(const FieldDeclarationNode* node) { node->getType()->visit(this); }
@@ -139,9 +141,6 @@ void NodeVisitor::visit(const VariableDeclarationNode* node) { node->getType()->
 
 void NodeVisitor::visit(const VariableReferenceNode* node)
 {
-    if (node->getSelector() != nullptr) {
-        node->getSelector()->visit(this);
-    }
 }
 
 void NodeVisitor::visit(const WhileStatementNode* node)

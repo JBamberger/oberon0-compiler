@@ -21,11 +21,17 @@ struct Symbol {
 };
 
 class Scope {
+
+  public:
+    static std::shared_ptr<BasicTypeNode> INTEGER;
+    static std::shared_ptr<BasicTypeNode> STRING;
+    static std::shared_ptr<BasicTypeNode> BOOLEAN;
+
+  private:
     std::shared_ptr<Scope> parent_;
     std::vector<Scope*> children_;
 
     std::string name_;
-    std::vector<std::unique_ptr<BasicTypeNode>> default_types_;
     std::map<std::string, std::unique_ptr<Symbol>> identifier_map_;
 
   public:
@@ -74,6 +80,7 @@ class Scope {
     }
 
   private:
-    void declareDefaultType(const std::string& name);
+    void declareDefaultType(const std::shared_ptr<BasicTypeNode>& type);
+
     void print(int indent, std::ostream& out) const;
 };

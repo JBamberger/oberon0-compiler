@@ -3,7 +3,7 @@
 #include <cassert>
 
 AssignmentNode::AssignmentNode(const FilePos& pos,
-                               std::unique_ptr<VariableReferenceNode> assignee,
+                               std::unique_ptr<AssignableExpressionNode> assignee,
                                std::unique_ptr<ExpressionNode> value)
     : StatementNode(NodeType::assignment, pos), assignee_(std::move(assignee)),
       value_(std::move(value))
@@ -14,7 +14,7 @@ AssignmentNode::AssignmentNode(const FilePos& pos,
 
 AssignmentNode::~AssignmentNode() = default;
 
-const std::unique_ptr<VariableReferenceNode>& AssignmentNode::getAssignee() const
+const std::unique_ptr<AssignableExpressionNode>& AssignmentNode::getAssignee() const
 {
     return assignee_;
 }

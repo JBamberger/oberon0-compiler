@@ -11,7 +11,6 @@
 #include "ast/ProcedureCallNode.h"
 #include "ast/ProcedureDeclarationNode.h"
 #include "ast/RecordTypeNode.h"
-#include "ast/SelectorNode.h"
 #include "ast/TypeNode.h"
 #include "ast/VariableDeclarationNode.h"
 #include "ast/WhileStatementNode.h"
@@ -55,7 +54,8 @@ class Parser {
     std::unique_ptr<ProcedureCallNode> procedure_call(const Identifier& id);
     std::unique_ptr<IfStatementNode> if_statement();
     std::unique_ptr<WhileStatementNode> while_statement();
-    std::unique_ptr<SelectorNode> selector();
+    std::unique_ptr<AssignableExpressionNode>
+    selector(std::unique_ptr<AssignableExpressionNode> parent);
 
     static std::unique_ptr<ExpressionNode>
     evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,

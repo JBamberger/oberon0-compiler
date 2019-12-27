@@ -3,17 +3,17 @@
 #include "VariableReferenceNode.h"
 
 class AssignmentNode : public StatementNode {
-    std::unique_ptr<VariableReferenceNode> assignee_;
+    std::unique_ptr<AssignableExpressionNode> assignee_;
     std::unique_ptr<ExpressionNode> value_;
 
   public:
     AssignmentNode(const FilePos& pos,
-                   std::unique_ptr<VariableReferenceNode> assignee,
+                   std::unique_ptr<AssignableExpressionNode> assignee,
                    std::unique_ptr<ExpressionNode> value);
 
     ~AssignmentNode() override;
 
-    const std::unique_ptr<VariableReferenceNode>& getAssignee() const;
+    const std::unique_ptr<AssignableExpressionNode>& getAssignee() const;
 
     const std::unique_ptr<ExpressionNode>& getValue() const;
 

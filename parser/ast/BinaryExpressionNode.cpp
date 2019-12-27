@@ -1,16 +1,41 @@
 #include "BinaryExpressionNode.h"
 #include "NodeVisitor.h"
+#include "Scope.h"
 #include <cassert>
 
+inline std::shared_ptr<TypeNode> selectType(const BinaryOperator op)
+{
+    switch (op) {
+    case BinaryOperator::plus:
+    case BinaryOperator::minus:
+    case BinaryOperator::times:
+    case BinaryOperator::div:
+    case BinaryOperator::mod:
+        return Scope::INTEGER;
+    case BinaryOperator::logical_or:
+    case BinaryOperator::logical_and:
+    case BinaryOperator::eq:
+    case BinaryOperator::neq:
+    case BinaryOperator::lt:
+    case BinaryOperator::leq:
+    case BinaryOperator::gt:
+    case BinaryOperator::geq:
+        return Scope::BOOLEAN;
+    default:
+        std::terminate();
+    }
+}
+
 BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
-                                           BinaryOperator op,
+                                           const BinaryOperator op,
                                            std::unique_ptr<ExpressionNode> operand1,
                                            std::unique_ptr<ExpressionNode> operand2)
-    : ExpressionNode(NodeType::binary_expression, pos), op_(op), operand1_(std::move(operand1)),
-      operand2_(std::move(operand2))
+    : ExpressionNode(NodeType::binary_expression, pos, selectType(op)), op_(op),
+      operand1_(std::move(operand1)), operand2_(std::move(operand2))
 {
     assert(operand1_ != nullptr);
     assert(operand2_ != nullptr);
+    assert(operand1_->getType() == operand2_->getType());
 }
 
 BinaryExpressionNode::~BinaryExpressionNode() = default;
@@ -28,63 +53,6 @@ const std::unique_ptr<ExpressionNode>& BinaryExpressionNode::getOperand2() const
 }
 
 void BinaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
-
-std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
-{
-    // clang-format off
-    switch (op) {
-    case BinaryOperator::plus:        stream << "'+'";   break;
-    case BinaryOperator::minus:       stream << "'-'";   break;
-    case BinaryOperator::times:       stream << "'*'";   break;
-    case BinaryOperator::div:         stream << "'DIV'"; break;
-    case BinaryOperator::mod:         stream << "'MOD'"; break;
-    case BinaryOperator::logical_or:  stream << "'OR'";  break;
-    case BinaryOperator::logical_and: stream << "'&'";   break;
-    case BinaryOperator::eq:          stream << "'='";   break;
-    case BinaryOperator::neq:         stream << "'#'";   break;
-    case BinaryOperator::lt:          stream << "'<'";   break;
-    case BinaryOperator::leq:         stream << "'<='";  break;
-    case BinaryOperator::gt:          stream << "'>'";   break;
-    case BinaryOperator::geq:         stream << "'>='";  break;
-    default: std::terminate();
-    }
-    // clang-format on
-    return stream;
-}
-
-BinaryOperator toBinaryOperator(const TokenType& type)
-{
-    switch (type) {
-    case TokenType::op_eq:
-        return BinaryOperator::eq;
-    case TokenType::op_neq:
-        return BinaryOperator::neq;
-    case TokenType::op_lt:
-        return BinaryOperator::lt;
-    case TokenType::op_leq:
-        return BinaryOperator::leq;
-    case TokenType::op_gt:
-        return BinaryOperator::gt;
-    case TokenType::op_geq:
-        return BinaryOperator::geq;
-    case TokenType::op_plus:
-        return BinaryOperator::plus;
-    case TokenType::op_minus:
-        return BinaryOperator::minus;
-    case TokenType::op_or:
-        return BinaryOperator::logical_or;
-    case TokenType::op_times:
-        return BinaryOperator::times;
-    case TokenType::op_div:
-        return BinaryOperator::div;
-    case TokenType::op_mod:
-        return BinaryOperator::mod;
-    case TokenType::op_and:
-        return BinaryOperator::logical_and;
-    default:
-        throw std::runtime_error("Invalid binary token type.");
-    }
-}
 
 void BinaryExpressionNode::print(std::ostream& stream) const
 {

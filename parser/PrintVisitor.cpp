@@ -73,7 +73,7 @@ void PrintVisitor::visit(const BinaryExpressionNode* node)
 
 void PrintVisitor::visit(const FieldReferenceNode* node)
 {
-    line() << "FieldReference " << node->getName() << "\n";
+    line() << "FieldReference " << node->getFieldName() << "\n";
     inc();
     NodeVisitor::visit(node);
     dec();
@@ -199,11 +199,6 @@ void PrintVisitor::visit(const VariableDeclarationNode* node)
 void PrintVisitor::visit(const VariableReferenceNode* node)
 {
     line() << "VariableReference " << node->getName() << "\n";
-    inc();
-    if (node->getSelector()) {
-        node->getSelector()->visit(this);
-    }
-    dec();
 }
 
 void PrintVisitor::visit(const WhileStatementNode* node)

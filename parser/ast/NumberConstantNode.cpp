@@ -1,9 +1,9 @@
 #include "NumberConstantNode.h"
 #include "NodeVisitor.h"
-#include <cassert>
+#include "Scope.h"
 
 NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value)
-    : ConstantNode(NodeType::number_constant, pos), value_(value)
+    : ConstantNode(NodeType::number_constant, pos, Scope::INTEGER), value_(value)
 {
 }
 

@@ -13,7 +13,6 @@
 #include "ast/FieldReferenceNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/ParameterDeclarationNode.h"
-#include "ast/SelectorNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
 #include "ast/UnaryExpressionNode.h"
@@ -274,7 +273,6 @@ std::unique_ptr<ExpressionNode> Parser::factor()
     switch (next->getType()) {
     case TokenType::const_ident: {
         const auto id = ident();
-        auto sel = selector();
 
         // TODO: perform lookup in symbol table and return value if constant
         const auto resolved = current_scope_->resolveIdentifier(id.name);
@@ -294,8 +292,9 @@ std::unique_ptr<ExpressionNode> Parser::factor()
                     return std::make_unique<StringConstantNode>(id.pos, str_const->getValue());
                 }
             }
-
-            return std::make_unique<VariableReferenceNode>(id.pos, id.name, std::move(sel));
+            // TODO: resolve type correctly
+            auto type = std::shared_ptr<TypeNode>();
+            return selector(std::make_unique<VariableReferenceNode>(id.pos, id.name, std::move(type)));
         }
         logger_->error(id.pos, errorMissingDeclaration(id.name));
         exit(EXIT_FAILURE);
@@ -484,14 +483,23 @@ std::unique_ptr<StatementNode> Parser::statement()
 
 std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 {
-    auto lhs = std::make_unique<VariableReferenceNode>(id.pos, id.name);
-    lhs->setSelector(selector());
+    const auto symbol = current_scope_->resolveIdentifier(id.name)->value;
 
-    static_cast<void>(require_token(TokenType::op_becomes));
+    // TODO: also check for field / array
+    const auto var_ref = dynamic_cast<VariableDeclarationNode*>(symbol);
+    if (var_ref != nullptr) {
+        auto lhs =
+            selector(std::make_unique<VariableReferenceNode>(id.pos, id.name, var_ref->getType()));
 
-    auto rhs = expression();
+        static_cast<void>(require_token(TokenType::op_becomes));
 
-    return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
+        auto rhs = expression();
+
+        return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
+    }
+
+    logger_->error(id.pos, errorLhsNotAssignable());
+    exit(EXIT_FAILURE);
 }
 
 std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
@@ -573,37 +581,37 @@ void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* par
     static_cast<void>(require_token(TokenType::rparen));
 }
 
-std::unique_ptr<SelectorNode> Parser::selector()
+std::unique_ptr<AssignableExpressionNode>
+Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
 {
-    std::unique_ptr<SelectorNode> node = nullptr;
-    SelectorNode* current_node = nullptr;
+
+    std::unique_ptr<AssignableExpressionNode> prev = std::move(parent);
     auto next = scanner_->peekToken();
     while (true) {
-        std::unique_ptr<SelectorNode> next_node;
         if (next->getType() == TokenType::period) {
             static_cast<void>(scanner_->nextToken());
             const auto id = ident();
 
-            next_node = std::make_unique<FieldReferenceNode>(id.pos, id.name);
+            // TODO: resolve type correctly
+            auto type = prev->getType();
+            prev = std::make_unique<FieldReferenceNode>(id.pos, id.name, type, std::move(prev));
         } else if (next->getType() == TokenType::lbrack) {
+
             const auto open_token = scanner_->nextToken();
-            next_node =
-                std::make_unique<ArrayReferenceNode>(open_token->getPosition(), expression());
+            auto index = expression();
             static_cast<void>(require_token(TokenType::rbrack));
+
+            // TODO: resolve type correctly
+            auto type = prev->getType();
+            prev = std::make_unique<ArrayReferenceNode>(open_token->getPosition(), std::move(index),
+                                                        type, std::move(prev));
         } else {
             break;
         }
 
-        if (node == nullptr) {
-            node = std::move(next_node);
-            current_node = node.get();
-        } else {
-            current_node->setNext(std::move(next_node));
-        }
-
         next = scanner_->peekToken();
     }
-    return node;
+    return std::move(prev);
 }
 
 std::unique_ptr<ExpressionNode>
@@ -625,7 +633,6 @@ Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
             first->setValue(!first->getValue());
             break;
         default:
-            std::cerr << "Invalid operator. This shouldn't be possible." << std::endl;
             std::terminate();
         }
         return operand;
@@ -656,17 +663,17 @@ Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
         case BinaryOperator::mod:
             first->setValue(first->getValue() % second->getValue());
             break;
-        case BinaryOperator::logical_and:
-            first->setValue(first->getValue() && second->getValue());
-            break;
-        case BinaryOperator::logical_or:
-            first->setValue(first->getValue() || second->getValue());
-            break;
         case BinaryOperator::plus:
             first->setValue(first->getValue() + second->getValue());
             break;
         case BinaryOperator::minus:
             first->setValue(first->getValue() - second->getValue());
+            break;
+        case BinaryOperator::logical_and:
+            first->setValue(first->getValue() && second->getValue());
+            break;
+        case BinaryOperator::logical_or:
+            first->setValue(first->getValue() || second->getValue());
             break;
         case BinaryOperator::eq:
             first->setValue(first->getValue() == second->getValue());
@@ -687,7 +694,6 @@ Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
             first->setValue(first->getValue() >= second->getValue());
             break;
         default:
-            std::cerr << "Invalid operator. This shouldn't be possible." << std::endl;
             std::terminate();
         }
 
