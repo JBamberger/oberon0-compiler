@@ -5,6 +5,7 @@
 #include "ast/AssignmentNode.h"
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
+#include "ast/BooleanConstantNode.h"
 #include "ast/FieldReferenceNode.h"
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
@@ -16,7 +17,6 @@
 #include "ast/StringConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include "ast/WhileStatementNode.h"
-#include "ast/BooleanConstantNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
@@ -120,7 +120,6 @@ void PrintVisitor::visit(const NumberConstantNode* node)
 
 void PrintVisitor::visit(const ParameterDeclarationNode* node)
 {
-    dec();
     line() << "Parameter " << (node->isIsReference() ? "*" : "") << node->getName() << "\n";
 }
 
