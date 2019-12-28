@@ -5,7 +5,7 @@ class VariableDeclarationNode : public TypedIdentifierNode {
   public:
     VariableDeclarationNode(const FilePos& pos,
                             std::string name,
-                            std::shared_ptr<TypeNode> type);
+                            std::string type);
 
     ~VariableDeclarationNode() override;
 

@@ -11,7 +11,7 @@ VariableReferenceNode::VariableReferenceNode(const FilePos& pos, VariableDeclara
 
 VariableReferenceNode::~VariableReferenceNode() = default;
 
-const std::string& VariableReferenceNode::getName() const { return variable_->getName(); }
+std::string VariableReferenceNode::getName() const { return variable_->getName(); }
 
 VariableDeclarationNode* VariableReferenceNode::getVariable() const { return variable_; }
 

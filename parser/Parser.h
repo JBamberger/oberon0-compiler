@@ -19,6 +19,8 @@ class Parser {
 
     Scanner* scanner_;
     Logger* logger_;
+
+    std::unordered_map<std::string, std::unique_ptr<TypeNode>> types_;
     std::shared_ptr<Scope> current_scope_;
 
   public:
@@ -43,9 +45,7 @@ class Parser {
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
-    std::shared_ptr<TypeNode> type();
-    std::unique_ptr<ArrayTypeNode> array_type();
-    std::unique_ptr<RecordTypeNode> record_type();
+    std::string type();
     void field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list);
     void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params);
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
@@ -57,13 +57,12 @@ class Parser {
     std::unique_ptr<AssignableExpressionNode>
     selector(std::unique_ptr<AssignableExpressionNode> parent);
 
-    static std::unique_ptr<ExpressionNode>
+    std::unique_ptr<ExpressionNode>
     evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
                              std::unique_ptr<ExpressionNode> operand_2,
                              std::unique_ptr<const Token> op);
-    static std::unique_ptr<ExpressionNode>
-    evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
-                            std::unique_ptr<const Token> op);
+    std::unique_ptr<ExpressionNode> evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
+                                                            std::unique_ptr<const Token> op);
 
     template <class T>
     void insertDeclaration(std::unique_ptr<T> node, std::vector<std::unique_ptr<T>>* list)
@@ -80,4 +79,7 @@ class Parser {
     Node* resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const;
     Node* resolveId(const Scope* scope, const Identifier& id) const;
     Node* resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const;
+
+    std::string addType(std::unique_ptr<TypeNode> type);
+    TypeNode* findType(const std::string& name, const FilePos& pos) const;
 };

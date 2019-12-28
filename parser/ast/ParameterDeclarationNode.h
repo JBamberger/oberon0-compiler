@@ -7,7 +7,7 @@ class ParameterDeclarationNode : public TypedIdentifierNode {
   public:
     ParameterDeclarationNode(const FilePos& pos,
                              std::string name,
-                             std::shared_ptr<TypeNode> type,
+                             std::string type,
                              bool is_reference);
 
     ~ParameterDeclarationNode() override;

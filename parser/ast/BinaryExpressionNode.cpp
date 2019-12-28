@@ -3,7 +3,7 @@
 #include "Scope.h"
 #include <cassert>
 
-inline std::shared_ptr<TypeNode> selectType(const BinaryOperator op)
+inline std::string selectType(const BinaryOperator op)
 {
     switch (op) {
     case BinaryOperator::plus:
@@ -11,7 +11,7 @@ inline std::shared_ptr<TypeNode> selectType(const BinaryOperator op)
     case BinaryOperator::times:
     case BinaryOperator::div:
     case BinaryOperator::mod:
-        return Scope::INTEGER;
+        return "INTEGER";
     case BinaryOperator::logical_or:
     case BinaryOperator::logical_and:
     case BinaryOperator::eq:
@@ -20,7 +20,7 @@ inline std::shared_ptr<TypeNode> selectType(const BinaryOperator op)
     case BinaryOperator::leq:
     case BinaryOperator::gt:
     case BinaryOperator::geq:
-        return Scope::BOOLEAN;
+        return "BOOLEAN";
     default:
         std::terminate();
     }
@@ -57,4 +57,38 @@ void BinaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(th
 void BinaryExpressionNode::print(std::ostream& stream) const
 {
     stream << "BinaryExpressionNode(" << op_ << ", " << *operand1_ << ", " << *operand2_ << ")";
+}
+
+int BinaryExpressionNode::eval(BinaryOperator op, int v1, int v2)
+{
+    switch (op) {
+    case BinaryOperator::times:
+        return v1 * v2;
+    case BinaryOperator::div:
+        return v1 / v2;
+    case BinaryOperator::mod:
+        return v1 % v2;
+    case BinaryOperator::plus:
+        return v1 + v2;
+    case BinaryOperator::minus:
+        return v1 - v2;
+    case BinaryOperator::logical_and:
+        return v1 && v2;
+    case BinaryOperator::logical_or:
+        return v1 || v2;
+    case BinaryOperator::eq:
+        return v1 == v2;
+    case BinaryOperator::neq:
+        return v1 != v2;
+    case BinaryOperator::lt:
+        return v1 < v2;
+    case BinaryOperator::leq:
+        return v1 <= v2;
+    case BinaryOperator::gt:
+        return v1 > v2;
+    case BinaryOperator::geq:
+        return v1 >= v2;
+    default:
+        std::terminate();
+    }
 }

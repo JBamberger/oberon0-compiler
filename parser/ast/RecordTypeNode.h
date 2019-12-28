@@ -13,8 +13,12 @@ class RecordTypeNode : public TypeNode {
     ~RecordTypeNode() override;
 
     std::vector<std::unique_ptr<FieldDeclarationNode>>* getMembers() const;
+
     const std::shared_ptr<Scope>& getScope() const;
 
+    std::string getId() const override;
+
     void visit(NodeVisitor* visitor) const override;
+
     void print(std::ostream& stream) const override;
 };

@@ -3,6 +3,8 @@
 #include "Token.h"
 #include <ostream>
 
+enum class OperatorType : char { logical, arithmetic, comparison };
+
 enum class UnaryOperator : char { plus, minus, not};
 
 enum class BinaryOperator : char {
@@ -87,4 +89,28 @@ inline BinaryOperator toBinaryOperator(const TokenType& type)
     default: std::terminate();
     }
     // clang-format on
+}
+
+inline OperatorType getOperatorType(BinaryOperator type)
+{
+    switch (type) {
+    case BinaryOperator::eq:
+    case BinaryOperator::neq:
+    case BinaryOperator::lt:
+    case BinaryOperator::leq:
+    case BinaryOperator::gt:
+    case BinaryOperator::geq:
+        return OperatorType::comparison;
+    case BinaryOperator::plus:
+    case BinaryOperator::minus:
+    case BinaryOperator::times:
+    case BinaryOperator::div:
+    case BinaryOperator::mod:
+        return OperatorType::arithmetic;
+    case BinaryOperator::logical_or:
+    case BinaryOperator::logical_and:
+        return OperatorType::logical;
+    default:
+        std::terminate();
+    }
 }

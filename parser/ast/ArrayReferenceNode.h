@@ -9,12 +9,13 @@ class ArrayReferenceNode : public AssignableExpressionNode {
   public:
     ArrayReferenceNode(const FilePos& pos,
                        std::unique_ptr<ExpressionNode> index,
-                       std::shared_ptr<TypeNode> type,
+                       std::string type,
                        std::unique_ptr<AssignableExpressionNode> array_ref);
 
     ~ArrayReferenceNode() override;
 
     const std::unique_ptr<AssignableExpressionNode>& getArrayRef() const;
+
     const std::unique_ptr<ExpressionNode>& getIndex() const;
 
     void visit(NodeVisitor* visitor) const override;

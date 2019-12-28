@@ -1,5 +1,7 @@
 #pragma once
 
+class BooleanConstantNode;
+class ParameterReferenceNode;
 class BlockNode;
 class FieldReferenceNode;
 class SelectorNode;
@@ -22,8 +24,8 @@ class VariableReferenceNode;
 class WhileStatementNode;
 class BinaryExpressionNode;
 class ChainedReferenceNode;
-class BasicTypeNode;
 class AssignmentNode;
+class BasicTypeNode;
 class ArrayTypeNode;
 class ArrayReferenceNode;
 class ModuleNode;
@@ -50,12 +52,15 @@ class NodeVisitor {
     virtual void visit(const IfStatementNode* node) = 0;
     virtual void visit(const ModuleNode* node) = 0;
     virtual void visit(const NumberConstantNode* node) = 0;
+    virtual void visit(const BooleanConstantNode* node);
+    virtual void visit(const StringConstantNode* node) = 0;
+
     virtual void visit(const ParameterDeclarationNode* node) = 0;
     virtual void visit(const ProcedureCallNode* node) = 0;
     virtual void visit(const RecordTypeNode* node) = 0;
-    virtual void visit(const StringConstantNode* node) = 0;
     virtual void visit(const TypedIdentifierNode* node) = 0;
     virtual void visit(const BasicTypeNode* node) = 0;
     virtual void visit(const VariableReferenceNode* node) = 0;
+    virtual void visit(const ParameterReferenceNode* node);
     virtual void visit(const WhileStatementNode* node) = 0;
 };

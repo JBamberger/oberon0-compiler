@@ -9,12 +9,14 @@
 #include "ast/IfStatementNode.h"
 #include "ast/ModuleNode.h"
 #include "ast/NumberConstantNode.h"
+#include "ast/ParameterReferenceNode.h"
 #include "ast/ProcedureCallNode.h"
 #include "ast/ProcedureDeclarationNode.h"
 #include "ast/RecordTypeNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/UnaryExpressionNode.h"
 #include "ast/WhileStatementNode.h"
+#include "ast/BooleanConstantNode.h"
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
@@ -45,6 +47,7 @@ void PrintVisitor::visit(const ArrayTypeNode* node)
     line() << "ArrayType\n";
     inc();
     line() << node->getSize() << "\n";
+    line() << node->getType() << "\n";
     NodeVisitor::visit(node);
     dec();
 }
@@ -89,10 +92,7 @@ void PrintVisitor::visit(const ConstantDeclarationNode* node)
 
 void PrintVisitor::visit(const FieldDeclarationNode* node)
 {
-    line() << "Field " << node->getName() << "\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
+    line() << "Field " << node->getName() << " : " << node->getType() << "\n";
 }
 
 void PrintVisitor::visit(const IfStatementNode* node)
@@ -120,10 +120,8 @@ void PrintVisitor::visit(const NumberConstantNode* node)
 
 void PrintVisitor::visit(const ParameterDeclarationNode* node)
 {
-    line() << "Parameter " << (node->isIsReference() ? "*" : "") << node->getName() << "\n";
-    inc();
-    NodeVisitor::visit(node);
     dec();
+    line() << "Parameter " << (node->isIsReference() ? "*" : "") << node->getName() << "\n";
 }
 
 void PrintVisitor::visit(const ProcedureCallNode* node)
@@ -166,18 +164,12 @@ void PrintVisitor::visit(const StringConstantNode* node)
 
 void PrintVisitor::visit(const TypeDeclarationNode* node)
 {
-    line() << "TypeDeclaration " << node->getName() << "\n";
-    inc();
-    node->getType()->visit(this);
-    dec();
+    line() << "TypeDeclaration " << node->getName() << " : " << node->getType() << "\n";
 }
 
 void PrintVisitor::visit(const TypedIdentifierNode* node)
 {
-    line() << "TypedIdentifier " << node->getName() << "\n";
-    inc();
-    node->getType()->visit(this);
-    dec();
+    line() << "TypedIdentifier " << node->getName() << " : " << node->getType() << "\n";
 }
 
 void PrintVisitor::visit(const UnaryExpressionNode* node)
@@ -190,15 +182,17 @@ void PrintVisitor::visit(const UnaryExpressionNode* node)
 
 void PrintVisitor::visit(const VariableDeclarationNode* node)
 {
-    line() << "VariableDeclaration " << node->getName() << "\n";
-    inc();
-    NodeVisitor::visit(node);
-    dec();
+    line() << "VariableDeclaration " << node->getName() << " : " << node->getType() << "\n";
 }
 
 void PrintVisitor::visit(const VariableReferenceNode* node)
 {
     line() << "VariableReference " << node->getName() << "\n";
+}
+
+void PrintVisitor::visit(const ParameterReferenceNode* node)
+{
+    line() << "ParameterReference " << node->getName() << "\n";
 }
 
 void PrintVisitor::visit(const WhileStatementNode* node)
@@ -207,6 +201,11 @@ void PrintVisitor::visit(const WhileStatementNode* node)
     inc();
     NodeVisitor::visit(node);
     dec();
+}
+
+void PrintVisitor::visit(const BooleanConstantNode* node)
+{
+    line() << "BooleanConstant " << node->getValue() << "\n";
 }
 
 void PrintVisitor::printBlock(const BlockNode* node)

@@ -13,6 +13,7 @@
 #include "ast/FieldReferenceNode.h"
 #include "ast/NumberConstantNode.h"
 #include "ast/ParameterDeclarationNode.h"
+#include "ast/ParameterReferenceNode.h"
 #include "ast/StringConstantNode.h"
 #include "ast/TypeDeclarationNode.h"
 #include "ast/UnaryExpressionNode.h"
@@ -21,14 +22,21 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include "ast/BooleanConstantNode.h"
 
+class ParameterReferenceNode;
 Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
 
 Parser::~Parser() = default;
 
 inline std::string type_str(const TokenType& t) { return (std::stringstream() << t).str(); }
 
-std::unique_ptr<Node> Parser::parse() { return module(); }
+std::unique_ptr<Node> Parser::parse()
+{
+    // new type map
+    types_ = std::unordered_map<std::string, std::unique_ptr<TypeNode>>();
+    return module();
+}
 
 std::unique_ptr<const Token> Parser::require_token(const TokenType& type) const
 {
@@ -71,28 +79,31 @@ std::unique_ptr<ModuleNode> Parser::module()
     const auto id1 = ident();
 
     auto module_node = std::make_unique<ModuleNode>(pos, id1.name);
-    current_scope_ = module_node->getScope();
+    current_scope_ = module_node->getScope(); // enter scope
+
+    // add the built-in types to the module scope
+    addType(BasicTypeNode::makeInt());
+    addType(BasicTypeNode::makeBool());
+    addType(BasicTypeNode::makeString());
 
     static_cast<void>(require_token(TokenType::semicolon));
-
     declarations(module_node.get());
-
     if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
-        // just consume the token, we've checked it already.
         static_cast<void>(scanner_->nextToken());
         statement_sequence(module_node->getStatements().get());
     }
-
     static_cast<void>(require_token(TokenType::kw_end));
-
-    const auto name_pos = scanner_->peekToken()->getPosition();
     const auto id2 = ident();
+    static_cast<void>(require_token(TokenType::period));
+
+    // check for E028
     if (id1.name != id2.name) {
-        logger_->error(name_pos,
+        logger_->error(id2.name,
                        "Expected equal module names but got " + id1 + " and " + id2 + ".");
         exit(EXIT_FAILURE);
     }
-    static_cast<void>(require_token(TokenType::period));
+
+    current_scope_ = nullptr; // exit scope
 
     return module_node;
 }
@@ -157,15 +168,19 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>*
     auto tp = type();
     static_cast<void>(require_token(TokenType::semicolon));
 
-    auto node = std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp));
-    insertDeclaration(std::move(node), list);
+    if (current_scope_->declareIdentifier(id.name, findType(tp, id.pos))) {
+        list->push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
+    } else {
+        logger_->error(id.pos, errorDuplicateIdentifier(id.name));
+        exit(EXIT_FAILURE);
+    }
 }
 
 void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* list)
 {
     const auto ids = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto tp = std::shared_ptr<TypeNode>(type());
+    auto tp = type();
     static_cast<void>(require_token(TokenType::semicolon));
 
     for (const auto& id : ids) {
@@ -296,6 +311,12 @@ std::unique_ptr<ExpressionNode> Parser::factor()
             return selector(std::make_unique<VariableReferenceNode>(id.pos, var_decl));
         }
 
+        // check if the identifier is a parameter
+        const auto param_decl = dynamic_cast<ParameterDeclarationNode*>(resolved);
+        if (param_decl != nullptr) {
+            return selector(std::make_unique<ParameterReferenceNode>(id.pos, param_decl));
+        }
+
         logger_->error(id.pos, "Unknown identifier type.");
         exit(EXIT_FAILURE);
     }
@@ -333,76 +354,75 @@ std::unique_ptr<ExpressionNode> Parser::factor()
     }
 }
 
-std::shared_ptr<TypeNode> Parser::type()
+std::string Parser::type()
 {
-    //TODO: resolve type
-    // How should types be managed? in the scope?
-    // unique names from record/arrays: ARRAY 10 OF INTEGER --> [A,10,INTEGER
-    //
-    // Use unique_ptr everywhere and implement comparison?
-    // Use plain pointer and keep memory in scope?
-    // Remain with shared_ptr? -> requires solution for the resolution step
+    // unique names from record/arrays:
+    // ARRAY 10 OF INTEGER --> [A,10,INTEGER;]
+    // RECORD a,b: INTEGER; c: RECORD x: BOOLEAN END; END -->
+    // [R;a,INTEGER;b,INTEGER;c,[R;x,BOOLEAN;]]
+
     const auto next = scanner_->peekToken();
 
-    if (next->getType() == TokenType::const_ident) {
+    switch (next->getType()) {
+    case TokenType::const_ident: {
         const auto id = ident();
 
+        // the type must already exist because it is not allowed to define new basic types (E005,
+        // E007, E008)
         const auto resolved_type = dynamic_cast<TypeNode*>(resolveId(current_scope_.get(), id));
-        if (resolved_type == nullptr)
-        {
+        if (resolved_type == nullptr) {
             logger_->error(id.pos, "Identifier is not a type.");
             exit(EXIT_FAILURE);
         }
 
-        return std::make_unique<BasicTypeNode>(id.pos, id.name);
+        // this must be getId because the identifier could be the name of a typedef
+        return resolved_type->getId();
     }
+    case TokenType::kw_array: {
+        const auto pos = require_token(TokenType::kw_array)->getPosition();
+        const auto array_value = expression();
+        static_cast<void>(require_token(TokenType::kw_of));
+        auto array_type = type();
 
-    if (next->getType() == TokenType::kw_array) {
-        return array_type();
+        // check for E003
+        const auto constant = dynamic_cast<NumberConstantNode*>(array_value.get());
+        if (constant == nullptr) {
+            logger_->error(array_value->getFilePos(), errorExpressionNotConst());
+            exit(EXIT_FAILURE);
+        }
+
+        // check for E004
+        const auto size = constant->getValue();
+        if (0 >= size) {
+            logger_->error(array_value->getFilePos(), errorSizeLtZero(size));
+            exit(EXIT_FAILURE);
+        }
+
+        return addType(std::make_unique<ArrayTypeNode>(pos, size, std::move(array_type)));
     }
+    case TokenType::kw_record: {
+        const auto pos = scanner_->peekToken()->getPosition();
 
-    if (next->getType() == TokenType::kw_record) {
-        return record_type();
+        auto type = std::make_unique<RecordTypeNode>(pos, current_scope_);
+        current_scope_ = type->getScope(); // enter scope
+
+        static_cast<void>(require_token(TokenType::kw_record));
+        field_list(type->getMembers());
+        while (scanner_->peekToken()->getType() == TokenType::semicolon) {
+            static_cast<void>(require_token(TokenType::semicolon));
+            field_list(type->getMembers());
+        }
+        static_cast<void>(require_token(TokenType::kw_end));
+
+        current_scope_ = type->getScope()->getParent(); // exit scope
+        return addType(std::move(type));
     }
-
-    logger_->error(next->getPosition(), "Expected Identifier, ARRAY or RECORD but got " +
-                                            (std::stringstream() << *next).str() + ".");
-    exit(EXIT_FAILURE);
-}
-
-std::unique_ptr<ArrayTypeNode> Parser::array_type()
-{
-    const auto pos = require_token(TokenType::kw_array)->getPosition();
-    const auto array_value = expression();
-    static_cast<void>(require_token(TokenType::kw_of));
-    auto array_type = type();
-
-    const auto constant = dynamic_cast<NumberConstantNode*>(array_value.get());
-    if (constant != nullptr) {
-        return std::make_unique<ArrayTypeNode>(pos, constant->getValue(), std::move(array_type));
+    default: {
+        const auto tt = (std::stringstream() << *next).str();
+        logger_->error(next->getPosition(), "Expected name, ARRAY or RECORD but got " + tt + ".");
+        exit(EXIT_FAILURE);
     }
-    logger_->error(array_value->getFilePos(), errorExpressionNotConst());
-    exit(EXIT_FAILURE);
-}
-
-std::unique_ptr<RecordTypeNode> Parser::record_type()
-{
-    const auto pos = require_token(TokenType::kw_record)->getPosition();
-
-    auto node = std::make_unique<RecordTypeNode>(pos, current_scope_);
-    current_scope_ = node->getScope(); // enter scope
-
-    field_list(node->getMembers());
-
-    while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-        static_cast<void>(require_token(TokenType::semicolon));
-        field_list(node->getMembers());
     }
-
-    static_cast<void>(require_token(TokenType::kw_end));
-
-    current_scope_ = node->getScope()->getParent(); // exit scope
-    return node;
 }
 
 void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list)
@@ -412,7 +432,7 @@ void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list
     }
     const auto ids = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto tp = std::shared_ptr<TypeNode>(type());
+    auto tp = type();
 
     for (const auto& id : ids) {
         auto node = std::make_unique<FieldDeclarationNode>(id.pos, id.name, tp);
@@ -451,7 +471,7 @@ void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* 
 
     const auto ids = ident_list();
     static_cast<void>(require_token(TokenType::colon));
-    auto tp = std::shared_ptr<TypeNode>(type());
+    auto tp = type();
 
     for (const auto& id : ids) {
         auto node = std::make_unique<ParameterDeclarationNode>(id.pos, id.name, tp, is_reference);
@@ -500,18 +520,27 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 {
     const auto symbol = resolveId(current_scope_.get(), id);
 
-    const auto var_ref = dynamic_cast<VariableDeclarationNode*>(symbol);
-    if (var_ref != nullptr) {
-        auto lhs = selector(std::make_unique<VariableReferenceNode>(id.pos, var_ref));
+    std::unique_ptr<AssignableExpressionNode> parent = nullptr;
 
-        static_cast<void>(require_token(TokenType::op_becomes));
-        auto rhs = expression();
-
-        return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
+    const auto var_decl = dynamic_cast<VariableDeclarationNode*>(symbol);
+    if (var_decl != nullptr) {
+        parent = std::make_unique<VariableReferenceNode>(id.pos, var_decl);
+    } else {
+        const auto param_decl = dynamic_cast<ParameterDeclarationNode*>(symbol);
+        if (param_decl != nullptr) {
+            parent = std::make_unique<ParameterReferenceNode>(id.pos, param_decl);
+        } else {
+            logger_->error(id.pos, errorLhsNotAssignable());
+            exit(EXIT_FAILURE);
+        }
     }
 
-    logger_->error(id.pos, errorLhsNotAssignable());
-    exit(EXIT_FAILURE);
+    auto lhs = selector(std::move(parent));
+
+    static_cast<void>(require_token(TokenType::op_becomes));
+    auto rhs = expression();
+
+    return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
 }
 
 std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
@@ -604,15 +633,15 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
             static_cast<void>(scanner_->nextToken());
             const auto id = ident();
 
-            // in this branch the previous ref must be a record, otherwise no field references are
-            // possible.
-            const auto record_ref = dynamic_cast<RecordTypeNode*>(prev->getType().get());
+            // check for E018: field reference only on records
+            const auto record_ref =
+                dynamic_cast<RecordTypeNode*>(findType(prev->getType(), prev->getFilePos()));
             if (record_ref == nullptr) {
                 logger_->error(prev->getFilePos(), "Ref is not a record type.");
                 exit(EXIT_FAILURE);
             }
 
-            // field references can only use the local field declarations
+            // check for E019: field references can only use the local field declarations
             const auto field = dynamic_cast<FieldDeclarationNode*>(
                 resolveLocalId(record_ref->getScope().get(), id));
             if (field == nullptr) {
@@ -627,21 +656,23 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
             auto index = expression();
             static_cast<void>(require_token(TokenType::rbrack));
 
-            // allow array indexing only on array types
-            const auto arr = dynamic_cast<ArrayTypeNode*>(prev->getType().get());
+            // check for E016: array indexing only on array types
+            const auto arr =
+                dynamic_cast<ArrayTypeNode*>(findType(prev->getType(), prev->getFilePos()));
             if (arr == nullptr) {
                 logger_->error(open_token->getPosition(), "Array indexing on non-array type.");
                 exit(EXIT_FAILURE);
             }
 
-            // require int type for index
-            const auto int_type = dynamic_cast<BasicTypeNode*>(index->getType().get());
+            // check for E030: array indices must be int
+            const auto int_type =
+                dynamic_cast<BasicTypeNode*>(findType(index->getType(), index->getFilePos()));
             if (int_type == nullptr || int_type->getName() != "INTEGER") {
                 logger_->error(index->getFilePos(), "Index is not of type INTEGER.");
                 exit(EXIT_FAILURE);
             }
 
-            // if the index is constant perform range checks
+            // check for E017: perform range check if the index is constant
             const auto const_idx = dynamic_cast<NumberConstantNode*>(index.get());
             if (const_idx != nullptr) {
                 const auto value = const_idx->getValue();
@@ -659,7 +690,7 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
 
         next = scanner_->peekToken();
     }
-    return std::move(prev);
+    return prev;
 }
 
 std::unique_ptr<ExpressionNode>
@@ -714,6 +745,26 @@ Node* Parser::resolveId(const Scope* scope, const std::string& name, const FileP
     return resolved->value;
 }
 
+std::string Parser::addType(std::unique_ptr<TypeNode> type)
+{
+    const auto name = type->getId();
+    // it doesn't matter if the type cannot be inserted as the types are the same if the descriptor
+    // is the same
+    static_cast<void>(current_scope_->declareIdentifier(name, type.get()));
+    static_cast<void>(types_.insert({name, std::move(type)}));
+    return name;
+}
+
+TypeNode* Parser::findType(const std::string& name, const FilePos& pos) const
+{
+    const auto record = types_.find(name);
+    if (record == types_.end()) {
+        logger_->error(pos, errorMissingDeclaration(name));
+        exit(EXIT_FAILURE);
+    }
+    return record->second.get();
+}
+
 Node* Parser::resolveId(const Scope* scope, const Identifier& id) const
 {
     return resolveId(scope, id.name, id.pos);
@@ -728,54 +779,57 @@ Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
     assert(operand_2 != nullptr);
 
     const auto bin_op = toBinaryOperator(op->getType());
+    const auto op_type = getOperatorType(bin_op);
+    std::string result_type;
+    switch (op_type) {
+    case OperatorType::logical: {
+
+        if (operand_1->getType() != "BOOLEAN") {
+            logger_->error(operand_1->getFilePos(), "Operand is not of type BOOLEAN.");
+            exit(EXIT_FAILURE);
+        }
+        if (operand_2->getType() != "BOOLEAN") {
+            logger_->error(operand_2->getFilePos(), "Operand is not of type BOOLEAN.");
+            exit(EXIT_FAILURE);
+        }
+        result_type = "BOOLEAN";
+        break;
+    }
+    case OperatorType::arithmetic: {
+        if (operand_1->getType() != "INTEGER") {
+            logger_->error(operand_1->getFilePos(), "Operand is not of type INTEGER.");
+            exit(EXIT_FAILURE);
+        }
+        if (operand_2->getType() != "INTEGER") {
+            logger_->error(operand_2->getFilePos(), "Operand is not of type INTEGER.");
+            exit(EXIT_FAILURE);
+        }
+        result_type = "INTEGER";
+        break;
+    }
+    case OperatorType::comparison: {
+        if (operand_1->getType() != operand_2->getType()) {
+            logger_->error(operand_1->getFilePos(), "Operands have different types.");
+            exit(EXIT_FAILURE);
+        }
+        result_type = "BOOLEAN";
+        break;
+    }
+    default:
+        std::terminate();
+    }
+
     const auto first = dynamic_cast<NumberConstantNode*>(operand_1.get());
     const auto second = dynamic_cast<NumberConstantNode*>(operand_2.get());
     if (first != nullptr && second != nullptr) {
-        switch (bin_op) {
-        case BinaryOperator::times:
-            first->setValue(first->getValue() * second->getValue());
-            break;
-        case BinaryOperator::div:
-            first->setValue(first->getValue() / second->getValue());
-            break;
-        case BinaryOperator::mod:
-            first->setValue(first->getValue() % second->getValue());
-            break;
-        case BinaryOperator::plus:
-            first->setValue(first->getValue() + second->getValue());
-            break;
-        case BinaryOperator::minus:
-            first->setValue(first->getValue() - second->getValue());
-            break;
-        case BinaryOperator::logical_and:
-            first->setValue(first->getValue() && second->getValue());
-            break;
-        case BinaryOperator::logical_or:
-            first->setValue(first->getValue() || second->getValue());
-            break;
-        case BinaryOperator::eq:
-            first->setValue(first->getValue() == second->getValue());
-            break;
-        case BinaryOperator::neq:
-            first->setValue(first->getValue() != second->getValue());
-            break;
-        case BinaryOperator::lt:
-            first->setValue(first->getValue() < second->getValue());
-            break;
-        case BinaryOperator::leq:
-            first->setValue(first->getValue() <= second->getValue());
-            break;
-        case BinaryOperator::gt:
-            first->setValue(first->getValue() > second->getValue());
-            break;
-        case BinaryOperator::geq:
-            first->setValue(first->getValue() >= second->getValue());
-            break;
-        default:
-            std::terminate();
-        }
+        const auto value =
+            BinaryExpressionNode::eval(bin_op, first->getValue(), second->getValue());
+        if (result_type == "INTEGER") {
+            return std::make_unique<NumberConstantNode>(first->getFilePos(), value);
 
-        return operand_1;
+        } else {
+            return std::make_unique<BooleanConstantNode>(first->getFilePos(), value);
+        }
     }
 
     return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), bin_op,

@@ -20,4 +20,6 @@ class BinaryExpressionNode : public ExpressionNode {
     const std::unique_ptr<ExpressionNode>& getOperand2() const;
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
+
+    static int eval(BinaryOperator op, int v1, int v2);
 };

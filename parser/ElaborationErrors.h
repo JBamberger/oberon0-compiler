@@ -1,6 +1,48 @@
 #pragma once
 #include "fmt/format.h"
 
+// Constant expressions must be evaluated
+// Arithmetic operators produce INTEGER
+// Comparison operators produce BOOLEAN
+// Boolean operators produce BOOLEAN
+// RECORD types are passed by reference
+// ARRAY types are passed by reference
+
+// E001: Names must be unique in the scope
+// E002: Constant declarations must evaluate to constants
+// E003: Array sizes must evaluate to constants
+// E004: Array sizes must be greater than 0
+// E005: Array type must exist
+// E006: Record field names must be unique in the record
+// E007: Record field types must exist
+// E008: Variable types must exist
+// E009: Procedure identifiers must be unique in the procedure
+// E010: ARRAY formal parameters cannot be VAR
+// E011: RECORD formal parameters cannot be VAR
+// E012: Arithmetic operators operate only on INTEGER
+// E013: Comparison operators require the same type for both arguments
+// E014: Boolean operators operate only on BOOLEAN
+// E015: Names must be declared before they are used
+// E016: Array selectors can only be used on ARRAY types
+// E017: Constant array indices must be within the array bounds
+// E018: Field selectors can only be used on RECORD types
+// E019: Field selector fields must exist on the given RECORD type
+// E020: Actual and formal parameter counts must match for procedure calls
+// E021: Actual and formal parameter types must match for procedure calls
+// E022: Constants cannot be used for VAR parameters
+// E023: Expressions cannot be used for VAR parameters
+// E024: The assignment lhs must be assignable
+// E025: The types of rhs and lhs of an assignment must match
+// E026: The type of IF-conditions must be BOOLEAN
+// E027: The type of WHILE-conditions must be BOOLEAN
+// E028: Module names at begin and end must match
+// E029: Procedure names at begin and end must match
+// E030: Array indices must be of type INTEGER
+
+// W001: WHILE-condition is constant
+// W002: IF-condition is constant
+
+
 inline auto errorDuplicateIdentifier(const std::string& identifier)
 {
     return format(FMT_STRING("Duplicate identifier '{:s}'."), identifier);
@@ -10,7 +52,7 @@ inline auto errorExpressionNotConst() { return "Expression must be constant."; }
 
 inline auto errorSizeLtZero(int size)
 {
-    return format(FMT_STRING("Array size must be >= 0 but is {:d}"), size);
+    return format(FMT_STRING("Array size must be > 0 but is {:d}"), size);
 }
 
 inline auto errorMissingDeclaration(const std::string& identifier)

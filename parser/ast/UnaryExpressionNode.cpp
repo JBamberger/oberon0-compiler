@@ -4,14 +4,14 @@
 #include "Token.h"
 #include <cassert>
 
-inline std::shared_ptr<TypeNode> selectType(const UnaryOperator op)
+inline std::string selectType(const UnaryOperator op)
 {
     switch (op) {
     case UnaryOperator::plus:
     case UnaryOperator::minus:
-        return Scope::INTEGER;
+        return "INTEGER";
     case UnaryOperator::not:
-        return Scope::BOOLEAN;
+        return "BOOLEAN";
     default:
         std::terminate();
     }

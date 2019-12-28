@@ -10,7 +10,7 @@ class VariableReferenceNode : public AssignableExpressionNode {
     VariableReferenceNode(const FilePos& pos, VariableDeclarationNode* variable);
     ~VariableReferenceNode() override;
 
-    const std::string& getName() const;
+    std::string getName() const;
 
     VariableDeclarationNode* getVariable() const;
 

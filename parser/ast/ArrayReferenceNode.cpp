@@ -5,7 +5,7 @@
 
 ArrayReferenceNode::ArrayReferenceNode(const FilePos& pos,
                                        std::unique_ptr<ExpressionNode> index,
-                                       std::shared_ptr<TypeNode> type,
+                                       std::string type,
                                        std::unique_ptr<AssignableExpressionNode> array_ref)
     : AssignableExpressionNode(NodeType::selector, pos, std::move(type)),
       array_ref_(std::move(array_ref)), index_(std::move(index))

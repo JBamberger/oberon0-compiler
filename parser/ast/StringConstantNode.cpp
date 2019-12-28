@@ -3,7 +3,7 @@
 #include "Scope.h"
 
 StringConstantNode::StringConstantNode(const FilePos& pos, std::string value)
-    : ConstantNode(NodeType::string_constant, pos, Scope::STRING), value_(std::move(value))
+    : ConstantNode(NodeType::string_constant, pos, "STRING"), value_(std::move(value))
 {
 }
 

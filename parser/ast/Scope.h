@@ -21,13 +21,6 @@ struct Symbol {
 };
 
 class Scope {
-
-  public:
-    static std::shared_ptr<BasicTypeNode> INTEGER;
-    static std::shared_ptr<BasicTypeNode> STRING;
-    static std::shared_ptr<BasicTypeNode> BOOLEAN;
-
-  private:
     std::shared_ptr<Scope> parent_;
     std::vector<Scope*> children_;
 

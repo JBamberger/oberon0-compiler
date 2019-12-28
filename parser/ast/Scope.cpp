@@ -3,18 +3,8 @@
 #include <cassert>
 #include <utility>
 
-std::shared_ptr<BasicTypeNode> Scope::INTEGER =
-    std::make_shared<BasicTypeNode>(FilePos(), "INTEGER");
-std::shared_ptr<BasicTypeNode> Scope::BOOLEAN =
-    std::make_shared<BasicTypeNode>(FilePos(), "BOOLEAN");
-std::shared_ptr<BasicTypeNode> Scope::STRING = std::make_shared<BasicTypeNode>(FilePos(), "STRING");
-
 Scope::Scope(std::string name) : name_(std::move(name))
 {
-    // Declare builtin types in the hightest level scope
-    declareDefaultType(INTEGER);
-    declareDefaultType(BOOLEAN);
-    declareDefaultType(STRING);
 }
 
 Scope::Scope(std::string name, std::shared_ptr<Scope> parent)
