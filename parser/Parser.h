@@ -15,6 +15,9 @@
 #include "ast/VariableDeclarationNode.h"
 #include "ast/WhileStatementNode.h"
 
+enum class OperatorType : char;
+enum class BinaryOperator : char;
+
 class Parser {
 
     Scanner* scanner_;
@@ -29,10 +32,12 @@ class Parser {
     std::unique_ptr<Node> parse();
 
   private:
+    // parsing utility functions
     std::unique_ptr<const Token> require_token(const TokenType& type) const;
     Identifier ident() const;
     std::vector<Identifier> ident_list() const;
 
+    // parsing functions
     std::unique_ptr<ModuleNode> module();
     void declarations(BlockNode* block);
     void const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>* list);
@@ -57,12 +62,18 @@ class Parser {
     std::unique_ptr<AssignableExpressionNode>
     selector(std::unique_ptr<AssignableExpressionNode> parent);
 
+    // expression evaluation
     std::unique_ptr<ExpressionNode>
     evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
                              std::unique_ptr<ExpressionNode> operand_2,
-                             std::unique_ptr<const Token> op);
+                             std::unique_ptr<const Token> op) const;
     std::unique_ptr<ExpressionNode> evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
-                                                            std::unique_ptr<const Token> op);
+                                                            std::unique_ptr<const Token> op) const;
+
+    // type checking
+    std::string
+    typeCheckBinary(ExpressionNode* operand_1, ExpressionNode* operand_2, OperatorType op) const;
+    std::string typeCheckUnary(ExpressionNode* operand, OperatorType op) const;
 
     template <class T>
     void insertDeclaration(std::unique_ptr<T> node, std::vector<std::unique_ptr<T>>* list)
@@ -75,11 +86,11 @@ class Parser {
         }
     }
 
+    // type and scope handling
     Node* resolveLocalId(const Scope* scope, const Identifier& id) const;
     Node* resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const;
     Node* resolveId(const Scope* scope, const Identifier& id) const;
     Node* resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const;
-
     std::string addType(std::unique_ptr<TypeNode> type);
     TypeNode* findType(const std::string& name, const FilePos& pos) const;
 };

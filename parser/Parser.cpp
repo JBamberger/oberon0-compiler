@@ -9,6 +9,7 @@
 #include "ast/ArrayReferenceNode.h"
 #include "ast/BasicTypeNode.h"
 #include "ast/BinaryExpressionNode.h"
+#include "ast/BooleanConstantNode.h"
 #include "ast/ConstantDeclarationNode.h"
 #include "ast/FieldReferenceNode.h"
 #include "ast/NumberConstantNode.h"
@@ -22,7 +23,6 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
-#include "ast/BooleanConstantNode.h"
 
 class ParameterReferenceNode;
 Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
@@ -546,9 +546,38 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 {
     auto proc = std::make_unique<ProcedureCallNode>(id.pos, id.name);
-
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
         actual_parameters(proc->getParameters().get());
+    }
+
+    // check for E031: name must reference a procedure declaration
+    const auto proc_decl =
+        dynamic_cast<ProcedureDeclarationNode*>(resolveId(current_scope_.get(), id));
+    if (proc_decl == nullptr) {
+        logger_->error(id.pos, "Identifier doesn't refer to a procedure.");
+        exit(EXIT_FAILURE);
+    }
+
+    const auto actual = proc->getParameters().get();
+    const auto formal = proc_decl->getParams().get();
+
+    // check for E020: actual and formal param counts must match
+    if (actual->size() != formal->size()) {
+        logger_->error(
+            proc->getFilePos(),
+            "Number of actual parameters does not match number of parameters of the declaration.");
+        exit(EXIT_FAILURE);
+    }
+
+    // check for E021: actual and formal param types must match
+    for (size_t i = 0; i < actual->size(); ++i) {
+        const auto& a = actual->at(i);
+        const auto& b = formal->at(i);
+        if (a->getType() != b->getType()) {
+            logger_->error(a->getFilePos(), "Parameter type mismatch. Expected " + b->getType() +
+                                                " got " + a->getType() + ".");
+            exit(EXIT_FAILURE);
+        }
     }
 
     return proc;
@@ -695,29 +724,119 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
 
 std::unique_ptr<ExpressionNode>
 Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
-                                const std::unique_ptr<const Token> op)
+                                const std::unique_ptr<const Token> op) const
 {
     assert(operand != nullptr);
     const auto unary_op = toUnaryOperator(op->getType());
-    auto first = dynamic_cast<NumberConstantNode*>(operand.get());
+
+    // check for E012,E013,E014: types match operator
+    const auto result_type = typeCheckUnary(operand.get(), getOperatorType(unary_op));
+
+    // T001: evaluate constants
+    const auto first = dynamic_cast<NumberConstantNode*>(operand.get());
     if (first != nullptr) {
-        switch (unary_op) {
-        case UnaryOperator::plus:
-            first->setValue(+first->getValue());
-            break;
-        case UnaryOperator::minus:
-            first->setValue(-first->getValue());
-            break;
-        case UnaryOperator::not:
-            first->setValue(!first->getValue());
-            break;
-        default:
-            std::terminate();
+        const auto value = evalUnary(unary_op, first->getValue());
+
+        if (result_type == "INTEGER") {
+            return std::make_unique<NumberConstantNode>(first->getFilePos(), value);
         }
-        return operand;
+        return std::make_unique<BooleanConstantNode>(first->getFilePos(), value);
     }
 
     return std::make_unique<UnaryExpressionNode>(op->getPosition(), unary_op, std::move(operand));
+}
+
+std::unique_ptr<ExpressionNode>
+Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
+                                 std::unique_ptr<ExpressionNode> operand_2,
+                                 const std::unique_ptr<const Token> op) const
+{
+    assert(operand_1 != nullptr);
+    assert(operand_2 != nullptr);
+
+    const auto bin_op = toBinaryOperator(op->getType());
+
+    // check for E012,E013,E014: types match operator
+    const auto result_type =
+        typeCheckBinary(operand_1.get(), operand_2.get(), getOperatorType(bin_op));
+
+    // T001: evaluate constants
+    const auto first = dynamic_cast<NumberConstantNode*>(operand_1.get());
+    const auto second = dynamic_cast<NumberConstantNode*>(operand_2.get());
+    if (first != nullptr && second != nullptr) {
+        const auto value = evalBinary(bin_op, first->getValue(), second->getValue());
+        if (result_type == "INTEGER") {
+            return std::make_unique<NumberConstantNode>(first->getFilePos(), value);
+        }
+        return std::make_unique<BooleanConstantNode>(first->getFilePos(), value);
+    }
+
+    return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), bin_op,
+                                                  std::move(operand_1), std::move(operand_2));
+}
+
+std::string
+Parser::typeCheckBinary(ExpressionNode* operand_1, ExpressionNode* operand_2, OperatorType op) const
+{
+    switch (op) {
+    case OperatorType::logical: {
+
+        if (operand_1->getType() != "BOOLEAN") {
+            logger_->error(operand_1->getFilePos(), "Operand is not of type BOOLEAN.");
+            exit(EXIT_FAILURE);
+        }
+        if (operand_2->getType() != "BOOLEAN") {
+            logger_->error(operand_2->getFilePos(), "Operand is not of type BOOLEAN.");
+            exit(EXIT_FAILURE);
+        }
+        return "BOOLEAN";
+    }
+    case OperatorType::arithmetic: {
+        if (operand_1->getType() != "INTEGER") {
+            logger_->error(operand_1->getFilePos(), "Operand is not of type INTEGER.");
+            exit(EXIT_FAILURE);
+        }
+        if (operand_2->getType() != "INTEGER") {
+            logger_->error(operand_2->getFilePos(), "Operand is not of type INTEGER.");
+            exit(EXIT_FAILURE);
+        }
+        return "INTEGER";
+    }
+    case OperatorType::comparison: {
+        if (operand_1->getType() != operand_2->getType()) {
+            logger_->error(operand_1->getFilePos(), "Operands have different types.");
+            exit(EXIT_FAILURE);
+        }
+        return "BOOLEAN";
+    }
+    default:
+        std::terminate();
+    }
+}
+
+std::string Parser::typeCheckUnary(ExpressionNode* operand, OperatorType op) const
+{
+    switch (op) {
+    case OperatorType::logical: {
+
+        if (operand->getType() != "BOOLEAN") {
+            logger_->error(operand->getFilePos(), "Operand is not of type BOOLEAN.");
+            exit(EXIT_FAILURE);
+        }
+        return "BOOLEAN";
+    }
+    case OperatorType::arithmetic: {
+        if (operand->getType() != "INTEGER") {
+            logger_->error(operand->getFilePos(), "Operand is not of type INTEGER.");
+            exit(EXIT_FAILURE);
+        }
+        return "INTEGER";
+    }
+    case OperatorType::comparison:
+        // there is no unary comparison operator
+    default:
+        std::terminate();
+    }
 }
 
 Node* Parser::resolveLocalId(const Scope* scope, const Identifier& id) const
@@ -768,70 +887,4 @@ TypeNode* Parser::findType(const std::string& name, const FilePos& pos) const
 Node* Parser::resolveId(const Scope* scope, const Identifier& id) const
 {
     return resolveId(scope, id.name, id.pos);
-}
-
-std::unique_ptr<ExpressionNode>
-Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
-                                 std::unique_ptr<ExpressionNode> operand_2,
-                                 const std::unique_ptr<const Token> op)
-{
-    assert(operand_1 != nullptr);
-    assert(operand_2 != nullptr);
-
-    const auto bin_op = toBinaryOperator(op->getType());
-    const auto op_type = getOperatorType(bin_op);
-    std::string result_type;
-    switch (op_type) {
-    case OperatorType::logical: {
-
-        if (operand_1->getType() != "BOOLEAN") {
-            logger_->error(operand_1->getFilePos(), "Operand is not of type BOOLEAN.");
-            exit(EXIT_FAILURE);
-        }
-        if (operand_2->getType() != "BOOLEAN") {
-            logger_->error(operand_2->getFilePos(), "Operand is not of type BOOLEAN.");
-            exit(EXIT_FAILURE);
-        }
-        result_type = "BOOLEAN";
-        break;
-    }
-    case OperatorType::arithmetic: {
-        if (operand_1->getType() != "INTEGER") {
-            logger_->error(operand_1->getFilePos(), "Operand is not of type INTEGER.");
-            exit(EXIT_FAILURE);
-        }
-        if (operand_2->getType() != "INTEGER") {
-            logger_->error(operand_2->getFilePos(), "Operand is not of type INTEGER.");
-            exit(EXIT_FAILURE);
-        }
-        result_type = "INTEGER";
-        break;
-    }
-    case OperatorType::comparison: {
-        if (operand_1->getType() != operand_2->getType()) {
-            logger_->error(operand_1->getFilePos(), "Operands have different types.");
-            exit(EXIT_FAILURE);
-        }
-        result_type = "BOOLEAN";
-        break;
-    }
-    default:
-        std::terminate();
-    }
-
-    const auto first = dynamic_cast<NumberConstantNode*>(operand_1.get());
-    const auto second = dynamic_cast<NumberConstantNode*>(operand_2.get());
-    if (first != nullptr && second != nullptr) {
-        const auto value =
-            BinaryExpressionNode::eval(bin_op, first->getValue(), second->getValue());
-        if (result_type == "INTEGER") {
-            return std::make_unique<NumberConstantNode>(first->getFilePos(), value);
-
-        } else {
-            return std::make_unique<BooleanConstantNode>(first->getFilePos(), value);
-        }
-    }
-
-    return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), bin_op,
-                                                  std::move(operand_1), std::move(operand_2));
 }

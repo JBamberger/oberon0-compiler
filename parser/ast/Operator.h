@@ -35,18 +35,6 @@ inline std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
     // clang-format on
 }
 
-inline UnaryOperator toUnaryOperator(const TokenType& type)
-{
-    // clang-format off
-    switch (type) {
-    case TokenType::op_plus:  return UnaryOperator::plus;
-    case TokenType::op_minus: return UnaryOperator::minus;
-    case TokenType::op_not:   return UnaryOperator::not;
-    default: std::terminate();
-    }
-    // clang-format on
-}
-
 inline std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
 {
     // clang-format off
@@ -64,6 +52,18 @@ inline std::ostream& operator<<(std::ostream& stream, const BinaryOperator& op)
     case BinaryOperator::leq:         return stream << "'<='";
     case BinaryOperator::gt:          return stream << "'>'";
     case BinaryOperator::geq:         return stream << "'>='";
+    default: std::terminate();
+    }
+    // clang-format on
+}
+
+inline UnaryOperator toUnaryOperator(const TokenType& type)
+{
+    // clang-format off
+    switch (type) {
+    case TokenType::op_plus:  return UnaryOperator::plus;
+    case TokenType::op_minus: return UnaryOperator::minus;
+    case TokenType::op_not:   return UnaryOperator::not;
     default: std::terminate();
     }
     // clang-format on
@@ -110,6 +110,67 @@ inline OperatorType getOperatorType(BinaryOperator type)
     case BinaryOperator::logical_or:
     case BinaryOperator::logical_and:
         return OperatorType::logical;
+    default:
+        std::terminate();
+    }
+}
+
+inline OperatorType getOperatorType(UnaryOperator type)
+{
+    switch (type) {
+    case UnaryOperator::plus:
+    case UnaryOperator::minus:
+        return OperatorType ::arithmetic;
+    case UnaryOperator::not:
+        return OperatorType ::logical;
+    default:
+        std::terminate();
+    }
+}
+
+inline int evalBinary(const BinaryOperator op, const int v1, const int v2)
+{
+    switch (op) {
+    case BinaryOperator::times:
+        return v1 * v2;
+    case BinaryOperator::div:
+        return v1 / v2;
+    case BinaryOperator::mod:
+        return v1 % v2;
+    case BinaryOperator::plus:
+        return v1 + v2;
+    case BinaryOperator::minus:
+        return v1 - v2;
+    case BinaryOperator::logical_and:
+        return v1 && v2;
+    case BinaryOperator::logical_or:
+        return v1 || v2;
+    case BinaryOperator::eq:
+        return v1 == v2;
+    case BinaryOperator::neq:
+        return v1 != v2;
+    case BinaryOperator::lt:
+        return v1 < v2;
+    case BinaryOperator::leq:
+        return v1 <= v2;
+    case BinaryOperator::gt:
+        return v1 > v2;
+    case BinaryOperator::geq:
+        return v1 >= v2;
+    default:
+        std::terminate();
+    }
+}
+
+inline int evalUnary(const UnaryOperator op, const int value)
+{
+    switch (op) {
+    case UnaryOperator::plus:
+        return +value;
+    case UnaryOperator::minus:
+        return -value;
+    case UnaryOperator::not:
+        return !value;
     default:
         std::terminate();
     }

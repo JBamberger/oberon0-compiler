@@ -1,12 +1,12 @@
 #pragma once
 #include "fmt/format.h"
 
-// Constant expressions must be evaluated
-// Arithmetic operators produce INTEGER
-// Comparison operators produce BOOLEAN
-// Boolean operators produce BOOLEAN
-// RECORD types are passed by reference
-// ARRAY types are passed by reference
+// T001: Constant expressions must be evaluated
+// T002: Arithmetic operators produce INTEGER
+// T003: Comparison operators produce BOOLEAN
+// T004: Boolean operators produce BOOLEAN
+// T005: RECORD types are passed by reference
+// T006: ARRAY types are passed by reference
 
 // E001: Names must be unique in the scope
 // E002: Constant declarations must evaluate to constants
@@ -38,6 +38,7 @@
 // E028: Module names at begin and end must match
 // E029: Procedure names at begin and end must match
 // E030: Array indices must be of type INTEGER
+// E031: Procedure call name must refer to a procedure declaration
 
 // W001: WHILE-condition is constant
 // W002: IF-condition is constant

@@ -1,6 +1,5 @@
 #include "RecordTypeNode.h"
 #include "NodeVisitor.h"
-#include <cassert>
 #include <utility>
 
 RecordTypeNode::RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent)
@@ -24,7 +23,7 @@ std::string RecordTypeNode::getId() const
     std::stringstream s;
     s << "[R;";
     for (const auto& m : *members_) {
-        s << m->getName() << "," << m->getType();
+        s << m->getName() << "," << m->getType() << ";";
     }
     s << "]";
     return s.str();
