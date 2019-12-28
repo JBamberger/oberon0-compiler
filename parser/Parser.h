@@ -33,7 +33,11 @@ class Parser {
 
   private:
     // parsing utility functions
-    std::unique_ptr<const Token> require_token(const TokenType& type) const;
+    bool checkToken(const TokenType& type) const;
+    bool checkAndConsumeToken(const TokenType& type) const;
+    void requireToken(const TokenType& type) const;
+    std::unique_ptr<const Token> requireAndGetToken(const TokenType& type) const;
+
     Identifier ident() const;
     std::vector<Identifier> ident_list() const;
 

@@ -38,7 +38,32 @@ std::unique_ptr<Node> Parser::parse()
     return module();
 }
 
-std::unique_ptr<const Token> Parser::require_token(const TokenType& type) const
+bool Parser::checkToken(const TokenType& type) const
+{
+    return scanner_->peekToken()->getType() == type;
+}
+
+bool Parser::checkAndConsumeToken(const TokenType& type) const
+{
+    const auto consume = checkToken(type);
+    if (consume) {
+        static_cast<void>(scanner_->nextToken());
+    }
+    return consume;
+}
+
+void Parser::requireToken(const TokenType& type) const
+{
+    const auto token = scanner_->nextToken();
+    if (token->getType() != type) {
+        const auto msg = "Expected " + type_str(type) + " but got " +
+                         (std::stringstream() << *token).str() + ".";
+        logger_->error(token->getPosition(), msg);
+        exit(EXIT_FAILURE);
+    }
+}
+
+std::unique_ptr<const Token> Parser::requireAndGetToken(const TokenType& type) const
 {
     auto token = scanner_->nextToken();
     if (token->getType() != type) {
@@ -52,7 +77,7 @@ std::unique_ptr<const Token> Parser::require_token(const TokenType& type) const
 
 Identifier Parser::ident() const
 {
-    const auto token = require_token(TokenType::const_ident);
+    const auto token = requireAndGetToken(TokenType::const_ident);
     const auto ident_token = dynamic_cast<const IdentToken*>(token.get());
     assert(ident_token != nullptr);
 
@@ -65,8 +90,7 @@ std::vector<Identifier> Parser::ident_list() const
     const auto pos = scanner_->peekToken()->getPosition();
     ids.push_back(ident());
 
-    while (scanner_->peekToken()->getType() == TokenType::comma) {
-        static_cast<void>(scanner_->nextToken());
+    while (checkAndConsumeToken(TokenType::comma)) {
         ids.push_back(ident());
     }
 
@@ -75,26 +99,25 @@ std::vector<Identifier> Parser::ident_list() const
 
 std::unique_ptr<ModuleNode> Parser::module()
 {
-    const auto pos = require_token(TokenType::kw_module)->getPosition();
+    const auto pos = requireAndGetToken(TokenType::kw_module)->getPosition();
     const auto id1 = ident();
 
     auto module_node = std::make_unique<ModuleNode>(pos, id1.name);
     current_scope_ = module_node->getScope(); // enter scope
 
     // add the built-in types to the module scope
-    addType(BasicTypeNode::makeInt());
-    addType(BasicTypeNode::makeBool());
-    addType(BasicTypeNode::makeString());
+    static_cast<void>(addType(BasicTypeNode::makeInt()));
+    static_cast<void>(addType(BasicTypeNode::makeBool()));
+    static_cast<void>(addType(BasicTypeNode::makeString()));
 
-    static_cast<void>(require_token(TokenType::semicolon));
+    requireToken(TokenType::semicolon);
     declarations(module_node.get());
-    if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
-        static_cast<void>(scanner_->nextToken());
+    if (checkAndConsumeToken(TokenType::kw_begin)) {
         statement_sequence(module_node->getStatements().get());
     }
-    static_cast<void>(require_token(TokenType::kw_end));
+    requireToken(TokenType::kw_end);
     const auto id2 = ident();
-    static_cast<void>(require_token(TokenType::period));
+    requireToken(TokenType::period);
 
     // check for E028
     if (id1.name != id2.name) {
@@ -110,52 +133,36 @@ std::unique_ptr<ModuleNode> Parser::module()
 
 void Parser::declarations(BlockNode* block)
 {
-    auto next = scanner_->peekToken();
-    const auto pos = next->getPosition();
-
-    if (next->getType() == TokenType::kw_const) {
-        static_cast<void>(scanner_->nextToken()); // const keyword
-
-        next = scanner_->peekToken();
-        while (next->getType() == TokenType::const_ident) {
+    if (checkAndConsumeToken(TokenType::kw_const)) {
+        while (checkToken(TokenType::const_ident)) {
             const_declaration(block->getConstants().get());
-            next = scanner_->peekToken();
         }
     }
 
-    if (next->getType() == TokenType::kw_type) {
-        static_cast<void>(scanner_->nextToken()); // type keyword
-
-        next = scanner_->peekToken();
-        while (next->getType() == TokenType::const_ident) {
+    if (checkAndConsumeToken(TokenType::kw_type)) {
+        while (checkToken(TokenType::const_ident)) {
             type_declaration(block->getTypes().get());
-            next = scanner_->peekToken();
         }
     }
 
-    if (next->getType() == TokenType::kw_var) {
-        static_cast<void>(scanner_->nextToken()); // var keyword
-
-        next = scanner_->peekToken();
-        while (next->getType() == TokenType::const_ident) {
+    if (checkAndConsumeToken(TokenType::kw_var)) {
+        while (checkToken(TokenType::const_ident)) {
             var_declaration(block->getVariables().get());
-            next = scanner_->peekToken();
         }
     }
 
-    while (next->getType() == TokenType::kw_procedure) {
+    while (checkToken(TokenType::kw_procedure)) {
         procedure_declaration(block->getProcedures().get());
-        static_cast<void>(require_token(TokenType::semicolon));
-        next = scanner_->peekToken();
+        requireToken(TokenType::semicolon);
     }
 }
 
 void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>* list)
 {
     const auto id = ident();
-    static_cast<void>(require_token(TokenType::op_eq));
+    requireToken(TokenType::op_eq);
     auto value = expression();
-    static_cast<void>(require_token(TokenType::semicolon));
+    requireToken(TokenType::semicolon);
 
     auto node = std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(value));
     insertDeclaration(std::move(node), list);
@@ -164,9 +171,9 @@ void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNo
 void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>* list)
 {
     const auto id = ident();
-    static_cast<void>(require_token(TokenType::op_eq));
+    requireToken(TokenType::op_eq);
     auto tp = type();
-    static_cast<void>(require_token(TokenType::semicolon));
+    requireToken(TokenType::semicolon);
 
     if (current_scope_->declareIdentifier(id.name, findType(tp, id.pos))) {
         list->push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
@@ -179,9 +186,9 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>*
 void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* list)
 {
     const auto ids = ident_list();
-    static_cast<void>(require_token(TokenType::colon));
+    requireToken(TokenType::colon);
     auto tp = type();
-    static_cast<void>(require_token(TokenType::semicolon));
+    requireToken(TokenType::semicolon);
 
     for (const auto& id : ids) {
         auto node = std::make_unique<VariableDeclarationNode>(id.pos, id.name, tp);
@@ -192,26 +199,25 @@ void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode
 void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>* list)
 {
     // procedure heading
-    const auto pos = require_token(TokenType::kw_procedure)->getPosition();
+    const auto pos = requireAndGetToken(TokenType::kw_procedure)->getPosition();
     const auto id1 = ident();
 
     auto node = std::make_unique<ProcedureDeclarationNode>(pos, id1.name, current_scope_);
     current_scope_ = node->getScope(); // enter block scope
 
-    if (scanner_->peekToken()->getType() == TokenType::lparen) {
+    if (checkToken(TokenType::lparen)) {
         formal_parameters(node->getParams().get());
     }
-    static_cast<void>(require_token(TokenType::semicolon));
+    requireToken(TokenType::semicolon);
 
     // procedure body
     declarations(node.get());
 
-    if (scanner_->peekToken()->getType() == TokenType::kw_begin) {
-        static_cast<void>(scanner_->nextToken());
+    if (checkAndConsumeToken(TokenType::kw_begin)) {
         statement_sequence(node->getStatements().get());
     }
 
-    static_cast<void>(require_token(TokenType::kw_end));
+    requireToken(TokenType::kw_end);
     const auto id2 = ident();
 
     if (id1.name != id2.name) {
@@ -337,13 +343,13 @@ std::unique_ptr<ExpressionNode> Parser::factor()
         return std::make_unique<StringConstantNode>(pos, value);
     }
     case TokenType::lparen: {
-        static_cast<void>(require_token(TokenType::lparen));
+        requireToken(TokenType::lparen);
         auto expr = expression();
-        static_cast<void>(require_token(TokenType::rparen));
+        requireToken(TokenType::rparen);
         return expr;
     }
     case TokenType::op_not: {
-        auto op = require_token(TokenType::op_not);
+        auto op = requireAndGetToken(TokenType::op_not);
         auto value = factor();
         return evaluateUnaryExpression(std::move(value), std::move(op));
     }
@@ -367,8 +373,8 @@ std::string Parser::type()
     case TokenType::const_ident: {
         const auto id = ident();
 
-        // the type must already exist because it is not allowed to define new basic types (E005,
-        // E007, E008)
+        // check for E005,E007,E008: the type must already exist because it is not allowed to define
+        // new basic types
         const auto resolved_type = dynamic_cast<TypeNode*>(resolveId(current_scope_.get(), id));
         if (resolved_type == nullptr) {
             logger_->error(id.pos, "Identifier is not a type.");
@@ -379,9 +385,9 @@ std::string Parser::type()
         return resolved_type->getId();
     }
     case TokenType::kw_array: {
-        const auto pos = require_token(TokenType::kw_array)->getPosition();
+        const auto pos = requireAndGetToken(TokenType::kw_array)->getPosition();
         const auto array_value = expression();
-        static_cast<void>(require_token(TokenType::kw_of));
+        requireToken(TokenType::kw_of);
         auto array_type = type();
 
         // check for E003
@@ -406,13 +412,12 @@ std::string Parser::type()
         auto type = std::make_unique<RecordTypeNode>(pos, current_scope_);
         current_scope_ = type->getScope(); // enter scope
 
-        static_cast<void>(require_token(TokenType::kw_record));
+        requireToken(TokenType::kw_record);
         field_list(type->getMembers());
-        while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-            static_cast<void>(require_token(TokenType::semicolon));
+        while (checkAndConsumeToken(TokenType::semicolon)) {
             field_list(type->getMembers());
         }
-        static_cast<void>(require_token(TokenType::kw_end));
+        requireToken(TokenType::kw_end);
 
         current_scope_ = type->getScope()->getParent(); // exit scope
         return addType(std::move(type));
@@ -427,11 +432,11 @@ std::string Parser::type()
 
 void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list)
 {
-    if (scanner_->peekToken()->getType() != TokenType::const_ident) {
+    if (!checkToken(TokenType::const_ident)) {
         return;
     }
     const auto ids = ident_list();
-    static_cast<void>(require_token(TokenType::colon));
+    requireToken(TokenType::colon);
     auto tp = type();
 
     for (const auto& id : ids) {
@@ -442,35 +447,22 @@ void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list
 
 void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list)
 {
-    const auto pos = require_token(TokenType::lparen)->getPosition();
+    requireToken(TokenType::lparen);
 
-    if (scanner_->peekToken()->getType() == TokenType::kw_var ||
-        scanner_->peekToken()->getType() == TokenType::const_ident) {
-
+    if (checkToken(TokenType::kw_var) || checkToken(TokenType::const_ident)) {
         fp_section(list);
-
-        while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-            static_cast<void>(scanner_->nextToken());
-
+        while (checkAndConsumeToken(TokenType::semicolon)) {
             fp_section(list);
         }
     }
-
-    static_cast<void>(require_token(TokenType::rparen));
+    requireToken(TokenType::rparen);
 }
 
 void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list)
 {
-    const auto next_token = scanner_->peekToken();
-
-    auto is_reference = false;
-    if (next_token->getType() == TokenType::kw_var) {
-        static_cast<void>(scanner_->nextToken());
-        is_reference = true;
-    }
-
+    const auto is_reference = checkAndConsumeToken(TokenType::kw_var);
     const auto ids = ident_list();
-    static_cast<void>(require_token(TokenType::colon));
+    requireToken(TokenType::colon);
     auto tp = type();
 
     for (const auto& id : ids) {
@@ -482,8 +474,7 @@ void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* 
 void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list)
 {
     list->emplace_back(statement());
-    while (scanner_->peekToken()->getType() == TokenType::semicolon) {
-        static_cast<void>(scanner_->nextToken());
+    while (checkAndConsumeToken(TokenType::semicolon)) {
         list->emplace_back(statement());
     }
 }
@@ -536,7 +527,7 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 
     auto lhs = selector(std::move(parent));
 
-    static_cast<void>(require_token(TokenType::op_becomes));
+    requireToken(TokenType::op_becomes);
     auto rhs = expression();
 
     // check for E025: assignment types must match
@@ -551,7 +542,7 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 {
     auto actual = std::make_unique<std::vector<std::unique_ptr<ExpressionNode>>>();
-    if (scanner_->peekToken()->getType() == TokenType::lparen) {
+    if (checkToken(TokenType::lparen)) {
         actual_parameters(actual.get());
     }
 
@@ -589,9 +580,9 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 std::unique_ptr<IfStatementNode> Parser::if_statement()
 {
     // if statement
-    auto pos = require_token(TokenType::kw_if)->getPosition();
+    auto pos = requireAndGetToken(TokenType::kw_if)->getPosition();
     auto cond = expression();
-    static_cast<void>(require_token(TokenType::kw_then));
+    requireToken(TokenType::kw_then);
     auto node = std::make_unique<IfStatementNode>(pos, std::move(cond));
 
     statement_sequence(node->getThenPart().get());
@@ -600,13 +591,13 @@ std::unique_ptr<IfStatementNode> Parser::if_statement()
     auto nextNode = node.get();
 
     // elif statements
-    while (scanner_->peekToken()->getType() == TokenType::kw_elsif) {
-        pos = scanner_->nextToken()->getPosition();
+    while (checkToken(TokenType::kw_elsif)) {
+        pos = requireAndGetToken(TokenType::kw_elsif)->getPosition();
         cond = expression();
         auto tmp_node = std::make_unique<IfStatementNode>(pos, std::move(cond));
         const auto tmp_ptr = tmp_node.get();
 
-        static_cast<void>(require_token(TokenType::kw_then));
+        requireToken(TokenType::kw_then);
         statement_sequence(tmp_node->getThenPart().get());
 
         nextNode->getElsePart()->push_back(std::move(tmp_node));
@@ -614,54 +605,46 @@ std::unique_ptr<IfStatementNode> Parser::if_statement()
     }
 
     // else statement
-    if (scanner_->peekToken()->getType() == TokenType::kw_else) {
-        static_cast<void>(scanner_->nextToken());
+    if (checkAndConsumeToken(TokenType::kw_else)) {
         statement_sequence(nextNode->getElsePart().get());
     }
-
-    static_cast<void>(require_token(TokenType::kw_end));
+    requireToken(TokenType::kw_end);
 
     return node;
 }
 
 std::unique_ptr<WhileStatementNode> Parser::while_statement()
 {
-    const auto token = require_token(TokenType::kw_while);
+    const auto pos = requireAndGetToken(TokenType::kw_while)->getPosition();
     auto cond = expression();
-    auto stmt = std::make_unique<WhileStatementNode>(token->getPosition(), std::move(cond));
+    auto stmt = std::make_unique<WhileStatementNode>(pos, std::move(cond));
 
-    static_cast<void>(require_token(TokenType::kw_do));
+    requireToken(TokenType::kw_do);
     statement_sequence(stmt->getBody().get());
-    static_cast<void>(require_token(TokenType::kw_end));
+    requireToken(TokenType::kw_end);
 
     return stmt;
 }
 
 void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params)
 {
-    static_cast<void>(require_token(TokenType::lparen));
+    requireToken(TokenType::lparen);
 
-    if (scanner_->peekToken()->getType() != TokenType::rparen) {
+    if (!checkToken(TokenType::rparen)) {
         params->push_back(expression());
-
-        while (scanner_->peekToken()->getType() == TokenType::comma) {
-            static_cast<void>(scanner_->nextToken());
-
+        while (checkAndConsumeToken(TokenType::comma)) {
             params->push_back(expression());
         }
     }
-
-    static_cast<void>(require_token(TokenType::rparen));
+    requireToken(TokenType::rparen);
 }
 
 std::unique_ptr<AssignableExpressionNode>
 Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
 {
     auto prev = std::move(parent);
-    auto next = scanner_->peekToken();
     while (true) {
-        if (next->getType() == TokenType::period) {
-            static_cast<void>(scanner_->nextToken());
+        if (checkAndConsumeToken(TokenType::period)) {
             const auto id = ident();
 
             // check for E018: field reference only on records
@@ -682,10 +665,10 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
 
             prev = std::make_unique<FieldReferenceNode>(id.pos, field, std::move(prev));
 
-        } else if (next->getType() == TokenType::lbrack) {
-            const auto open_token = scanner_->nextToken();
+        } else if (checkToken(TokenType::lbrack)) {
+            const auto open_token = requireAndGetToken(TokenType::lbrack);
             auto index = expression();
-            static_cast<void>(require_token(TokenType::rbrack));
+            requireToken(TokenType::rbrack);
 
             // check for E016: array indexing only on array types
             const auto arr =
@@ -718,8 +701,6 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
         } else {
             break;
         }
-
-        next = scanner_->peekToken();
     }
     return prev;
 }
