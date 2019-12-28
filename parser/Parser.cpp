@@ -579,34 +579,50 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 
 std::unique_ptr<IfStatementNode> Parser::if_statement()
 {
-    // if statement
+    // if condition
     auto pos = requireAndGetToken(TokenType::kw_if)->getPosition();
     auto cond = expression();
     requireToken(TokenType::kw_then);
-    auto node = std::make_unique<IfStatementNode>(pos, std::move(cond));
 
+    // check for E026: if condition must be BOOLEAN
+    if (cond->getType() != "BOOLEAN") {
+        logger_->error(cond->getFilePos(), "If condition must be of type BOOLEAN.");
+        exit(EXIT_FAILURE);
+    }
+
+    auto node = std::make_unique<IfStatementNode>(pos, std::move(cond));
+    // if body
     statement_sequence(node->getThenPart().get());
 
     // this is the next node where the else body must be filled
-    auto nextNode = node.get();
+    auto next_node = node.get();
 
     // elif statements
     while (checkToken(TokenType::kw_elsif)) {
+        // elif condition
         pos = requireAndGetToken(TokenType::kw_elsif)->getPosition();
         cond = expression();
+        requireToken(TokenType::kw_then);
+
+        // check for E026: if condition must be BOOLEAN
+        if (cond->getType() != "BOOLEAN") {
+            logger_->error(cond->getFilePos(), "If condition must be of type BOOLEAN.");
+            exit(EXIT_FAILURE);
+        }
+
         auto tmp_node = std::make_unique<IfStatementNode>(pos, std::move(cond));
         const auto tmp_ptr = tmp_node.get();
 
-        requireToken(TokenType::kw_then);
+        // elif body
         statement_sequence(tmp_node->getThenPart().get());
 
-        nextNode->getElsePart()->push_back(std::move(tmp_node));
-        nextNode = tmp_ptr;
+        next_node->getElsePart()->push_back(std::move(tmp_node));
+        next_node = tmp_ptr;
     }
 
     // else statement
     if (checkAndConsumeToken(TokenType::kw_else)) {
-        statement_sequence(nextNode->getElsePart().get());
+        statement_sequence(next_node->getElsePart().get());
     }
     requireToken(TokenType::kw_end);
 
@@ -617,6 +633,13 @@ std::unique_ptr<WhileStatementNode> Parser::while_statement()
 {
     const auto pos = requireAndGetToken(TokenType::kw_while)->getPosition();
     auto cond = expression();
+
+    // check for E027: while condition must be BOOLEAN
+    if (cond->getType() != "BOOLEAN") {
+        logger_->error(cond->getFilePos(), "While condition must be of type BOOLEAN.");
+        exit(EXIT_FAILURE);
+    }
+
     auto stmt = std::make_unique<WhileStatementNode>(pos, std::move(cond));
 
     requireToken(TokenType::kw_do);
