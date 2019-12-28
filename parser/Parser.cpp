@@ -518,10 +518,9 @@ std::unique_ptr<StatementNode> Parser::statement()
 
 std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 {
+    // check for E024: lhs must be assignable
     const auto symbol = resolveId(current_scope_.get(), id);
-
     std::unique_ptr<AssignableExpressionNode> parent = nullptr;
-
     const auto var_decl = dynamic_cast<VariableDeclarationNode*>(symbol);
     if (var_decl != nullptr) {
         parent = std::make_unique<VariableReferenceNode>(id.pos, var_decl);
@@ -539,6 +538,12 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 
     static_cast<void>(require_token(TokenType::op_becomes));
     auto rhs = expression();
+
+    // check for E025: assignment types must match
+    if (lhs->getType() != rhs->getType()) {
+        logger_->error(rhs->getFilePos(), "Assignment type mismatch.");
+        exit(EXIT_FAILURE);
+    }
 
     return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
 }
@@ -652,8 +657,7 @@ void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* par
 std::unique_ptr<AssignableExpressionNode>
 Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
 {
-
-    std::unique_ptr<AssignableExpressionNode> prev = std::move(parent);
+    auto prev = std::move(parent);
     auto next = scanner_->peekToken();
     while (true) {
         if (next->getType() == TokenType::period) {
