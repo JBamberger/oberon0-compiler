@@ -545,26 +545,24 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 
 std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 {
-    auto proc = std::make_unique<ProcedureCallNode>(id.pos, id.name);
+    auto actual = std::make_unique<std::vector<std::unique_ptr<ExpressionNode>>>();
     if (scanner_->peekToken()->getType() == TokenType::lparen) {
-        actual_parameters(proc->getParameters().get());
+        actual_parameters(actual.get());
     }
 
     // check for E031: name must reference a procedure declaration
-    const auto proc_decl =
-        dynamic_cast<ProcedureDeclarationNode*>(resolveId(current_scope_.get(), id));
+    auto proc_decl = dynamic_cast<ProcedureDeclarationNode*>(resolveId(current_scope_.get(), id));
     if (proc_decl == nullptr) {
         logger_->error(id.pos, "Identifier doesn't refer to a procedure.");
         exit(EXIT_FAILURE);
     }
 
-    const auto actual = proc->getParameters().get();
     const auto formal = proc_decl->getParams().get();
 
     // check for E020: actual and formal param counts must match
     if (actual->size() != formal->size()) {
         logger_->error(
-            proc->getFilePos(),
+            id.pos,
             "Number of actual parameters does not match number of parameters of the declaration.");
         exit(EXIT_FAILURE);
     }
@@ -580,7 +578,7 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
         }
     }
 
-    return proc;
+    return std::make_unique<ProcedureCallNode>(id.pos, proc_decl, std::move(actual));
 }
 
 std::unique_ptr<IfStatementNode> Parser::if_statement()

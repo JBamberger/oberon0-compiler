@@ -89,7 +89,7 @@ void NodeVisitor::visit(const ParameterDeclarationNode* node) {}
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
-    for (const auto& p : *node->getParameters()) {
+    for (const auto& p : *node->getParams()) {
         p->visit(this);
     }
 }

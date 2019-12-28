@@ -1,27 +1,32 @@
 #include "ProcedureCallNode.h"
 #include "NodeVisitor.h"
 
-ProcedureCallNode::ProcedureCallNode(const FilePos& pos, std::string name)
-    : StatementNode(NodeType::procedure_call, pos), name_(std::move(name)),
-      parameters_(std::make_unique<std::vector<std::unique_ptr<ExpressionNode>>>())
+ProcedureCallNode::ProcedureCallNode(
+    const FilePos& pos,
+    ProcedureDeclarationNode* procedure,
+    std::unique_ptr<std::vector<std::unique_ptr<ExpressionNode>>> params)
+    : StatementNode(NodeType::procedure_call, pos), procedure_(procedure),
+      params_(std::move(params))
 {
 }
 
 ProcedureCallNode::~ProcedureCallNode() = default;
 
-const std::string& ProcedureCallNode::getName() const { return name_; }
+ProcedureDeclarationNode* ProcedureCallNode::getProcedure() const { return procedure_; }
+
+const std::string& ProcedureCallNode::getName() const { return procedure_->getName(); }
 
 const std::unique_ptr<std::vector<std::unique_ptr<ExpressionNode>>>&
-ProcedureCallNode::getParameters() const
+ProcedureCallNode::getParams() const
 {
-    return parameters_;
+    return params_;
 }
 void ProcedureCallNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void ProcedureCallNode::print(std::ostream& stream) const
 {
-    stream << "ProcedureCall(" << name_;
-    for (const auto& p : *parameters_) {
+    stream << "ProcedureCall(" << getName();
+    for (const auto& p : *params_) {
         stream << ", " << *p;
     }
     stream << ")";
