@@ -1,15 +1,20 @@
 #pragma once
 #include "ExpressionNode.h"
+#include "VariableDeclarationNode.h"
 
 class VariableReferenceNode : public AssignableExpressionNode {
 
-    std::string name_;
+    VariableDeclarationNode* variable_;
 
   public:
-    VariableReferenceNode(const FilePos& pos, std::string name, std::shared_ptr<TypeNode> type);
+    VariableReferenceNode(const FilePos& pos, VariableDeclarationNode* variable);
     ~VariableReferenceNode() override;
 
     const std::string& getName() const;
+
+    VariableDeclarationNode* getVariable() const;
+
     void visit(NodeVisitor* visitor) const override;
+
     void print(std::ostream& stream) const override;
 };

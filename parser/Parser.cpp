@@ -274,29 +274,29 @@ std::unique_ptr<ExpressionNode> Parser::factor()
     case TokenType::const_ident: {
         const auto id = ident();
 
-        // TODO: perform lookup in symbol table and return value if constant
-        const auto resolved = current_scope_->resolveIdentifier(id.name);
-        if (resolved != nullptr) {
-            const auto const_decl = dynamic_cast<ConstantDeclarationNode*>(resolved->value);
+        const auto resolved = resolveId(current_scope_.get(), id);
 
-            if (const_decl != nullptr) {
-                const auto num_const =
-                    dynamic_cast<NumberConstantNode*>(const_decl->getValue().get());
-                if (num_const != nullptr) {
-                    return std::make_unique<NumberConstantNode>(id.pos, num_const->getValue());
-                }
-
-                const auto str_const =
-                    dynamic_cast<StringConstantNode*>(const_decl->getValue().get());
-                if (str_const != nullptr) {
-                    return std::make_unique<StringConstantNode>(id.pos, str_const->getValue());
-                }
+        // check if the identifier is a constant
+        const auto const_decl = dynamic_cast<ConstantDeclarationNode*>(resolved);
+        if (const_decl != nullptr) {
+            const auto num_const = dynamic_cast<NumberConstantNode*>(const_decl->getValue().get());
+            if (num_const != nullptr) {
+                return std::make_unique<NumberConstantNode>(id.pos, num_const->getValue());
             }
-            // TODO: resolve type correctly
-            auto type = std::shared_ptr<TypeNode>();
-            return selector(std::make_unique<VariableReferenceNode>(id.pos, id.name, std::move(type)));
+
+            const auto str_const = dynamic_cast<StringConstantNode*>(const_decl->getValue().get());
+            if (str_const != nullptr) {
+                return std::make_unique<StringConstantNode>(id.pos, str_const->getValue());
+            }
         }
-        logger_->error(id.pos, errorMissingDeclaration(id.name));
+
+        // check if the identifier is a variable
+        const auto var_decl = dynamic_cast<VariableDeclarationNode*>(resolved);
+        if (var_decl != nullptr) {
+            return selector(std::make_unique<VariableReferenceNode>(id.pos, var_decl));
+        }
+
+        logger_->error(id.pos, "Unknown identifier type.");
         exit(EXIT_FAILURE);
     }
     case TokenType::const_number: {
@@ -333,12 +333,27 @@ std::unique_ptr<ExpressionNode> Parser::factor()
     }
 }
 
-std::unique_ptr<TypeNode> Parser::type()
+std::shared_ptr<TypeNode> Parser::type()
 {
+    //TODO: resolve type
+    // How should types be managed? in the scope?
+    // unique names from record/arrays: ARRAY 10 OF INTEGER --> [A,10,INTEGER
+    //
+    // Use unique_ptr everywhere and implement comparison?
+    // Use plain pointer and keep memory in scope?
+    // Remain with shared_ptr? -> requires solution for the resolution step
     const auto next = scanner_->peekToken();
 
     if (next->getType() == TokenType::const_ident) {
         const auto id = ident();
+
+        const auto resolved_type = dynamic_cast<TypeNode*>(resolveId(current_scope_.get(), id));
+        if (resolved_type == nullptr)
+        {
+            logger_->error(id.pos, "Identifier is not a type.");
+            exit(EXIT_FAILURE);
+        }
+
         return std::make_unique<BasicTypeNode>(id.pos, id.name);
     }
 
@@ -483,16 +498,13 @@ std::unique_ptr<StatementNode> Parser::statement()
 
 std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 {
-    const auto symbol = current_scope_->resolveIdentifier(id.name)->value;
+    const auto symbol = resolveId(current_scope_.get(), id);
 
-    // TODO: also check for field / array
     const auto var_ref = dynamic_cast<VariableDeclarationNode*>(symbol);
     if (var_ref != nullptr) {
-        auto lhs =
-            selector(std::make_unique<VariableReferenceNode>(id.pos, id.name, var_ref->getType()));
+        auto lhs = selector(std::make_unique<VariableReferenceNode>(id.pos, var_ref));
 
         static_cast<void>(require_token(TokenType::op_becomes));
-
         auto rhs = expression();
 
         return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
@@ -592,19 +604,55 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
             static_cast<void>(scanner_->nextToken());
             const auto id = ident();
 
-            // TODO: resolve type correctly
-            auto type = prev->getType();
-            prev = std::make_unique<FieldReferenceNode>(id.pos, id.name, type, std::move(prev));
-        } else if (next->getType() == TokenType::lbrack) {
+            // in this branch the previous ref must be a record, otherwise no field references are
+            // possible.
+            const auto record_ref = dynamic_cast<RecordTypeNode*>(prev->getType().get());
+            if (record_ref == nullptr) {
+                logger_->error(prev->getFilePos(), "Ref is not a record type.");
+                exit(EXIT_FAILURE);
+            }
 
+            // field references can only use the local field declarations
+            const auto field = dynamic_cast<FieldDeclarationNode*>(
+                resolveLocalId(record_ref->getScope().get(), id));
+            if (field == nullptr) {
+                logger_->error(id.pos, "Field is not part of the record type.");
+                exit(EXIT_FAILURE);
+            }
+
+            prev = std::make_unique<FieldReferenceNode>(id.pos, field, std::move(prev));
+
+        } else if (next->getType() == TokenType::lbrack) {
             const auto open_token = scanner_->nextToken();
             auto index = expression();
             static_cast<void>(require_token(TokenType::rbrack));
 
-            // TODO: resolve type correctly
-            auto type = prev->getType();
+            // allow array indexing only on array types
+            const auto arr = dynamic_cast<ArrayTypeNode*>(prev->getType().get());
+            if (arr == nullptr) {
+                logger_->error(open_token->getPosition(), "Array indexing on non-array type.");
+                exit(EXIT_FAILURE);
+            }
+
+            // require int type for index
+            const auto int_type = dynamic_cast<BasicTypeNode*>(index->getType().get());
+            if (int_type == nullptr || int_type->getName() != "INTEGER") {
+                logger_->error(index->getFilePos(), "Index is not of type INTEGER.");
+                exit(EXIT_FAILURE);
+            }
+
+            // if the index is constant perform range checks
+            const auto const_idx = dynamic_cast<NumberConstantNode*>(index.get());
+            if (const_idx != nullptr) {
+                const auto value = const_idx->getValue();
+                if (value < 0 || arr->getSize() <= value) {
+                    logger_->error(index->getFilePos(), "Index out of range.");
+                    exit(EXIT_FAILURE);
+                }
+            }
+
             prev = std::make_unique<ArrayReferenceNode>(open_token->getPosition(), std::move(index),
-                                                        type, std::move(prev));
+                                                        arr->getType(), std::move(prev));
         } else {
             break;
         }
@@ -639,6 +687,36 @@ Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
     }
 
     return std::make_unique<UnaryExpressionNode>(op->getPosition(), unary_op, std::move(operand));
+}
+
+Node* Parser::resolveLocalId(const Scope* scope, const Identifier& id) const
+{
+    return resolveLocalId(scope, id.name, id.pos);
+}
+
+Node* Parser::resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const
+{
+    const auto resolved = current_scope_->resolveIdentifierLocally(name);
+    if (resolved == nullptr) {
+        logger_->error(pos, errorMissingDeclaration(name));
+        exit(EXIT_FAILURE);
+    }
+    return resolved->value;
+}
+
+Node* Parser::resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const
+{
+    const auto resolved = current_scope_->resolveIdentifier(name);
+    if (resolved == nullptr) {
+        logger_->error(pos, errorMissingDeclaration(name));
+        exit(EXIT_FAILURE);
+    }
+    return resolved->value;
+}
+
+Node* Parser::resolveId(const Scope* scope, const Identifier& id) const
+{
+    return resolveId(scope, id.name, id.pos);
 }
 
 std::unique_ptr<ExpressionNode>

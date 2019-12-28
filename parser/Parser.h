@@ -43,7 +43,7 @@ class Parser {
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
-    std::unique_ptr<TypeNode> type();
+    std::shared_ptr<TypeNode> type();
     std::unique_ptr<ArrayTypeNode> array_type();
     std::unique_ptr<RecordTypeNode> record_type();
     void field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list);
@@ -75,4 +75,9 @@ class Parser {
             exit(EXIT_FAILURE);
         }
     }
+
+    Node* resolveLocalId(const Scope* scope, const Identifier& id) const;
+    Node* resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const;
+    Node* resolveId(const Scope* scope, const Identifier& id) const;
+    Node* resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const;
 };

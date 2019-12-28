@@ -2,7 +2,7 @@
 #include "NodeVisitor.h"
 #include <cassert>
 
-ArrayTypeNode::ArrayTypeNode(const FilePos& pos, const int size, std::unique_ptr<TypeNode> type)
+ArrayTypeNode::ArrayTypeNode(const FilePos& pos, const int size, std::shared_ptr<TypeNode> type)
     : TypeNode(NodeType::array_type, pos), size_(size), type_(std::move(type))
 {
     assert(type_ != nullptr);
@@ -12,7 +12,7 @@ ArrayTypeNode::~ArrayTypeNode() = default;
 
 int ArrayTypeNode::getSize() const { return size_; }
 
-const std::unique_ptr<TypeNode>& ArrayTypeNode::getType() const { return type_; }
+std::shared_ptr<TypeNode> ArrayTypeNode::getType() const { return type_; }
 
 void ArrayTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 

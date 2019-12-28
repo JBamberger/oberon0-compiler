@@ -7,7 +7,7 @@ class TypeDeclarationNode : public Node {
     std::shared_ptr<TypeNode> type_;
 
   public:
-    TypeDeclarationNode(const FilePos& pos, std::string name, std::unique_ptr<TypeNode> type);
+    TypeDeclarationNode(const FilePos& pos, std::string name, std::shared_ptr<TypeNode> type);
     ~TypeDeclarationNode() override;
 
     const std::string& getName() const;

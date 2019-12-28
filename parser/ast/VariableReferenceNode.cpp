@@ -3,21 +3,21 @@
 #include "NodeVisitor.h"
 #include <utility>
 
-VariableReferenceNode::VariableReferenceNode(const FilePos& pos,
-                                             std::string name,
-                                             std::shared_ptr<TypeNode> type)
-    : AssignableExpressionNode(NodeType::variable_reference, pos, std::move(type)),
-      name_(std::move(name))
+VariableReferenceNode::VariableReferenceNode(const FilePos& pos, VariableDeclarationNode* variable)
+    : AssignableExpressionNode(NodeType::variable_reference, pos, variable->getType()),
+      variable_(variable)
 {
 }
 
 VariableReferenceNode::~VariableReferenceNode() = default;
 
-const std::string& VariableReferenceNode::getName() const { return name_; }
+const std::string& VariableReferenceNode::getName() const { return variable_->getName(); }
+
+VariableDeclarationNode* VariableReferenceNode::getVariable() const { return variable_; }
 
 void VariableReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 
 void VariableReferenceNode::print(std::ostream& stream) const
 {
-    stream << "VariableReferenceNode(" << name_ << ")";
+    stream << "VariableReferenceNode(" << variable_->getType() << ")";
 }

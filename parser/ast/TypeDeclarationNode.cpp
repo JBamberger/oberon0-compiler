@@ -5,7 +5,7 @@
 
 TypeDeclarationNode::TypeDeclarationNode(const FilePos& pos,
                                          std::string name,
-                                         std::unique_ptr<TypeNode> type)
+                                         std::shared_ptr<TypeNode> type)
     : Node(NodeType::type_reference, pos), name_(std::move(name)), type_(std::move(type))
 {
     assert(type_ != nullptr);
