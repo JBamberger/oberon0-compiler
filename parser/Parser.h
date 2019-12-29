@@ -45,20 +45,20 @@ class Parser {
     // parsing functions
     std::unique_ptr<ModuleNode> module();
     void declarations(BlockNode* block);
-    void const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>* list);
-    void type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>* list);
-    void var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* list);
-    void procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>* list);
-    void formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list);
-    void fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list);
+    void const_declaration(    std::vector<std::unique_ptr<ConstantDeclarationNode>>& list);
+    void type_declaration(     std::vector<std::unique_ptr<TypeDeclarationNode>>& list);
+    void var_declaration(      std::vector<std::unique_ptr<VariableDeclarationNode>>& list);
+    void procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>& list);
+    void formal_parameters(    std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
+    void fp_section(           std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
     std::unique_ptr<ExpressionNode> expression();
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
     std::string type();
-    void field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list);
-    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params);
-    void statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list);
+    void field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>& list);
+    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>&  list);
+    void statement_sequence(std::vector<std::unique_ptr<StatementNode>>& list);
     std::unique_ptr<StatementNode> statement();
     std::unique_ptr<AssignmentNode> assignment(const Identifier& id);
     std::unique_ptr<ProcedureCallNode> procedure_call(const Identifier& id);
@@ -81,10 +81,10 @@ class Parser {
     std::string typeCheckUnary(ExpressionNode* operand, OperatorType op) const;
 
     template <class T>
-    void insertDeclaration(std::unique_ptr<T> node, std::vector<std::unique_ptr<T>>* list)
+    void insertDeclaration(std::unique_ptr<T> node, std::vector<std::unique_ptr<T>>& list)
     {
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-            list->push_back(std::move(node));
+            list.push_back(std::move(node));
         } else {
             logError(node->getFilePos(), error_id::E001, node->getName());
             exit(EXIT_FAILURE);

@@ -4,15 +4,20 @@
 #include <vector>
 
 class WhileStatementNode : public StatementNode {
+  public:
+    using StmtList = std::vector<std::unique_ptr<StatementNode>>;
+
+  private:
     std::unique_ptr<ExpressionNode> condition_;
-    std::unique_ptr<std::vector<std::unique_ptr<StatementNode>>> body_;
+    StmtList body_;
 
   public:
     WhileStatementNode(const FilePos& pos, std::unique_ptr<ExpressionNode> condition);
     ~WhileStatementNode() override;
 
     const std::unique_ptr<ExpressionNode>& getCondition() const;
-    const std::unique_ptr<std::vector<std::unique_ptr<StatementNode>>>& getBody() const;
+    StmtList& getBody();
+    const StmtList& getBody() const;
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

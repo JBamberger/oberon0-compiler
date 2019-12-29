@@ -5,11 +5,9 @@
 
 WhileStatementNode::WhileStatementNode(const FilePos& pos,
                                        std::unique_ptr<ExpressionNode> condition)
-    : StatementNode(NodeType::while_statement, pos), condition_(std::move(condition)),
-      body_(std::make_unique<std::vector<std::unique_ptr<StatementNode>>>())
+    : StatementNode(NodeType::while_statement, pos), condition_(std::move(condition))
 {
     assert(condition_ != nullptr);
-    assert(body_ != nullptr);
 }
 
 WhileStatementNode::~WhileStatementNode() = default;
@@ -19,11 +17,9 @@ const std::unique_ptr<ExpressionNode>& WhileStatementNode::getCondition() const
     return condition_;
 }
 
-const std::unique_ptr<std::vector<std::unique_ptr<StatementNode>>>&
-WhileStatementNode::getBody() const
-{
-    return body_;
-}
+WhileStatementNode::StmtList& WhileStatementNode::getBody() { return body_; }
+
+const WhileStatementNode::StmtList& WhileStatementNode::getBody() const { return body_; }
 
 void WhileStatementNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 

@@ -1,27 +1,29 @@
 #include "ProcedureDeclarationNode.h"
 #include "NodeVisitor.h"
 #include "PrintUtils.h"
-#include <cassert>
-#include <utility>
 
 ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos,
                                                    const std::string& name,
                                                    const std::shared_ptr<Scope>& parent)
-    : BlockNode(pos, name, std::make_shared<Scope>("ProcedureScope " + name, parent)),
-      params_(std::make_unique<ParamList>()),
-      procedures_(std::make_unique<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>())
+    : BlockNode(pos, name, std::make_shared<Scope>("ProcedureScope " + name, parent))
 {
 }
 
 ProcedureDeclarationNode::~ProcedureDeclarationNode() = default;
 
-const std::unique_ptr<ParamList>& ProcedureDeclarationNode::getParams() const { return params_; }
+ProcedureDeclarationNode::ParamDeclList& ProcedureDeclarationNode::getParams() { return params_; }
 
-const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
-ProcedureDeclarationNode::getProcedures() const
+const ProcedureDeclarationNode::ParamDeclList& ProcedureDeclarationNode::getParams() const
+{
+    return params_;
+}
+
+const BlockNode::ProcDeclList& ProcedureDeclarationNode::getProcedures() const
 {
     return procedures_;
 }
+
+BlockNode::ProcDeclList& ProcedureDeclarationNode::getProcedures() { return procedures_; }
 
 void ProcedureDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 

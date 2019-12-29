@@ -136,10 +136,10 @@ void PrintVisitor::visit(const ProcedureDeclarationNode* node)
     line() << "ProcedureDeclaration " << node->getName() << "\n";
     inc();
 
-    if (!node->getParams()->empty()) {
+    if (!node->getParams().empty()) {
         line() << "Parameters:\n";
         inc();
-        for (const auto& s : *node->getParams()) {
+        for (const auto& s : node->getParams()) {
             s->visit(this);
         }
         dec();
@@ -209,42 +209,42 @@ void PrintVisitor::visit(const BooleanConstantNode* node)
 
 void PrintVisitor::printBlock(const BlockNode* node)
 {
-    if (!node->getConstants()->empty()) {
+    if (!node->getConstants().empty()) {
         line() << "Constants:\n";
         inc();
-        for (const auto& decl : *node->getConstants()) {
+        for (const auto& decl : node->getConstants()) {
             decl->visit(this);
         }
         dec();
     }
-    if (!node->getTypes()->empty()) {
+    if (!node->getTypes().empty()) {
         line() << "Types:\n";
         inc();
-        for (const auto& decl : *node->getTypes()) {
+        for (const auto& decl : node->getTypes()) {
             decl->visit(this);
         }
         dec();
     }
-    if (!node->getVariables()->empty()) {
+    if (!node->getVariables().empty()) {
         line() << "Variables:\n";
         inc();
-        for (const auto& decl : *node->getVariables()) {
+        for (const auto& decl : node->getVariables()) {
             decl->visit(this);
         }
         dec();
     }
-    if (!node->getProcedures()->empty()) {
+    if (!node->getProcedures().empty()) {
         line() << "Procedures:\n";
         inc();
-        for (const auto& decl : *node->getProcedures()) {
+        for (const auto& decl : node->getProcedures()) {
             decl->visit(this);
         }
         dec();
     }
-    if (!node->getStatements()->empty()) {
+    if (!node->getStatements().empty()) {
         line() << "Statements:\n";
         inc();
-        for (const auto& s : *node->getStatements()) {
+        for (const auto& s : node->getStatements()) {
             s->visit(this);
         }
         dec();

@@ -113,7 +113,7 @@ std::unique_ptr<ModuleNode> Parser::module()
     requireToken(TokenType::semicolon);
     declarations(module_node.get());
     if (checkAndConsumeToken(TokenType::kw_begin)) {
-        statement_sequence(module_node->getStatements().get());
+        statement_sequence(module_node->getStatements());
     }
     requireToken(TokenType::kw_end);
     const auto id2 = ident();
@@ -134,29 +134,29 @@ void Parser::declarations(BlockNode* block)
 {
     if (checkAndConsumeToken(TokenType::kw_const)) {
         while (checkToken(TokenType::const_ident)) {
-            const_declaration(block->getConstants().get());
+            const_declaration(block->getConstants());
         }
     }
 
     if (checkAndConsumeToken(TokenType::kw_type)) {
         while (checkToken(TokenType::const_ident)) {
-            type_declaration(block->getTypes().get());
+            type_declaration(block->getTypes());
         }
     }
 
     if (checkAndConsumeToken(TokenType::kw_var)) {
         while (checkToken(TokenType::const_ident)) {
-            var_declaration(block->getVariables().get());
+            var_declaration(block->getVariables());
         }
     }
 
     while (checkToken(TokenType::kw_procedure)) {
-        procedure_declaration(block->getProcedures().get());
+        procedure_declaration(block->getProcedures());
         requireToken(TokenType::semicolon);
     }
 }
 
-void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>* list)
+void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>& list)
 {
     const auto id = ident();
     requireToken(TokenType::op_eq);
@@ -173,7 +173,7 @@ void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNo
     insertDeclaration(std::move(node), list);
 }
 
-void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>* list)
+void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>& list)
 {
     const auto id = ident();
     requireToken(TokenType::op_eq);
@@ -186,10 +186,10 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>*
         exit(EXIT_FAILURE);
     }
 
-    list->push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
+    list.push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
 }
 
-void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* list)
+void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>& list)
 {
     const auto ids = ident_list();
     requireToken(TokenType::colon);
@@ -202,7 +202,7 @@ void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode
     }
 }
 
-void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>* list)
+void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>& list)
 {
     // procedure heading
     const auto pos = requireAndGetToken(TokenType::kw_procedure)->getPosition();
@@ -212,7 +212,7 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
     current_scope_ = node->getScope(); // enter block scope
 
     if (checkToken(TokenType::lparen)) {
-        formal_parameters(node->getParams().get());
+        formal_parameters(node->getParams());
     }
     requireToken(TokenType::semicolon);
 
@@ -220,7 +220,7 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
     declarations(node.get());
 
     if (checkAndConsumeToken(TokenType::kw_begin)) {
-        statement_sequence(node->getStatements().get());
+        statement_sequence(node->getStatements());
     }
 
     requireToken(TokenType::kw_end);
@@ -232,7 +232,7 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
         exit(EXIT_FAILURE);
     }
 
-    for (const auto& a : *node->getParams()) {
+    for (const auto& a : node->getParams()) {
         const auto arg_type = findType(a->getType(), a->getFilePos());
 
         // check for E010: ARRAYs cannot be passed as VAR
@@ -456,7 +456,7 @@ std::string Parser::type()
     }
 }
 
-void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list)
+void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>& list)
 {
     if (!checkToken(TokenType::const_ident)) {
         return;
@@ -471,7 +471,7 @@ void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>* list
     }
 }
 
-void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list)
+void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list)
 {
     requireToken(TokenType::lparen);
 
@@ -484,7 +484,7 @@ void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationN
     requireToken(TokenType::rparen);
 }
 
-void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* list)
+void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list)
 {
     const auto is_reference = checkAndConsumeToken(TokenType::kw_var);
     const auto ids = ident_list();
@@ -497,11 +497,11 @@ void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>* 
     }
 }
 
-void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>* list)
+void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>& list)
 {
-    list->emplace_back(statement());
+    list.emplace_back(statement());
     while (checkAndConsumeToken(TokenType::semicolon)) {
-        list->emplace_back(statement());
+        list.emplace_back(statement());
     }
 }
 
@@ -566,9 +566,9 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 
 std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 {
-    auto actual = std::make_unique<std::vector<std::unique_ptr<ExpressionNode>>>();
+    std::vector<std::unique_ptr<ExpressionNode>> actual;
     if (checkToken(TokenType::lparen)) {
-        actual_parameters(actual.get());
+        actual_parameters(actual);
     }
 
     // check for E031: name must reference a procedure declaration
@@ -578,17 +578,17 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
         exit(EXIT_FAILURE);
     }
 
-    const auto formal = proc_decl->getParams().get();
+    const auto& formal = proc_decl->getParams();
 
     // check for E020: actual and formal param counts must match
-    if (actual->size() != formal->size()) {
-        logError(id.pos, error_id::E020, actual->size(), formal->size(), id.name);
+    if (actual.size() != formal.size()) {
+        logError(id.pos, error_id::E020, actual.size(), formal.size(), id.name);
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < actual->size(); ++i) {
-        const auto& a = actual->at(i);
-        const auto& b = formal->at(i);
+    for (size_t i = 0; i < actual.size(); ++i) {
+        const auto& a = actual.at(i);
+        const auto& b = formal.at(i);
 
         // check for E021: actual and formal param types must match
         if (a->getType() != b->getType()) {
@@ -624,7 +624,7 @@ std::unique_ptr<IfStatementNode> Parser::if_statement()
 
     auto node = std::make_unique<IfStatementNode>(pos, std::move(cond));
     // if body
-    statement_sequence(node->getThenPart().get());
+    statement_sequence(node->getThenPart());
 
     // this is the next node where the else body must be filled
     auto next_node = node.get();
@@ -646,15 +646,15 @@ std::unique_ptr<IfStatementNode> Parser::if_statement()
         const auto tmp_ptr = tmp_node.get();
 
         // elif body
-        statement_sequence(tmp_node->getThenPart().get());
+        statement_sequence(tmp_node->getThenPart());
 
-        next_node->getElsePart()->push_back(std::move(tmp_node));
+        next_node->getElsePart().push_back(std::move(tmp_node));
         next_node = tmp_ptr;
     }
 
     // else statement
     if (checkAndConsumeToken(TokenType::kw_else)) {
-        statement_sequence(next_node->getElsePart().get());
+        statement_sequence(next_node->getElsePart());
     }
     requireToken(TokenType::kw_end);
 
@@ -675,20 +675,20 @@ std::unique_ptr<WhileStatementNode> Parser::while_statement()
     auto stmt = std::make_unique<WhileStatementNode>(pos, std::move(cond));
 
     requireToken(TokenType::kw_do);
-    statement_sequence(stmt->getBody().get());
+    statement_sequence(stmt->getBody());
     requireToken(TokenType::kw_end);
 
     return stmt;
 }
 
-void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>* params)
+void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>& list)
 {
     requireToken(TokenType::lparen);
 
     if (!checkToken(TokenType::rparen)) {
-        params->push_back(expression());
+        list.push_back(expression());
         while (checkAndConsumeToken(TokenType::comma)) {
-            params->push_back(expression());
+            list.push_back(expression());
         }
     }
     requireToken(TokenType::rparen);

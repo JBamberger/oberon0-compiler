@@ -5,19 +5,22 @@
 #include <memory>
 #include <vector>
 
+using ActualParamList = std::vector<std::unique_ptr<ExpressionNode>>;
+
 class ProcedureCallNode : public StatementNode {
     ProcedureDeclarationNode* procedure_;
-    std::unique_ptr<std::vector<std::unique_ptr<ExpressionNode>>> params_;
+    ActualParamList params_;
 
   public:
     ProcedureCallNode(const FilePos& pos,
                       ProcedureDeclarationNode* procedure,
-                      std::unique_ptr<std::vector<std::unique_ptr<ExpressionNode>>> params);
+                      ActualParamList params);
     ~ProcedureCallNode() override;
 
     const std::string& getName() const;
     ProcedureDeclarationNode* getProcedure() const;
-    const std::unique_ptr<std::vector<std::unique_ptr<ExpressionNode>>>& getParams() const;
+    ActualParamList& getParams();
+    const ActualParamList& getParams() const;
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
 };

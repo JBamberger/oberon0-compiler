@@ -52,11 +52,11 @@ void NodeVisitor::visit(const FieldDeclarationNode* node) {}
 void NodeVisitor::visit(const IfStatementNode* node)
 {
     node->getCondition()->visit(this);
-    for (const auto& s : *node->getThenPart()) {
+    for (const auto& s : node->getThenPart()) {
         s->visit(this);
     }
-    if (node->getElsePart() != nullptr) {
-        for (const auto& s : *node->getElsePart()) {
+    if (!node->getElsePart().empty()) {
+        for (const auto& s : node->getElsePart()) {
             s->visit(this);
         }
     }
@@ -64,19 +64,19 @@ void NodeVisitor::visit(const IfStatementNode* node)
 
 void NodeVisitor::visit(const ModuleNode* node)
 {
-    for (const auto& decl : *node->getConstants()) {
+    for (const auto& decl : node->getConstants()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getTypes()) {
+    for (const auto& decl : node->getTypes()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getVariables()) {
+    for (const auto& decl : node->getVariables()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getProcedures()) {
+    for (const auto& decl : node->getProcedures()) {
         decl->visit(this);
     }
-    for (const auto& s : *node->getStatements()) {
+    for (const auto& s : node->getStatements()) {
         s->visit(this);
     }
 }
@@ -89,38 +89,38 @@ void NodeVisitor::visit(const ParameterDeclarationNode* node) {}
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
-    for (const auto& p : *node->getParams()) {
+    for (const auto& p : node->getParams()) {
         p->visit(this);
     }
 }
 
 void NodeVisitor::visit(const ProcedureDeclarationNode* node)
 {
-    if (node->getParams() != nullptr) {
-        for (const auto& s : *node->getParams()) {
+    if (!node->getParams().empty()) {
+        for (const auto& s : node->getParams()) {
             s->visit(this);
         }
     }
-    for (const auto& decl : *node->getConstants()) {
+    for (const auto& decl : node->getConstants()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getTypes()) {
+    for (const auto& decl : node->getTypes()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getVariables()) {
+    for (const auto& decl : node->getVariables()) {
         decl->visit(this);
     }
-    for (const auto& decl : *node->getProcedures()) {
+    for (const auto& decl : node->getProcedures()) {
         decl->visit(this);
     }
-    for (const auto& s : *node->getStatements()) {
+    for (const auto& s : node->getStatements()) {
         s->visit(this);
     }
 }
 
 void NodeVisitor::visit(const RecordTypeNode* node)
 {
-    for (const auto& f : *node->getMembers()) {
+    for (const auto& f : node->getMembers()) {
         f->visit(this);
     }
 }
@@ -142,7 +142,7 @@ void NodeVisitor::visit(const ParameterReferenceNode* node) {}
 void NodeVisitor::visit(const WhileStatementNode* node)
 {
     node->getCondition()->visit(this);
-    for (const auto& s : *node->getBody()) {
+    for (const auto& s : node->getBody()) {
         s->visit(this);
     }
 }

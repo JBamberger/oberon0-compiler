@@ -2,19 +2,24 @@
 #include "BlockNode.h"
 #include "ParameterDeclarationNode.h"
 
-using ParamList = std::vector<std::unique_ptr<ParameterDeclarationNode>>;
-
 class ProcedureDeclarationNode : public BlockNode {
-    std::unique_ptr<ParamList> params_;
-    std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>> procedures_;
+  public:
+    using ParamDeclList = std::vector<std::unique_ptr<ParameterDeclarationNode>>;
+
+  private:
+    ParamDeclList params_;
+    ProcDeclList procedures_;
 
   public:
-    ProcedureDeclarationNode(const FilePos& pos, const std::string& name, const std::shared_ptr<Scope>& parent);
+    ProcedureDeclarationNode(const FilePos& pos,
+                             const std::string& name,
+                             const std::shared_ptr<Scope>& parent);
     ~ProcedureDeclarationNode() override;
 
-    const std::unique_ptr<ParamList>& getParams() const;
-    const std::unique_ptr<std::vector<std::unique_ptr<ProcedureDeclarationNode>>>&
-    getProcedures() const override;
+    ParamDeclList& getParams();
+    const ParamDeclList& getParams() const;
+    ProcDeclList& getProcedures() override;
+    const ProcDeclList& getProcedures() const override;
 
     void visit(NodeVisitor* visitor) const override;
     void print(std::ostream& stream) const override;
