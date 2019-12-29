@@ -600,6 +600,16 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
                                                 " got " + a->getType() + ".");
             exit(EXIT_FAILURE);
         }
+
+        if (b->isIsReference()) {
+            // check for E022: VAR parameter must be addressable and assignable
+            const auto assignable = dynamic_cast<AssignableExpressionNode*>(a.get());
+            if (assignable == nullptr) {
+                logger_->error(a->getFilePos(),
+                               "Parameter is passed by reference but is not assignable.");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 
     return std::make_unique<ProcedureCallNode>(id.pos, proc_decl, std::move(actual));

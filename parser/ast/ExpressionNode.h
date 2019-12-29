@@ -1,6 +1,5 @@
 #pragma once
 #include "Node.h"
-#include "TypeNode.h"
 
 class ExpressionNode : public Node {
     std::string type_;
