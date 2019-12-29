@@ -28,7 +28,8 @@ add_executable(oberon0c
     parser/Parser.cpp
     parser/PrintVisitor.h
     parser/PrintVisitor.cpp
-    parser/ElaborationErrors.h
+    parser/ParserErrors.h
+    parser/ParserErrors.cpp
 
     parser/ast/NodeVisitor.h
     parser/ast/NodeVisitor.cpp

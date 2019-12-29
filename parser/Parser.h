@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../scanner/Scanner.h"
+#include "ParserErrors.h"
 #include "ast/ArrayTypeNode.h"
 #include "ast/AssignmentNode.h"
 #include "ast/ExpressionNode.h"
@@ -85,7 +86,7 @@ class Parser {
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
             list->push_back(std::move(node));
         } else {
-            logger_->error(node->getFilePos(), errorDuplicateIdentifier(node->getName()));
+            logError(node->getFilePos(), error_id::E001, node->getName());
             exit(EXIT_FAILURE);
         }
     }
@@ -97,4 +98,10 @@ class Parser {
     Node* resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const;
     std::string addType(std::unique_ptr<TypeNode> type);
     TypeNode* findType(const std::string& name, const FilePos& pos) const;
+
+    template <typename... Types>
+    void logError(const FilePos& pos, const error_id id, Types&&... args) const
+    {
+        logger_->error(pos, getErrMsg(id, std::forward<Types>(args)...));
+    }
 };
