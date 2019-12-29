@@ -4,6 +4,7 @@
 
 class ConstantDeclarationNode : public Node {
     std::string name_;
+    //TODO: this should be a ConstantNode
     std::unique_ptr<ExpressionNode> value_;
 
   public:

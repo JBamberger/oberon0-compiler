@@ -164,6 +164,12 @@ void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNo
     auto value = expression();
     requireToken(TokenType::semicolon);
 
+    // check for E002: constant declarations must evaluate to constants
+    if (dynamic_cast<ConstantNode*>(value.get()) == nullptr) {
+        logger_->error(value->getFilePos(), "Expression value is not constant.");
+        exit(EXIT_FAILURE);
+    }
+
     auto node = std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(value));
     insertDeclaration(std::move(node), list);
 }
@@ -175,12 +181,13 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>*
     auto tp = type();
     requireToken(TokenType::semicolon);
 
-    if (current_scope_->declareIdentifier(id.name, findType(tp, id.pos))) {
-        list->push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
-    } else {
+    // check for E001: names must be unique
+    if (!current_scope_->declareIdentifier(id.name, findType(tp, id.pos))) {
         logger_->error(id.pos, errorDuplicateIdentifier(id.name));
         exit(EXIT_FAILURE);
     }
+
+    list->push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
 }
 
 void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>* list)
@@ -220,9 +227,28 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
     requireToken(TokenType::kw_end);
     const auto id2 = ident();
 
+    // check for E029: procedure names must match
     if (id1.name != id2.name) {
         logger_->error(pos, "Expected equal procedure names but got " + id1 + " and " + id2 + ".");
         exit(EXIT_FAILURE);
+    }
+
+    for (const auto& a : *node->getParams()) {
+        const auto arg_type = findType(a->getType(), a->getFilePos());
+
+        // check for E010: ARRAYs cannot be passed as VAR
+        const auto array_type = dynamic_cast<ArrayTypeNode*>(arg_type);
+        if (array_type != nullptr && a->isIsReference()) {
+            logger_->error(a->getFilePos(), "Parameter has ARRAY type and is VAR.");
+            exit(EXIT_FAILURE);
+        }
+
+        // check for E011: RECORDs cannot be passed as VAR
+        const auto record_type = dynamic_cast<RecordTypeNode*>(arg_type);
+        if (record_type != nullptr && a->isIsReference()) {
+            logger_->error(a->getFilePos(), "Parameter has RECORD type and is VAR.");
+            exit(EXIT_FAILURE);
+        }
     }
 
     current_scope_ = node->getScope()->getParent(); // exit block scope
@@ -240,6 +266,7 @@ std::unique_ptr<ExpressionNode> Parser::expression()
         maybe_operand == TokenType::op_gt || maybe_operand == TokenType::op_geq) {
         auto op = scanner_->nextToken();
         auto operand_2 = simple_expression();
+
         return evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
     }
 
@@ -563,10 +590,11 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
         exit(EXIT_FAILURE);
     }
 
-    // check for E021: actual and formal param types must match
     for (size_t i = 0; i < actual->size(); ++i) {
         const auto& a = actual->at(i);
         const auto& b = formal->at(i);
+
+        // check for E021: actual and formal param types must match
         if (a->getType() != b->getType()) {
             logger_->error(a->getFilePos(), "Parameter type mismatch. Expected " + b->getType() +
                                                 " got " + a->getType() + ".");
