@@ -38,7 +38,6 @@ TEST_P(ErrorTest, testSuccess)
     try {
         static_cast<void>(parser->parse());
     } catch (const ParseException& e) {
-        std::cout << e.position() << std::endl;
         EXPECT_EQ(e.what(), params.msg);
         return;
     }
