@@ -9,10 +9,10 @@ enum class error_id : char {
     E003, // * Array sizes must evaluate to constants
     E004, // * Array sizes must be greater than 0
     E005, // * Types must exist
-    E006, //   Record field names must be unique in the record
+    E006, //   unused
     E007, //   unused
     E008, //   unused
-    E009, //   Procedure identifiers must be unique in the procedure
+    E009, //   unused
     E010, // * ARRAY formal parameters cannot be VAR
     E011, // * RECORD formal parameters cannot be VAR
     E012, // * Arithmetic operators operate only on INTEGER
@@ -55,4 +55,4 @@ std::string getErrMsg(const error_id id, Types&&... args)
 // W001: WHILE-condition is constant
 // W002: IF-condition is constant
 
-// Get-Content .\parser\Parser.cpp | Select-String 'E\d{3}'  | %{$_.ToString().Trim()} | Sort-Object  | Get-Unique
+// Get-Content .\parser\src\Parser.cpp | Select-String 'E\d{3}'  | %{$_.ToString().Trim()} | Sort-Object  | Get-Unique
