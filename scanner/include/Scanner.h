@@ -9,34 +9,33 @@
 
 #include "Logger.h"
 #include "Token.h"
-#include <fstream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 
 class Scanner {
 
-  private:
     std::string filename_;
     const Logger* logger_;
     const Token* token_;
     int lineNo_, charNo_;
     std::unordered_map<std::string, TokenType> keywords_;
-    std::ifstream file_;
+    std::unique_ptr<std::ifstream> file_in_;
+    std::istream* file_;
     char ch_;
 
     void initTable();
     void read();
-    const FilePos getPosition() const;
+    FilePos getPosition() const;
     const Token* next();
     const Token* ident();
-    const int number();
-    const std::string string();
+    int number();
+    std::string string();
     void comment();
 
   public:
-    explicit Scanner(const std::string& filename, const Logger* logger);
+    explicit Scanner(std::istream* input, const Logger* logger);
+    explicit Scanner(std::string filename, const Logger* logger);
     ~Scanner();
     const Token* peekToken();
     std::unique_ptr<const Token> nextToken();

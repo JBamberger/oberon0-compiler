@@ -34,15 +34,15 @@ enum class LogLevel : unsigned int { DEBUG = 1, INFO = 2, ERROR = 3 };
 
 class Logger {
 
-  private:
     LogLevel level_;
     std::ostream *out_, *err_;
 
-    void log(LogLevel level,
-             const std::string& fileName,
-             int lineNo,
-             int charNo,
-             const std::string& msg) const;
+  protected:
+    virtual void log(LogLevel level,
+                     const std::string& fileName,
+                     int lineNo,
+                     int charNo,
+                     const std::string& msg) const;
     void log(LogLevel level, const std::string& fileName, const std::string& msg) const;
 
   public:

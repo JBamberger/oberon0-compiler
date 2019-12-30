@@ -18,3 +18,5 @@ target_link_libraries(oberon0c_parser PUBLIC
     oberon0c_ast
     fmt::fmt
 )
+
+add_subdirectory("test")
