@@ -1,5 +1,7 @@
 .idea/
 .vs/
 .vscode/
+.milestones/
 cmake-build-*/
 build/
+out/
