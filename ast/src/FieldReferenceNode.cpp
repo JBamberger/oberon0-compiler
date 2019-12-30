@@ -17,7 +17,7 @@ const std::unique_ptr<AssignableExpressionNode>& FieldReferenceNode::getRecordRe
 
 FieldReferenceNode::~FieldReferenceNode() = default;
 
-const std::string& FieldReferenceNode::getFieldName() const { return field_->getName(); }
+std::string FieldReferenceNode::getFieldName() const { return field_->getName(); }
 
 FieldDeclarationNode* FieldReferenceNode::getField() const { return field_; }
 

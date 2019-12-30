@@ -34,6 +34,6 @@ set(SOURCES
     "include/Scope.h"                    "src/Scope.cpp"
 )
 
-add_library(oberon0c_parser_ast ${SOURCES})
-target_include_directories(oberon0c_parser_ast PUBLIC "include" oberon0c_scanner)
-target_link_libraries(oberon0c_parser_ast PUBLIC oberon0c_scanner)
+add_library(oberon0c_ast ${SOURCES})
+target_include_directories(oberon0c_ast PUBLIC "include" oberon0c_scanner)
+target_link_libraries(oberon0c_ast PUBLIC oberon0c_scanner)

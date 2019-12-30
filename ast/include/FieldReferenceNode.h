@@ -13,7 +13,7 @@ class FieldReferenceNode : public AssignableExpressionNode {
                        std::unique_ptr<AssignableExpressionNode> record_ref);
     ~FieldReferenceNode() override;
 
-    const std::string& getFieldName() const;
+    std::string getFieldName() const;
     FieldDeclarationNode* getField() const;
     const std::unique_ptr<AssignableExpressionNode>& getRecordRef() const;
 
