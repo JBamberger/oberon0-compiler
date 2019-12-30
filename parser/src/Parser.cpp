@@ -15,6 +15,7 @@
 #include "NumberToken.h"
 #include "ParameterDeclarationNode.h"
 #include "ParameterReferenceNode.h"
+#include "ParseException.h"
 #include "ParserErrors.h"
 #include "StringConstantNode.h"
 #include "StringToken.h"
@@ -58,8 +59,8 @@ void Parser::requireToken(const TokenType& type) const
 
     // check for E000: syntax error
     if (token->getType() != type) {
-        logError(token->getPosition(), error_id::E000, to_string(type), to_string(*token));
-        exit(EXIT_FAILURE);
+        throw ParseException(token->getPosition(),
+                             getErrMsg(error_id::E000, to_string(type), to_string(*token)));
     }
 }
 
@@ -69,8 +70,8 @@ std::unique_ptr<const Token> Parser::requireAndGetToken(const TokenType& type) c
 
     // check for E000: syntax error
     if (token->getType() != type) {
-        logError(token->getPosition(), error_id::E000, to_string(type), to_string(*token));
-        exit(EXIT_FAILURE);
+        throw ParseException(token->getPosition(),
+                             getErrMsg(error_id::E000, to_string(type), to_string(*token)));
     }
     return token;
 }
@@ -121,8 +122,7 @@ std::unique_ptr<ModuleNode> Parser::module()
 
     // check for E028
     if (id1.name != id2.name) {
-        logError(id2.pos, error_id::E028, id1.name, id2.name);
-        exit(EXIT_FAILURE);
+        throw ParseException(id2.pos, getErrMsg(error_id::E028, id1.name, id2.name));
     }
 
     current_scope_ = nullptr; // exit scope
@@ -165,8 +165,7 @@ void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNo
 
     // check for E002: constant declarations must evaluate to constants
     if (dynamic_cast<ConstantNode*>(value.get()) == nullptr) {
-        logError(value->getFilePos(), error_id::E002);
-        exit(EXIT_FAILURE);
+        throw ParseException(value->getFilePos(), getErrMsg(error_id::E002));
     }
 
     auto node = std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(value));
@@ -182,8 +181,7 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>&
 
     // check for E001: names must be unique
     if (!current_scope_->declareIdentifier(id.name, findType(tp, id.pos))) {
-        logError(id.pos, error_id::E001, id.name);
-        exit(EXIT_FAILURE);
+        throw ParseException(id.pos, getErrMsg(error_id::E001, id.name));
     }
 
     list.push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, std::move(tp)));
@@ -228,8 +226,7 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
 
     // check for E029: procedure names must match
     if (id1.name != id2.name) {
-        logError(pos, error_id::E029, id1.name, id2.name);
-        exit(EXIT_FAILURE);
+        throw ParseException(pos, getErrMsg(error_id::E029, id1.name, id2.name));
     }
 
     for (const auto& a : node->getParams()) {
@@ -238,15 +235,13 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
         // check for E010: ARRAYs cannot be passed as VAR
         const auto array_type = dynamic_cast<ArrayTypeNode*>(arg_type);
         if (array_type != nullptr && a->isIsReference()) {
-            logError(a->getFilePos(), error_id::E010);
-            exit(EXIT_FAILURE);
+            throw ParseException(a->getFilePos(), getErrMsg(error_id::E010));
         }
 
         // check for E011: RECORDs cannot be passed as VAR
         const auto record_type = dynamic_cast<RecordTypeNode*>(arg_type);
         if (record_type != nullptr && a->isIsReference()) {
-            logError(a->getFilePos(), error_id::E011);
-            exit(EXIT_FAILURE);
+            throw ParseException(a->getFilePos(), getErrMsg(error_id::E011));
         }
     }
 
@@ -350,8 +345,7 @@ std::unique_ptr<ExpressionNode> Parser::factor()
             return selector(std::make_unique<ParameterReferenceNode>(id.pos, param_decl));
         }
 
-        logError(id.pos, error_id::E023, id.name);
-        exit(EXIT_FAILURE);
+        throw ParseException(id.pos, getErrMsg(error_id::E023, id.name));
     }
     case TokenType::const_number: {
         const auto token = scanner_->nextToken();
@@ -381,9 +375,8 @@ std::unique_ptr<ExpressionNode> Parser::factor()
         return evaluateUnaryExpression(std::move(value), std::move(op));
     }
     default:
-        logError(next->getPosition(), error_id::E000, "identifier, number, lparen or ~",
-                 to_string(*next));
-        exit(EXIT_FAILURE);
+        throw ParseException(next->getPosition(), getErrMsg(error_id::E000, "identifier, number, lparen or ~",
+                 to_string(*next)));
     }
 }
 
@@ -404,8 +397,7 @@ std::string Parser::type()
         // new basic types
         const auto resolved_type = dynamic_cast<TypeNode*>(resolveId(current_scope_.get(), id));
         if (resolved_type == nullptr) {
-            logError(id.pos, error_id::E005, id.name);
-            exit(EXIT_FAILURE);
+            throw ParseException(id.pos, getErrMsg(error_id::E005, id.name));
         }
 
         // this must be getId because the identifier could be the name of a typedef
@@ -420,15 +412,13 @@ std::string Parser::type()
         // check for E003: array size must be constant
         const auto constant = dynamic_cast<NumberConstantNode*>(array_value.get());
         if (constant == nullptr) {
-            logError(array_value->getFilePos(), error_id::E003);
-            exit(EXIT_FAILURE);
+            throw ParseException(array_value->getFilePos(), getErrMsg(error_id::E003));
         }
 
         // check for E004: array size must be gt 0
         const auto size = constant->getValue();
         if (0 >= size) {
-            logError(array_value->getFilePos(), error_id::E004, size);
-            exit(EXIT_FAILURE);
+            throw ParseException(array_value->getFilePos(), getErrMsg(error_id::E004, size));
         }
 
         return addType(std::make_unique<ArrayTypeNode>(pos, size, std::move(array_type)));
@@ -450,8 +440,8 @@ std::string Parser::type()
         return addType(std::move(type));
     }
     default: {
-        logError(next->getPosition(), error_id::E000, "name, ARRAY or RECORD", to_string(*next));
-        exit(EXIT_FAILURE);
+        throw ParseException(next->getPosition(),
+                             getErrMsg(error_id::E000, "name, ARRAY or RECORD", to_string(*next)));
     }
     }
 }
@@ -526,8 +516,8 @@ std::unique_ptr<StatementNode> Parser::statement()
         return while_statement();
     default: {
         const auto next = scanner_->peekToken();
-        logError(next->getPosition(), error_id::E000, "name, IF or WHILE", to_string(*next));
-        exit(EXIT_FAILURE);
+        throw ParseException(next->getPosition(),
+                             getErrMsg(error_id::E000, "name, IF or WHILE", to_string(*next)));
     }
     }
 }
@@ -545,8 +535,7 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
         if (param_decl != nullptr) {
             parent = std::make_unique<ParameterReferenceNode>(id.pos, param_decl);
         } else {
-            logError(id.pos, error_id::E024);
-            exit(EXIT_FAILURE);
+            throw ParseException(id.pos, getErrMsg(error_id::E024));
         }
     }
 
@@ -557,8 +546,8 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
 
     // check for E025: assignment types must match
     if (lhs->getType() != rhs->getType()) {
-        logError(rhs->getFilePos(), error_id::E025, lhs->getType(), rhs->getType());
-        exit(EXIT_FAILURE);
+        throw ParseException(rhs->getFilePos(),
+                             getErrMsg(error_id::E025, lhs->getType(), rhs->getType()));
     }
 
     return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
@@ -574,16 +563,15 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
     // check for E031: name must reference a procedure declaration
     auto proc_decl = dynamic_cast<ProcedureDeclarationNode*>(resolveId(current_scope_.get(), id));
     if (proc_decl == nullptr) {
-        logError(id.pos, error_id::E031, id.name);
-        exit(EXIT_FAILURE);
+        throw ParseException(id.pos, getErrMsg(error_id::E031, id.name));
     }
 
     const auto& formal = proc_decl->getParams();
 
     // check for E020: actual and formal param counts must match
     if (actual.size() != formal.size()) {
-        logError(id.pos, error_id::E020, actual.size(), formal.size(), id.name);
-        exit(EXIT_FAILURE);
+        throw ParseException(id.pos,
+                             getErrMsg(error_id::E020, actual.size(), formal.size(), id.name));
     }
 
     for (size_t i = 0; i < actual.size(); ++i) {
@@ -592,16 +580,15 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
 
         // check for E021: actual and formal param types must match
         if (a->getType() != b->getType()) {
-            logError(a->getFilePos(), error_id::E021, b->getType(), a->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(a->getFilePos(),
+                                 getErrMsg(error_id::E021, b->getType(), a->getType()));
         }
 
         if (b->isIsReference()) {
             // check for E022: VAR parameter must be addressable and assignable
             const auto assignable = dynamic_cast<AssignableExpressionNode*>(a.get());
             if (assignable == nullptr) {
-                logError(a->getFilePos(), error_id::E022, b->getName());
-                exit(EXIT_FAILURE);
+                throw ParseException(a->getFilePos(), getErrMsg(error_id::E022, b->getName()));
             }
         }
     }
@@ -618,8 +605,7 @@ std::unique_ptr<IfStatementNode> Parser::if_statement()
 
     // check for E026: if condition must be BOOLEAN
     if (cond->getType() != "BOOLEAN") {
-        logError(cond->getFilePos(), error_id::E026, cond->getType());
-        exit(EXIT_FAILURE);
+        throw ParseException(cond->getFilePos(), getErrMsg(error_id::E026, cond->getType()));
     }
 
     auto node = std::make_unique<IfStatementNode>(pos, std::move(cond));
@@ -638,8 +624,7 @@ std::unique_ptr<IfStatementNode> Parser::if_statement()
 
         // check for E026: if condition must be BOOLEAN
         if (cond->getType() != "BOOLEAN") {
-            logError(cond->getFilePos(), error_id::E026, cond->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(cond->getFilePos(), getErrMsg(error_id::E026, cond->getType()));
         }
 
         auto tmp_node = std::make_unique<IfStatementNode>(pos, std::move(cond));
@@ -668,8 +653,7 @@ std::unique_ptr<WhileStatementNode> Parser::while_statement()
 
     // check for E027: while condition must be BOOLEAN
     if (cond->getType() != "BOOLEAN") {
-        logError(cond->getFilePos(), error_id::E027, cond->getType());
-        exit(EXIT_FAILURE);
+        throw ParseException(cond->getFilePos(), getErrMsg(error_id::E027, cond->getType()));
     }
 
     auto stmt = std::make_unique<WhileStatementNode>(pos, std::move(cond));
@@ -706,16 +690,14 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
             const auto record_ref =
                 dynamic_cast<RecordTypeNode*>(findType(prev->getType(), prev->getFilePos()));
             if (record_ref == nullptr) {
-                logError(id.pos, error_id::E018, prev->getType());
-                exit(EXIT_FAILURE);
+                throw ParseException(id.pos, getErrMsg(error_id::E018, prev->getType()));
             }
 
             // check for E019: field references can only use the local field declarations
             const auto field = dynamic_cast<FieldDeclarationNode*>(
                 resolveLocalId(record_ref->getScope().get(), id));
             if (field == nullptr) {
-                logError(id.pos, error_id::E019, id.name, prev->getType());
-                exit(EXIT_FAILURE);
+                throw ParseException(id.pos, getErrMsg(error_id::E019, id.name, prev->getType()));
             }
 
             prev = std::make_unique<FieldReferenceNode>(id.pos, field, std::move(prev));
@@ -729,16 +711,14 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
             const auto arr =
                 dynamic_cast<ArrayTypeNode*>(findType(prev->getType(), prev->getFilePos()));
             if (arr == nullptr) {
-                logError(open_token->getPosition(), error_id::E016, prev->getType());
-                exit(EXIT_FAILURE);
+                throw ParseException(open_token->getPosition(), getErrMsg(error_id::E016, prev->getType()));
             }
 
             // check for E030: array indices must be int
             const auto int_type =
                 dynamic_cast<BasicTypeNode*>(findType(index->getType(), index->getFilePos()));
             if (int_type == nullptr || int_type->getName() != "INTEGER") {
-                logError(index->getFilePos(), error_id::E030, index->getType());
-                exit(EXIT_FAILURE);
+                throw ParseException(index->getFilePos(), getErrMsg(error_id::E030, index->getType()));
             }
 
             // check for E017: perform range check if the index is constant
@@ -746,8 +726,7 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
             if (const_idx != nullptr) {
                 const auto value = const_idx->getValue();
                 if (value < 0 || arr->getSize() <= value) {
-                    logError(index->getFilePos(), error_id::E017, value, arr->getSize());
-                    exit(EXIT_FAILURE);
+                    throw ParseException(index->getFilePos(), getErrMsg(error_id::E017, value, arr->getSize()));
                 }
             }
 
@@ -818,33 +797,28 @@ Parser::typeCheckBinary(ExpressionNode* operand_1, ExpressionNode* operand_2, Op
     case OperatorType::logical: {
         // check for E014: boolean ops only on BOOLEAN
         if (operand_1->getType() != "BOOLEAN") {
-            logError(operand_1->getFilePos(), error_id::E014, operand_1->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand_1->getFilePos(), getErrMsg(error_id::E014, operand_1->getType()));
         }
         if (operand_2->getType() != "BOOLEAN") {
-            logError(operand_2->getFilePos(), error_id::E014, operand_2->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand_2->getFilePos(), getErrMsg(error_id::E014, operand_2->getType()));
         }
         return "BOOLEAN";
     }
     case OperatorType::arithmetic: {
         // check for E012: arithmetic ops only on INTEGER
         if (operand_1->getType() != "INTEGER") {
-            logError(operand_1->getFilePos(), error_id::E012, operand_1->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand_1->getFilePos(), getErrMsg(error_id::E012, operand_1->getType()));
         }
         if (operand_2->getType() != "INTEGER") {
-            logError(operand_2->getFilePos(), error_id::E012, operand_2->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand_2->getFilePos(), getErrMsg(error_id::E012, operand_2->getType()));
         }
         return "INTEGER";
     }
     case OperatorType::comparison: {
         // check for E013: comparison types must be equal
         if (operand_1->getType() != operand_2->getType()) {
-            logError(operand_1->getFilePos(), error_id::E013, operand_1->getType(),
-                     operand_2->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand_1->getFilePos(), getErrMsg(error_id::E013, operand_1->getType(),
+                     operand_2->getType()));
         }
         return "BOOLEAN";
     }
@@ -859,16 +833,14 @@ std::string Parser::typeCheckUnary(ExpressionNode* operand, OperatorType op) con
     case OperatorType::logical: {
         // check for E014: boolean ops only on BOOLEAN
         if (operand->getType() != "BOOLEAN") {
-            logError(operand->getFilePos(), error_id::E014, operand->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand->getFilePos(), getErrMsg(error_id::E014, operand->getType()));
         }
         return "BOOLEAN";
     }
     case OperatorType::arithmetic: {
         // check for E012: arithmetic ops only on INTEGER
         if (operand->getType() != "INTEGER") {
-            logError(operand->getFilePos(), error_id::E012, operand->getType());
-            exit(EXIT_FAILURE);
+            throw ParseException(operand->getFilePos(), getErrMsg(error_id::E012, operand->getType()));
         }
         return "INTEGER";
     }
@@ -889,8 +861,7 @@ Node* Parser::resolveLocalId(const Scope* scope, const std::string& name, const 
 
     // check for E015: identifiers must exist
     if (resolved == nullptr) {
-        logError(pos, error_id::E015, name);
-        exit(EXIT_FAILURE);
+        throw ParseException(pos, getErrMsg(error_id::E015, name));
     }
 
     return resolved->value;
@@ -902,8 +873,7 @@ Node* Parser::resolveId(const Scope* scope, const std::string& name, const FileP
 
     // check for E015: identifiers must exist
     if (resolved == nullptr) {
-        logError(pos, error_id::E015, name);
-        exit(EXIT_FAILURE);
+        throw ParseException(pos, getErrMsg(error_id::E015, name));
     }
 
     return resolved->value;
@@ -925,8 +895,7 @@ TypeNode* Parser::findType(const std::string& name, const FilePos& pos) const
 
     // check for E005: types must exist
     if (record == types_.end()) {
-        logError(pos, error_id::E005, name);
-        exit(EXIT_FAILURE);
+        throw ParseException(pos, getErrMsg(error_id::E005, name));
     }
 
     return record->second.get();

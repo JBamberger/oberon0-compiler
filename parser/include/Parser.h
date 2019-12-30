@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Scanner.h"
-#include "ParserErrors.h"
 #include "ArrayTypeNode.h"
 #include "AssignmentNode.h"
 #include "ExpressionNode.h"
@@ -9,9 +7,11 @@
 #include "IfStatementNode.h"
 #include "ModuleNode.h"
 #include "Node.h"
+#include "ParserErrors.h"
 #include "ProcedureCallNode.h"
 #include "ProcedureDeclarationNode.h"
 #include "RecordTypeNode.h"
+#include "Scanner.h"
 #include "TypeNode.h"
 #include "VariableDeclarationNode.h"
 #include "WhileStatementNode.h"
@@ -30,6 +30,13 @@ class Parser {
   public:
     explicit Parser(Scanner* scanner, Logger* logger);
     ~Parser();
+
+    /**
+     * \brief Parses the input provided by the scanner and creates a semantically checked abstract
+     * syntax tree. In case of syntactic or semantic errors the function throws a ParseException.
+     *
+     * \return the checked abstract syntax tree of the input
+     */
     std::unique_ptr<Node> parse();
 
   private:
@@ -45,19 +52,19 @@ class Parser {
     // parsing functions
     std::unique_ptr<ModuleNode> module();
     void declarations(BlockNode* block);
-    void const_declaration(    std::vector<std::unique_ptr<ConstantDeclarationNode>>& list);
-    void type_declaration(     std::vector<std::unique_ptr<TypeDeclarationNode>>& list);
-    void var_declaration(      std::vector<std::unique_ptr<VariableDeclarationNode>>& list);
+    void const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>& list);
+    void type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>& list);
+    void var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>>& list);
     void procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>& list);
-    void formal_parameters(    std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
-    void fp_section(           std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
+    void formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
+    void fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
     std::unique_ptr<ExpressionNode> expression();
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
     std::string type();
     void field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>& list);
-    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>&  list);
+    void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>& list);
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>& list);
     std::unique_ptr<StatementNode> statement();
     std::unique_ptr<AssignmentNode> assignment(const Identifier& id);
@@ -86,8 +93,7 @@ class Parser {
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
             list.push_back(std::move(node));
         } else {
-            logError(node->getFilePos(), error_id::E001, node->getName());
-            exit(EXIT_FAILURE);
+            throw ParseException(node->getFilePos(), getErrMsg(error_id::E001, node->getName()));
         }
     }
 
@@ -98,10 +104,4 @@ class Parser {
     Node* resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const;
     std::string addType(std::unique_ptr<TypeNode> type);
     TypeNode* findType(const std::string& name, const FilePos& pos) const;
-
-    template <typename... Types>
-    void logError(const FilePos& pos, const error_id id, Types&&... args) const
-    {
-        logger_->error(pos, getErrMsg(id, std::forward<Types>(args)...));
-    }
 };

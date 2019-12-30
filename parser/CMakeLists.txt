@@ -1,5 +1,6 @@
 
 set(SOURCES
+    "include/ParseException.h"
     "include/Parser.h"       "src/Parser.cpp"
     "include/PrintVisitor.h" "src/PrintVisitor.cpp"
     "include/ParserErrors.h" "src/ParserErrors.cpp"

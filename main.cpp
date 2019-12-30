@@ -4,6 +4,7 @@
  * Created by Michael Grossniklaus on 12/14/17.
  */
 
+#include "ParseException.h"
 #include "Parser.h"
 #include "PrintVisitor.h"
 #include "Scanner.h"
@@ -18,16 +19,21 @@ int main(const int argc, const char* argv[])
     std::string filename = argv[1];
     auto logger = std::make_unique<Logger>();
     logger->setLevel(LogLevel::DEBUG);
-    auto scanner = std::make_unique<Scanner>(filename, logger.get());
+    const auto scanner = std::make_unique<Scanner>(filename, logger.get());
     auto parser = std::make_unique<Parser>(scanner.get(), logger.get());
 
+    std::unique_ptr<Node> tree;
+    try {
+        tree = parser->parse();
+    } catch (const ParseException& e) {
+        logger->error(e.position(), e.what());
+        exit(EXIT_FAILURE);
+    }
+
     std::cout << "Parse Tree:" << std::endl;
-    const auto tree = parser->parse();
-
     const auto visitor = std::make_unique<PrintVisitor>(std::cout);
-
     tree->visit(visitor.get());
 
     logger->info(filename, "Parsing complete.");
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
