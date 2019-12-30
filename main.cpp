@@ -4,9 +4,9 @@
  * Created by Michael Grossniklaus on 12/14/17.
  */
 
-#include "parser/Parser.h"
-#include "parser/PrintVisitor.h"
-#include "scanner/Scanner.h"
+#include "Parser.h"
+#include "PrintVisitor.h"
+#include "Scanner.h"
 #include <iostream>
 
 int main(const int argc, const char* argv[])

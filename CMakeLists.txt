@@ -4,92 +4,19 @@ project(oberon0c)
 set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(3rdparty/fmt)
+add_subdirectory(util)
+add_subdirectory(scanner)
+add_subdirectory(parser)
 
-
-include_directories(scanner)
-include_directories(util)
 
 add_executable(oberon0c
-    scanner/IdentToken.cpp
-    scanner/IdentToken.h
-    scanner/NumberToken.cpp
-    scanner/NumberToken.h
-    scanner/Scanner.cpp
-    scanner/Scanner.h
-    scanner/StringToken.cpp
-    scanner/StringToken.h
-    scanner/Token.cpp
-    scanner/Token.h
-
-    util/Logger.cpp
-    util/Logger.h
-
-    parser/Parser.h
-    parser/Parser.cpp
-    parser/PrintVisitor.h
-    parser/PrintVisitor.cpp
-    parser/ParserErrors.h
-    parser/ParserErrors.cpp
-
-    parser/ast/NodeVisitor.h
-    parser/ast/NodeVisitor.cpp
-    parser/ast/Node.h
-    parser/ast/Node.cpp
-    parser/ast/ExpressionNode.h
-    parser/ast/UnaryExpressionNode.h
-    parser/ast/UnaryExpressionNode.cpp
-    parser/ast/BinaryExpressionNode.h
-    parser/ast/BinaryExpressionNode.cpp
-    parser/ast/NumberConstantNode.h
-    parser/ast/NumberConstantNode.cpp
-    parser/ast/VariableReferenceNode.h
-    parser/ast/VariableReferenceNode.cpp
-    parser/ast/ParameterReferenceNode.h
-    parser/ast/ParameterReferenceNode.cpp
-    parser/ast/ArrayReferenceNode.h
-    parser/ast/ArrayReferenceNode.cpp
-    parser/ast/StatementNode.h
-    parser/ast/WhileStatementNode.h
-    parser/ast/WhileStatementNode.cpp
-    parser/ast/IfStatementNode.h
-    parser/ast/IfStatementNode.cpp
-    parser/ast/AssignmentNode.h
-    parser/ast/AssignmentNode.cpp
-    parser/ast/ProcedureCallNode.h
-    parser/ast/ProcedureCallNode.cpp
-    parser/ast/Identifier.h
-    parser/ast/TypedIdentifierNode.h
-    parser/ast/VariableDeclarationNode.h
-    parser/ast/VariableDeclarationNode.cpp
-    parser/ast/FieldReferenceNode.h
-    parser/ast/FieldReferenceNode.cpp
-    parser/ast/FieldDeclarationNode.h
-    parser/ast/FieldDeclarationNode.cpp
-    parser/ast/ParameterDeclarationNode.h
-    parser/ast/ParameterDeclarationNode.cpp
-    parser/ast/TypeNode.h
-    parser/ast/BasicTypeNode.h
-    parser/ast/BasicTypeNode.cpp
-    parser/ast/ArrayTypeNode.h
-    parser/ast/ArrayTypeNode.cpp
-    parser/ast/RecordTypeNode.h
-    parser/ast/RecordTypeNode.cpp
-    parser/ast/ConstantDeclarationNode.h
-    parser/ast/ConstantDeclarationNode.cpp
-    parser/ast/BlockNode.h
-    parser/ast/BlockNode.cpp
-    parser/ast/ModuleNode.h
-    parser/ast/ModuleNode.cpp
-    parser/ast/ProcedureDeclarationNode.h
-    parser/ast/ProcedureDeclarationNode.cpp
-    parser/ast/TypeDeclarationNode.h
-    parser/ast/TypeDeclarationNode.cpp
-    parser/ast/StringConstantNode.h
-    parser/ast/StringConstantNode.cpp
-    parser/ast/Scope.h
-    parser/ast/Scope.cpp
-
     main.cpp
 )
-
-target_link_libraries(oberon0c fmt::fmt)
+target_include_directories(oberon0c PRIVATE
+    oberon0c_util
+    oberon0c_parser
+)
+target_link_libraries(oberon0c PUBLIC
+    oberon0c_util
+    oberon0c_parser
+)

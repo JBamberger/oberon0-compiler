@@ -4,22 +4,22 @@
 
 #include "Parser.h"
 
+#include "ArrayReferenceNode.h"
+#include "BasicTypeNode.h"
+#include "BinaryExpressionNode.h"
+#include "BooleanConstantNode.h"
+#include "ConstantDeclarationNode.h"
+#include "FieldReferenceNode.h"
+#include "IdentToken.h"
+#include "NumberConstantNode.h"
+#include "NumberToken.h"
+#include "ParameterDeclarationNode.h"
+#include "ParameterReferenceNode.h"
 #include "ParserErrors.h"
+#include "StringConstantNode.h"
 #include "StringToken.h"
-#include "ast/ArrayReferenceNode.h"
-#include "ast/BasicTypeNode.h"
-#include "ast/BinaryExpressionNode.h"
-#include "ast/BooleanConstantNode.h"
-#include "ast/ConstantDeclarationNode.h"
-#include "ast/FieldReferenceNode.h"
-#include "ast/NumberConstantNode.h"
-#include "ast/ParameterDeclarationNode.h"
-#include "ast/ParameterReferenceNode.h"
-#include "ast/StringConstantNode.h"
-#include "ast/TypeDeclarationNode.h"
-#include "ast/UnaryExpressionNode.h"
-#include <IdentToken.h>
-#include <NumberToken.h>
+#include "TypeDeclarationNode.h"
+#include "UnaryExpressionNode.h"
 #include <cassert>
 #include <iostream>
 #include <sstream>

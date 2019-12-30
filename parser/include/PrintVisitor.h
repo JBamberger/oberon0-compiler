@@ -1,5 +1,5 @@
 #pragma once
-#include "ast/NodeVisitor.h"
+#include "NodeVisitor.h"
 #include <ostream>
 
 class PrintVisitor : public NodeVisitor {

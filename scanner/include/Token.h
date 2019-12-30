@@ -7,7 +7,7 @@
 #ifndef OBERON0C_TOKEN_H
 #define OBERON0C_TOKEN_H
 
-#include "../util/Logger.h"
+#include "Logger.h"
 #include <ostream>
 
 enum class TokenType : char {

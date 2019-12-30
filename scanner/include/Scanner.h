@@ -7,21 +7,20 @@
 #ifndef OBERON0C_SCANNER_H
 #define OBERON0C_SCANNER_H
 
-#include <memory>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <unordered_map>
+#include "Logger.h"
 #include "Token.h"
-#include "../util/Logger.h"
-
+#include <fstream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 class Scanner {
 
-private:
+  private:
     std::string filename_;
-    const Logger *logger_;
-    const Token *token_;
+    const Logger* logger_;
+    const Token* token_;
     int lineNo_, charNo_;
     std::unordered_map<std::string, TokenType> keywords_;
     std::ifstream file_;
@@ -36,12 +35,11 @@ private:
     const std::string string();
     void comment();
 
-public:
-    explicit Scanner(const std::string &filename, const Logger *logger);
+  public:
+    explicit Scanner(const std::string& filename, const Logger* logger);
     ~Scanner();
     const Token* peekToken();
     std::unique_ptr<const Token> nextToken();
-
 };
 
-#endif //OBERON0C_SCANNER_H
+#endif // OBERON0C_SCANNER_H

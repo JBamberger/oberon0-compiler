@@ -7,8 +7,8 @@
 #ifndef OBERON0C_AST_H
 #define OBERON0C_AST_H
 
-#include "../../util/Logger.h"
 #include <ostream>
+#include "Logger.h"
 
 class NodeVisitor;
 
