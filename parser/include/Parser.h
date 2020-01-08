@@ -7,7 +7,7 @@
 #include "IfStatementNode.h"
 #include "ModuleNode.h"
 #include "Node.h"
-#include "ParserErrors.h"
+#include "ParseException.h"
 #include "ProcedureCallNode.h"
 #include "ProcedureDeclarationNode.h"
 #include "RecordTypeNode.h"
@@ -93,7 +93,7 @@ class Parser {
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
             list.push_back(std::move(node));
         } else {
-            throw ParseException(node->getFilePos(), getErrMsg(error_id::E001, node->getName()));
+            throw ParseException(node->getFilePos(), error_id::E001, node->getName());
         }
     }
 
