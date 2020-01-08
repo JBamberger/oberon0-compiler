@@ -29,9 +29,13 @@ Parser::~Parser() = default;
 
 std::unique_ptr<Node> Parser::parse()
 {
+    const auto file_name = scanner_->peekToken()->getPosition().fileName;
+    logger_->info(file_name, "Begin parsing");
     // new type map
     types_ = std::unordered_map<std::string, std::unique_ptr<TypeNode>>();
-    return module();
+    auto mod = module();
+    logger_->info(file_name, "Finished parsing");
+    return std::move(mod);
 }
 
 bool Parser::checkToken(const TokenType& type) const

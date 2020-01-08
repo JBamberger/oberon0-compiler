@@ -41,7 +41,7 @@ class Scope {
      */
     explicit Scope(std::string name, std::shared_ptr<Scope> parent);
 
-    [[nodiscard]] bool declareIdentifier(std::string name, Node* value);
+    bool declareIdentifier(std::string name, Node* value);
     /**
      * \brief Inserts a new identifier into the scope.
      *
@@ -50,7 +50,7 @@ class Scope {
      * \param symbol description of the identifier
      * \return true if the identifier was added successfully
      */
-    [[nodiscard]] bool declareIdentifier(std::unique_ptr<Symbol> symbol);
+    bool declareIdentifier(std::unique_ptr<Symbol> symbol);
 
     /**
      * \brief Searches the identifiers type and returns its type.

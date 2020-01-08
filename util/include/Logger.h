@@ -48,7 +48,7 @@ class Logger {
   public:
     explicit Logger();
     explicit Logger(LogLevel level, std::ostream* out, std::ostream* err);
-    ~Logger();
+    virtual ~Logger();
 
     void error(FilePos pos, const std::string& msg) const;
     void error(const std::string& fileName, const std::string& msg) const;
