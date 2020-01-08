@@ -10,9 +10,9 @@ std::ostream& printList(std::ostream& stream,
 {
     stream << name << "(";
     if (!list_.empty()) {
-        stream << list_.at(0);
+        stream << *list_.at(0);
         for (size_t i = 1; i < list_.size(); ++i) {
-            stream << ", " << list_.at(i);
+            stream << ", " << *list_.at(i);
         }
     }
     stream << ")";

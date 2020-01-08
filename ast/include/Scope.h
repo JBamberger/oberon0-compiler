@@ -60,9 +60,9 @@ class Scope {
      *
      * \return The descriptor info of the identifier or null if the identifier is undeclared.
      */
-    Symbol* resolveIdentifier(const std::string& identifier);
+    Symbol* resolveIdentifier(const std::string& identifier) const;
 
-    Symbol* resolveIdentifierLocally(const std::string& identifier);
+    Symbol* resolveIdentifierLocally(const std::string& identifier) const;
 
     const std::shared_ptr<Scope>& getParent() const;
 

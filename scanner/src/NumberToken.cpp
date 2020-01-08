@@ -6,15 +6,13 @@
 
 #include "NumberToken.h"
 
-NumberToken::NumberToken(FilePos pos, int value) : Token(TokenType::const_number, pos), value_(value) {
+NumberToken::NumberToken(FilePos pos, int value)
+    : Token(TokenType::const_number, pos), value_(value)
+{
 }
 
 NumberToken::~NumberToken() = default;
 
-const int NumberToken::getValue() const {
-    return value_;
-}
+int NumberToken::getValue() const { return value_; }
 
-void NumberToken::print(std::ostream &stream) const {
-    stream << this->getType() << ": " << value_;
-}
+void NumberToken::print(std::ostream& stream) const { stream << this->getType() << ": " << value_; }

@@ -30,7 +30,7 @@ bool Scope::declareIdentifier(std::unique_ptr<Symbol> symbol)
     return true;
 }
 
-Symbol* Scope::resolveIdentifier(const std::string& identifier)
+Symbol* Scope::resolveIdentifier(const std::string& identifier) const
 {
     for (auto next = this; next != nullptr; next = next->parent_.get()) {
         const auto pair = next->identifier_map_.find(identifier);
@@ -41,7 +41,7 @@ Symbol* Scope::resolveIdentifier(const std::string& identifier)
     return nullptr;
 }
 
-Symbol* Scope::resolveIdentifierLocally(const std::string& identifier)
+Symbol* Scope::resolveIdentifierLocally(const std::string& identifier) const
 {
     const auto pair = identifier_map_.find(identifier);
     if (pair != identifier_map_.end()) {

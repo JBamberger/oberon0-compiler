@@ -1,6 +1,5 @@
 
 set(TESTS
-    "src/DebugLogger.h"
     "src/main.cpp"
     "src/test_errors.cpp"
 )

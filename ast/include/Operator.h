@@ -5,7 +5,7 @@
 
 enum class OperatorType : char { logical, arithmetic, comparison };
 
-enum class UnaryOperator : char { plus, minus, not};
+enum class UnaryOperator : char { plus, minus, inverse};
 
 enum class BinaryOperator : char {
     plus,
@@ -29,7 +29,7 @@ inline std::ostream& operator<<(std::ostream& stream, const UnaryOperator& op)
     switch (op) {
     case UnaryOperator::plus:  return stream << "'+'";
     case UnaryOperator::minus: return stream << "'-'";
-    case UnaryOperator::not:   return stream << "'~'";
+    case UnaryOperator::inverse:   return stream << "'~'";
     default: std::terminate();
     }
     // clang-format on
@@ -63,7 +63,7 @@ inline UnaryOperator toUnaryOperator(const TokenType& type)
     switch (type) {
     case TokenType::op_plus:  return UnaryOperator::plus;
     case TokenType::op_minus: return UnaryOperator::minus;
-    case TokenType::op_not:   return UnaryOperator::not;
+    case TokenType::op_not:   return UnaryOperator::inverse;
     default: std::terminate();
     }
     // clang-format on
@@ -121,7 +121,7 @@ inline OperatorType getOperatorType(UnaryOperator type)
     case UnaryOperator::plus:
     case UnaryOperator::minus:
         return OperatorType ::arithmetic;
-    case UnaryOperator::not:
+    case UnaryOperator::inverse:
         return OperatorType ::logical;
     default:
         std::terminate();
@@ -169,7 +169,7 @@ inline int evalUnary(const UnaryOperator op, const int value)
         return +value;
     case UnaryOperator::minus:
         return -value;
-    case UnaryOperator::not:
+    case UnaryOperator::inverse:
         return !value;
     default:
         std::terminate();

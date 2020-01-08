@@ -63,8 +63,6 @@ std::ostream& operator<<(std::ostream& stream, const TokenType& type);
 std::string to_string(const TokenType& t);
 
 class Token {
-
-  private:
     TokenType type_;
     FilePos pos_;
 
@@ -72,8 +70,8 @@ class Token {
     Token(TokenType type, FilePos pos);
     virtual ~Token();
 
-    const TokenType getType() const;
-    const FilePos getPosition() const;
+    TokenType getType() const;
+    FilePos getPosition() const;
 
     virtual void print(std::ostream& stream) const;
     friend std::ostream& operator<<(std::ostream& stream, const Token& symbol);

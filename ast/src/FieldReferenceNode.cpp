@@ -25,5 +25,5 @@ void FieldReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this
 
 void FieldReferenceNode::print(std::ostream& stream) const
 {
-    stream << "VariableReferenceNode(" << record_ref_ << ", " << field_->getName() << ")";
+    stream << "VariableReferenceNode(" << *record_ref_ << ", " << field_->getName() << ")";
 }

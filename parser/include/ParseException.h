@@ -4,7 +4,7 @@
 #include <utility>
 #include "ParserErrors.h"
 
-class ParseException : std::exception {
+class ParseException : public std::exception {
     FilePos pos_;
     std::string msg_;
 
@@ -21,11 +21,11 @@ class ParseException : std::exception {
     }
 
     explicit ParseException(FilePos pos, char const* message)
-        : ParseException(pos, std::string(message))
+        : ParseException(std::move(pos), std::string(message))
     {
     }
 
     FilePos position() const { return pos_; }
 
-    char const* what() const override { return msg_.c_str(); }
+    char const* what() const noexcept override { return msg_.c_str(); }
 };

@@ -7,22 +7,19 @@
 #ifndef OBERON0C_IDENTTOKEN_H
 #define OBERON0C_IDENTTOKEN_H
 
-
 #include "Token.h"
 
 class IdentToken final : public Token {
 
-private:
     std::string value_;
 
-public:
-    explicit IdentToken(FilePos pos, const std::string &value);
+  public:
+    explicit IdentToken(FilePos pos, const std::string& value);
     ~IdentToken() override;
 
-    const std::string getValue() const;
+    std::string getValue() const;
 
-    void print(std::ostream &stream) const override;
+    void print(std::ostream& stream) const override;
 };
 
-
-#endif //OBERON0C_IDENTTOKEN_H
+#endif // OBERON0C_IDENTTOKEN_H

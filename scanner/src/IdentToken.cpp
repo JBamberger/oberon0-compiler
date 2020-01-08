@@ -12,7 +12,8 @@ IdentToken::IdentToken(const FilePos pos, const std::string &value) :
 
 IdentToken::~IdentToken() = default;
 
-const std::string IdentToken::getValue() const {
+std::string IdentToken::getValue() const
+{
     return value_;
 }
 

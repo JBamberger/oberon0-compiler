@@ -852,7 +852,7 @@ Node* Parser::resolveLocalId(const Scope* scope, const Identifier& id) const
 
 Node* Parser::resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const
 {
-    const auto resolved = current_scope_->resolveIdentifierLocally(name);
+    const auto resolved = scope->resolveIdentifierLocally(name);
 
     // check for E015: identifiers must exist
     if (resolved == nullptr) {
@@ -862,9 +862,14 @@ Node* Parser::resolveLocalId(const Scope* scope, const std::string& name, const 
     return resolved->value;
 }
 
+Node* Parser::resolveId(const Scope* scope, const Identifier& id) const
+{
+    return resolveId(scope, id.name, id.pos);
+}
+
 Node* Parser::resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const
 {
-    const auto resolved = current_scope_->resolveIdentifier(name);
+    const auto resolved = scope->resolveIdentifier(name);
 
     // check for E015: identifiers must exist
     if (resolved == nullptr) {
@@ -894,9 +899,4 @@ TypeNode* Parser::findType(const std::string& name, const FilePos& pos) const
     }
 
     return record->second.get();
-}
-
-Node* Parser::resolveId(const Scope* scope, const Identifier& id) const
-{
-    return resolveId(scope, id.name, id.pos);
 }

@@ -10,7 +10,7 @@ inline std::string selectType(const UnaryOperator op)
     case UnaryOperator::plus:
     case UnaryOperator::minus:
         return "INTEGER";
-    case UnaryOperator::not:
+    case UnaryOperator::inverse:
         return "BOOLEAN";
     default:
         std::terminate();

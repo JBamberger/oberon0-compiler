@@ -10,6 +10,7 @@
 #include "StringToken.h"
 #include <fstream>
 #include <utility>
+#include <limits>
 
 Scanner::Scanner(std::string filename, const Logger* logger)
     : filename_(std::move(filename)), logger_(logger), token_(nullptr), lineNo_(1), charNo_(0),
@@ -286,7 +287,7 @@ int Scanner::number()
     const auto pos = getPosition();
     do {
         isHex = isHex | ((ch_ >= 'A') && (ch_ <= 'F'));
-        if (decValue <= ((INT_MAX - ch_ + '0') / 10)) {
+        if (decValue <= ((std::numeric_limits<int>::max() - ch_ + '0') / 10)) {
             if ((ch_ >= '0') && (ch_ <= '9')) {
                 decValue = 10 * decValue + (ch_ - '0');
                 hexValue = 16 * hexValue + (ch_ - '0');

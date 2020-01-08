@@ -1,4 +1,3 @@
-#include "DebugLogger.h"
 #include "ParseException.h"
 #include "Parser.h"
 #include <gtest/gtest-param-test.h>
@@ -6,6 +5,16 @@
 #include <ostream>
 #include <string>
 #include <utility>
+
+#include "Logger.h"
+
+class DebugLogger : public Logger {
+  protected:
+    void log(LogLevel, const std::string&, int, int, const std::string&) const override {}
+
+  public:
+    DebugLogger() = default;
+};
 
 struct test_spec {
     const std::string code;
@@ -65,7 +74,7 @@ INSTANTIATE_TEST_SUITE_P(ExpectThrow, ErrorTest, testing::Values(
     test_spec("MODULE test; VAR a: INTEGER; BEGIN a := a[1] END test.", getErrMsg(error_id::E016, "INTEGER")),
     test_spec("MODULE test; VAR a: ARRAY 1 OF INTEGER; BEGIN a[2] := 1 END test.", getErrMsg(error_id::E017, 2, 1)),
     test_spec("MODULE test; VAR a: INTEGER; BEGIN a.b := 1 END test.", getErrMsg(error_id::E018, "INTEGER")),
-    test_spec("MODULE test; VAR a: RECORD b: INTEGER; END; BEGIN a.a := 1 END test.", getErrMsg(error_id::E019, "a", "[R;b,INTEGER;]")),
+    test_spec("MODULE test; VAR a: RECORD b: INTEGER; END; BEGIN a.a := 1 END test.", getErrMsg(error_id::E015, "a", "[R;b,INTEGER;]")),
     test_spec("MODULE test; VAR a: INTEGER; PROCEDURE p(); BEGIN a := 0 END p; BEGIN p(1) END test.", getErrMsg(error_id::E020, 1, 0, "p")),
     test_spec("MODULE test; VAR a: INTEGER; PROCEDURE p(x: BOOLEAN); BEGIN a := 0 END p; BEGIN p(0) END test.", getErrMsg(error_id::E021, "BOOLEAN", "INTEGER")),
     test_spec("MODULE test; VAR a: INTEGER; PROCEDURE p(VAR x: INTEGER); BEGIN a := 0 END p; BEGIN p(0) END test.", getErrMsg(error_id::E022, "x")),

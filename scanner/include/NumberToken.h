@@ -7,23 +7,19 @@
 #ifndef OBERON0C_NUMBERTOKEN_H
 #define OBERON0C_NUMBERTOKEN_H
 
-
 #include "Token.h"
 
 class NumberToken final : public Token {
 
-private:
     int value_;
 
-public:
+  public:
     NumberToken(FilePos pos, int value);
     ~NumberToken() override;
 
-    const int getValue() const;
+    int getValue() const;
 
-    void print(std::ostream &stream) const override;
-
+    void print(std::ostream& stream) const override;
 };
 
-
-#endif //OBERON0C_NUMBERTOKEN_H
+#endif // OBERON0C_NUMBERTOKEN_H

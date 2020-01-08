@@ -17,6 +17,8 @@ struct Identifier {
 
     friend std::string operator+(const std::string& lhs, const Identifier& rhs)
     {
-        return lhs + (std::stringstream() << rhs).str();
+        std::stringstream s;
+        s << lhs << rhs;
+        return s.str();
     }
 };

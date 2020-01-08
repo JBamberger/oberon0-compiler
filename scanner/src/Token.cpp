@@ -12,9 +12,9 @@ Token::Token(TokenType type, FilePos pos) : type_(type), pos_(std::move(pos)) {}
 
 Token::~Token() = default;
 
-const TokenType Token::getType() const { return type_; }
+TokenType Token::getType() const { return type_; }
 
-const FilePos Token::getPosition() const { return pos_; }
+FilePos Token::getPosition() const { return pos_; }
 
 void Token::print(std::ostream& stream) const { stream << type_; }
 
@@ -24,7 +24,12 @@ std::ostream& operator<<(std::ostream& stream, const Token& symbol)
     return stream;
 }
 
-std::string to_string(const Token& t) { return (std::stringstream() << t).str(); }
+std::string to_string(const Token& t)
+{
+    std::stringstream s;
+    s << t;
+    return s.str();
+}
 
 std::ostream& operator<<(std::ostream& stream, const TokenType& type)
 {
@@ -83,4 +88,9 @@ std::ostream& operator<<(std::ostream& stream, const TokenType& type)
     return stream;
 }
 
-std::string to_string(const TokenType& t) { return (std::stringstream() << t).str(); }
+std::string to_string(const TokenType& t)
+{
+    std::stringstream s;
+    s << t;
+    return s.str();
+}
