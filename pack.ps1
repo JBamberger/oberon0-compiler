@@ -10,7 +10,7 @@ function New-TemporaryDirectory {
 }
 
 
-$dt = Get-Date -Format "yyyyMMdd_hhmmss";
+$dt = Get-Date -Format "yyyyMMdd_HHmmss";
 $out_name = "$($out_dir)$($dt)_oberon0c_acker_bamberger.zip";
 
 # create output directory
