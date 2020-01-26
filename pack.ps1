@@ -17,7 +17,7 @@ $out_name = "$($out_dir)$($dt)_oberon0c_acker_bamberger.zip";
 New-Item -ItemType Directory -Name $out_dir -Force | Out-Null;
 
 # build zip file
-$sources = Get-ChildItem -Exclude .git,.idea,.vs,build,cmake-build-*,out,.milestones;
+$sources = Get-ChildItem -Force -Exclude .idea,.vs,build,cmake-build-*,out,.milestones;
 $sources | Compress-Archive -DestinationPath $out_name
 
 # save the current location

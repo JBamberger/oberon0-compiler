@@ -37,16 +37,51 @@ class Parser {
      *
      * \return the checked abstract syntax tree of the input
      */
-    std::unique_ptr<Node> parse();
+    std::unique_ptr<ModuleNode> parse();
 
   private:
-    // parsing utility functions
+    /**
+     * \brief Checks the next tokens type
+     * \param type required token type
+     * \return true if the token type matched
+     */
     bool checkToken(const TokenType& type) const;
+
+    /**
+     * \brief Checks the next tokens type and consumes it if it has the specified type
+     * \param type required token type
+     * \return true if the token type matched
+     */
     bool checkAndConsumeToken(const TokenType& type) const;
+
+    /**
+     * \brief Asserts that the next token has the specified type and consumes the token silently.
+     * \param type required token type
+     * \throws ParseException if the token type mismatches.
+     */
     void requireToken(const TokenType& type) const;
+
+    /**
+     * \brief Asserts that the next token has the specified type and returns the token.
+     * \param type required token type
+     * \return the read token
+     * \throws ParseException if the token type mismatches.
+     */
     std::unique_ptr<const Token> requireAndGetToken(const TokenType& type) const;
 
+    /**
+     * \brief Reads the next token as an identifier.
+     * \return Identifier instance with the read position and name
+     * \throws ParseException if the token is not an identifier
+     */
     Identifier ident() const;
+
+
+    /**
+     * \brief Reads an identifier list.
+     * \return The vector of Identifier instances read.
+     * \throws ParseException if there is no valid Identifier list
+     */
     std::vector<Identifier> ident_list() const;
 
     // parsing functions

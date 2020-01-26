@@ -6,7 +6,7 @@ class PrintVisitor : public NodeVisitor {
     std::ostream& out_;
     int indent_;
 
-    std::ostream& line();
+    std::ostream& line() const;
     void inc();
     void dec();
 
@@ -37,6 +37,7 @@ class PrintVisitor : public NodeVisitor {
     void visit(const ParameterReferenceNode* node) override;
     void visit(const WhileStatementNode* node) override;
     void visit(const BooleanConstantNode* node) override;
-private:
+
+  private:
     void printBlock(const BlockNode* node);
 };

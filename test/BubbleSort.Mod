@@ -6,10 +6,15 @@ CONST Dim = 2 * 10;
 
 (* Record definition for a two-dimensional point. *)
 TYPE Point2D = RECORD x, y: INTEGER END;
+     Point3D = RECORD a: Point2D; z: INTEGER END;
+     PointList = ARRAY 30 OF Point3D;
+     ColorRGB = RECORD r, g, b: INTEGER END;
+     Polyg3D = RECORD color: ColorRGB; points: PointList END;
 
 (* Array to be sorted. *)
 VAR a: ARRAY Dim OF INTEGER;
     p: Point2D;
+    poly: Polyg3D;
 
 (* Initializes the array. *)
 PROCEDURE Init();
@@ -49,6 +54,10 @@ END Bubble;
 
 (* Main program. *)
 BEGIN
+    poly.color.r := 255;
+    poly.color.g := 0;
+    poly.color.b := 0;
+    poly.points[10].a.x := 1;
     Init;
     Bubble()
 END BubbleSort.

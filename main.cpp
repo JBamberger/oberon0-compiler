@@ -9,6 +9,7 @@
 #include "PrintVisitor.h"
 #include "Scanner.h"
 #include <iostream>
+#include <CodeGenerator.h>
 
 int main(const int argc, const char* argv[])
 {
@@ -21,8 +22,9 @@ int main(const int argc, const char* argv[])
     logger->setLevel(LogLevel::DEBUG);
     const auto scanner = std::make_unique<Scanner>(filename, logger.get());
     auto parser = std::make_unique<Parser>(scanner.get(), logger.get());
+    auto code_gen = CodeGenerator::create(Architecture::X86_64);
 
-    std::unique_ptr<Node> tree;
+    std::unique_ptr<ModuleNode> tree;
     try {
         tree = parser->parse();
     } catch (const ParseException& e) {
@@ -30,9 +32,12 @@ int main(const int argc, const char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "Parse Tree:" << std::endl;
-    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
-    tree->visit(visitor.get());
+//    std::cout << "Parse Tree:" << std::endl;
+//    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
+//    tree->visit(visitor.get());
+
+    code_gen->generate(std::move(tree), &std::cout);
+
 
     logger->info(filename, "Parsing complete.");
     exit(EXIT_SUCCESS);

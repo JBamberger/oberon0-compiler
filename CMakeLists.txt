@@ -11,23 +11,24 @@ add_subdirectory("3rdparty/googletest")
 add_subdirectory("3rdparty/fmt")
 
 if(MSVC)
-  add_compile_options(/W4 /WX)
+  add_compile_options(/W4) # /WX
 else()
-  add_compile_options(-Wall -Wextra -pedantic -Werror)
+  add_compile_options(-Wall -Wextra -pedantic) # -Werror
 endif()
 
 add_subdirectory("util")
 add_subdirectory("scanner")
 add_subdirectory("ast")
 add_subdirectory("parser")
+add_subdirectory("codegen")
 
 set(SOURCES
     "main.cpp"
 )
 
 add_executable(            oberon0c ${SOURCES})
-target_include_directories(oberon0c PRIVATE oberon0c_parser)
-target_link_libraries(     oberon0c PRIVATE oberon0c_parser)
+target_include_directories(oberon0c PRIVATE oberon0c_parser oberon0c_codegen)
+target_link_libraries(     oberon0c PRIVATE oberon0c_parser oberon0c_codegen)
 
 
 

@@ -20,9 +20,9 @@
 
 PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
 
-PrintVisitor::~PrintVisitor() {}
+PrintVisitor::~PrintVisitor() = default;
 
-std::ostream& PrintVisitor::line()
+std::ostream& PrintVisitor::line() const
 {
     for (auto i = 0; i < indent_; ++i) {
         out_ << "|   ";

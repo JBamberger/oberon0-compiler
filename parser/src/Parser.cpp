@@ -27,7 +27,7 @@ Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(lo
 
 Parser::~Parser() = default;
 
-std::unique_ptr<Node> Parser::parse()
+std::unique_ptr<ModuleNode> Parser::parse()
 {
     const auto file_name = scanner_->peekToken()->getPosition().fileName;
     logger_->info(file_name, "Begin parsing");
