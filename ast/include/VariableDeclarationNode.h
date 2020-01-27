@@ -3,9 +3,7 @@
 
 class VariableDeclarationNode : public TypedIdentifierNode {
   public:
-    VariableDeclarationNode(const FilePos& pos,
-                            std::string name,
-                            std::string type);
+    VariableDeclarationNode(const FilePos& pos, std::string name, std::string type);
 
     ~VariableDeclarationNode() override;
 

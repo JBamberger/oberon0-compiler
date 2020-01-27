@@ -1,7 +1,7 @@
 #pragma once
 #include "ExpressionNode.h"
-#include "Token.h"
 #include "Operator.h"
+#include "Token.h"
 
 class BinaryExpressionNode : public ExpressionNode {
     BinaryOperator op_;

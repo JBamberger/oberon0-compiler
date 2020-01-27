@@ -70,7 +70,6 @@ class Scope {
      */
     Symbol* resolveIdentifierLocally(const std::string& identifier) const;
 
-
     /**
      * \brief Returns the parent scope.
      * \return Pointer to the parent scope or null if this scope is the root scope

@@ -76,7 +76,6 @@ class Parser {
      */
     Identifier ident() const;
 
-
     /**
      * \brief Reads an identifier list.
      * \return The vector of Identifier instances read.

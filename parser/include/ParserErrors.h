@@ -55,4 +55,5 @@ std::string getErrMsg(const error_id id, Types&&... args)
 // W001: WHILE-condition is constant
 // W002: IF-condition is constant
 
-// Get-Content .\parser\src\Parser.cpp | Select-String 'E\d{3}'  | %{$_.ToString().Trim()} | Sort-Object  | Get-Unique
+// Get-Content .\parser\src\Parser.cpp | Select-String 'E\d{3}'  | %{$_.ToString().Trim()} |
+// Sort-Object  | Get-Unique

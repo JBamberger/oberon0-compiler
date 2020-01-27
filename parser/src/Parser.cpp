@@ -167,7 +167,12 @@ void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNo
         throw ParseException(value->getFilePos(), error_id::E002);
     }
 
-    auto node = std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(value));
+    std::unique_ptr<ConstantNode> constant_node(dynamic_cast<ConstantNode*>(value.release()));
+    if (constant_node == nullptr)
+        throw std::bad_cast();
+
+    auto node =
+        std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(constant_node));
     insertDeclaration(std::move(node), list);
 }
 

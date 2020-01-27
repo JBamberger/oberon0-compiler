@@ -5,7 +5,7 @@
 
 enum class OperatorType : char { logical, arithmetic, comparison };
 
-enum class UnaryOperator : char { plus, minus, inverse};
+enum class UnaryOperator : char { plus, minus, inverse };
 
 enum class BinaryOperator : char {
     plus,

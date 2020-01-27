@@ -1,16 +1,16 @@
 #pragma once
 #include "Logger.h"
+#include "ParserErrors.h"
 #include <exception>
 #include <utility>
-#include "ParserErrors.h"
 
 class ParseException : public std::exception {
     FilePos pos_;
     std::string msg_;
 
   public:
-      template <typename... Types>
-      explicit ParseException(FilePos pos, const error_id id, Types&&... args)
+    template <typename... Types>
+    explicit ParseException(FilePos pos, const error_id id, Types&&... args)
         : exception(), pos_(std::move(pos)), msg_(getErrMsg(id, std::forward<Types>(args)...))
     {
     }

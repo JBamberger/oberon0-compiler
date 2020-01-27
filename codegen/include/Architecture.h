@@ -1,5 +1,3 @@
 #pragma once
 
-enum class Architecture : char {
-    X86_64
-};
+enum class Architecture : char { X86_64 };
