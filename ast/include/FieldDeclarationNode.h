@@ -3,7 +3,7 @@
 
 class FieldDeclarationNode : public TypedIdentifierNode {
   public:
-    FieldDeclarationNode(const FilePos& pos, std::string name, std::string type);
+    FieldDeclarationNode(const FilePos& pos, std::string name, TypeNode* type);
 
     ~FieldDeclarationNode() override;
 

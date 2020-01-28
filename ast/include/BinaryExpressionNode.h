@@ -10,6 +10,7 @@ class BinaryExpressionNode : public ExpressionNode {
 
   public:
     BinaryExpressionNode(const FilePos& pos,
+                         TypeNode* type,
                          BinaryOperator op,
                          std::unique_ptr<ExpressionNode> operand1,
                          std::unique_ptr<ExpressionNode> operand2);

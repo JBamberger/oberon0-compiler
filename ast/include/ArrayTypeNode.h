@@ -3,10 +3,10 @@
 
 class ArrayTypeNode : public TypeNode {
     int size_;
-    std::string type_;
+    TypeNode* type_;
 
   public:
-    ArrayTypeNode(int size, std::string type);
+    ArrayTypeNode(int size, TypeNode* type);
 
     ~ArrayTypeNode() override;
 
@@ -14,7 +14,7 @@ class ArrayTypeNode : public TypeNode {
 
     size_t getByteSize() const override;
 
-    std::string getType() const;
+    TypeNode* getType() const;
 
     std::string getId() const override;
 

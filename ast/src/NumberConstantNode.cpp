@@ -1,10 +1,12 @@
 #include "NumberConstantNode.h"
 #include "NodeVisitor.h"
 #include "Scope.h"
+#include <cassert>
 
-NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value)
-    : ConstantNode(NodeType::number_constant, pos, "INTEGER"), value_(value)
+NumberConstantNode::NumberConstantNode(const FilePos& pos, const int value, TypeNode* type)
+    : ConstantNode(NodeType::number_constant, pos, type), value_(value)
 {
+    assert(type->getId() == "INTEGER");
 }
 
 NumberConstantNode::~NumberConstantNode() = default;

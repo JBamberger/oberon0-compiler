@@ -1,17 +1,19 @@
 
-#include <iomanip>
 #include "X86_64CodeGenerator.h"
+#include "ArrayReferenceNode.h"
+#include "AssignmentNode.h"
 #include "BinaryExpressionNode.h"
-#include "UnaryExpressionNode.h"
+#include "FieldReferenceNode.h"
 #include "NumberConstantNode.h"
 #include "StringConstantNode.h"
-#include "AssignmentNode.h"
-#include "FieldReferenceNode.h"
-#include "ArrayReferenceNode.h"
+#include "UnaryExpressionNode.h"
+#include <iomanip>
 
 X86_64CodeGenerator::X86_64CodeGenerator() : output_(nullptr), nl_("\n"), label_nr_(1) {}
 
 X86_64CodeGenerator::~X86_64CodeGenerator() = default;
+
+// clang-format off
 
 void X86_64CodeGenerator::generate(std::unique_ptr<ModuleNode> ast, std::ostream *output) {
     output_ = output;
@@ -87,12 +89,12 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
 void X86_64CodeGenerator::visit(const ConstantDeclarationNode *node) {
     const auto label = node->getName() + nextLabel();
     const auto type = node->getValue()->getType();
-    if (type == "INTEGER") {
+    if (type->getId() == "INTEGER") {
         // INTEGER constants are used as immediate value in the instructions
 //        const auto value = dynamic_cast<NumberConstantNode *>(node->getValue().get())->getValue();
 //        *output_ << padRight(label + ":", COMMENT_COL) << "; integer constant definition" << nl_
 //                 << "        dq      " << std::to_string(value) << nl_;
-    } else if (type == "STRING") {
+    } else if (type->getId() == "STRING") {
         //TODO: escape the string appropriately
         const auto value = dynamic_cast<StringConstantNode *>(node->getValue().get())->getValue();
         *output_ << padRight(label + ":", COMMENT_COL) << "; string constant definition" << nl_
@@ -364,3 +366,5 @@ std::string X86_64CodeGenerator::padRight(const std::string &value, const size_t
 
     return value + pad_string;
 }
+
+// clang-format on

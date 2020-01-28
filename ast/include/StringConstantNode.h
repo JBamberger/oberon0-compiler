@@ -7,7 +7,7 @@ class StringConstantNode : public ConstantNode {
     std::string value_;
 
   public:
-    StringConstantNode(const FilePos& pos, std::string value);
+    StringConstantNode(const FilePos& pos, std::string value, TypeNode* type);
     ~StringConstantNode() override = default;
 
     const std::string& getValue() const;

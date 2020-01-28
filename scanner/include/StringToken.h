@@ -7,23 +7,20 @@
 #ifndef OBERON0C_STRINGTOKEN_H
 #define OBERON0C_STRINGTOKEN_H
 
-
 #include "Token.h"
 
 class StringToken final : public Token {
 
-private:
+  private:
     std::string value_;
 
-public:
-    explicit StringToken(FilePos pos, const std::string &value);
+  public:
+    explicit StringToken(FilePos pos, const std::string& value);
     ~StringToken() override;
 
     const std::string getValue() const;
 
-    void print(std::ostream &stream) const override;
-
+    void print(std::ostream& stream) const override;
 };
 
-
-#endif //OBERON0C_STRINGTOKEN_H
+#endif // OBERON0C_STRINGTOKEN_H

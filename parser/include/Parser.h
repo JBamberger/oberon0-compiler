@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Operator.h>
 #include "ArrayTypeNode.h"
 #include "AssignmentNode.h"
 #include "ExpressionNode.h"
@@ -27,7 +28,12 @@ class Parser {
     std::unordered_map<std::string, std::unique_ptr<TypeNode>> types_;
     std::shared_ptr<Scope> current_scope_;
 
-  public:
+    TypeNode* integer_ = nullptr;
+    TypeNode* boolean_ = nullptr;
+    TypeNode* string_ = nullptr;
+
+
+public:
     explicit Parser(Scanner* scanner, Logger* logger);
     ~Parser();
 
@@ -96,7 +102,7 @@ class Parser {
     std::unique_ptr<ExpressionNode> simple_expression();
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
-    std::string type();
+    TypeNode* type();
     void field_list(MemberLayout<FieldDeclarationNode>& list);
     void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>& list);
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>& list);
@@ -117,9 +123,9 @@ class Parser {
                                                             std::unique_ptr<const Token> op) const;
 
     // type checking
-    std::string
+    TypeNode*
     typeCheckBinary(ExpressionNode* operand_1, ExpressionNode* operand_2, OperatorType op) const;
-    std::string typeCheckUnary(ExpressionNode* operand, OperatorType op) const;
+    TypeNode* typeCheckUnary(ExpressionNode* operand, OperatorType op) const;
 
     template <class T>
     void insertDeclaration(std::unique_ptr<T> node, std::vector<std::unique_ptr<T>>& list)
@@ -136,6 +142,8 @@ class Parser {
     Node* resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const;
     Node* resolveId(const Scope* scope, const Identifier& id) const;
     Node* resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const;
-    std::string addType(std::unique_ptr<TypeNode> type);
-    TypeNode* findType(const std::string& name, const FilePos& pos) const;
+    TypeNode* addType(std::unique_ptr<TypeNode> type);
+    TypeNode* findType(TypeNode* type, const FilePos& pos) const;
+    TypeNode* selectUnaryOperationType(UnaryOperator op) const;
+    TypeNode* selectBinaryOperationType(BinaryOperator op) const;
 };

@@ -9,6 +9,7 @@ class UnaryExpressionNode : public ExpressionNode {
 
   public:
     UnaryExpressionNode(const FilePos& pos,
+                        TypeNode* type,
                         UnaryOperator op,
                         std::unique_ptr<ExpressionNode> operand);
     ~UnaryExpressionNode() override;

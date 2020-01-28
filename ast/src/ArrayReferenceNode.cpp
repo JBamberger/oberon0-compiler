@@ -5,10 +5,10 @@
 
 ArrayReferenceNode::ArrayReferenceNode(const FilePos& pos,
                                        std::unique_ptr<ExpressionNode> index,
-                                       std::string type,
+                                       TypeNode* type,
                                        std::unique_ptr<AssignableExpressionNode> array_ref)
-    : AssignableExpressionNode(NodeType::selector, pos, std::move(type)),
-      array_ref_(std::move(array_ref)), index_(std::move(index))
+    : AssignableExpressionNode(NodeType::selector, pos, type), array_ref_(std::move(array_ref)),
+      index_(std::move(index))
 {
     assert(array_ref_ != nullptr);
     assert(index_ != nullptr);

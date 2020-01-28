@@ -5,9 +5,9 @@
 
 ParameterDeclarationNode::ParameterDeclarationNode(const FilePos& pos,
                                                    std::string name,
-                                                   std::string type,
+                                                   TypeNode* type,
                                                    const bool is_reference)
-    : TypedIdentifierNode(NodeType::parameter, pos, std::move(name), std::move(type)),
+    : TypedIdentifierNode(NodeType::parameter, pos, std::move(name), type),
       is_reference_(is_reference)
 {
 }

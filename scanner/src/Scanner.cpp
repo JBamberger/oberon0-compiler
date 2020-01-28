@@ -9,8 +9,8 @@
 #include "NumberToken.h"
 #include "StringToken.h"
 #include <fstream>
-#include <utility>
 #include <limits>
+#include <utility>
 
 Scanner::Scanner(std::string filename, const Logger* logger)
     : filename_(std::move(filename)), logger_(logger), token_(nullptr), lineNo_(1), charNo_(0),

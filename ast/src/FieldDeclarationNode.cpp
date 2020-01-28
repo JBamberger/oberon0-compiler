@@ -3,8 +3,8 @@
 #include "NodeVisitor.h"
 #include <utility>
 
-FieldDeclarationNode::FieldDeclarationNode(const FilePos& pos, std::string name, std::string type)
-    : TypedIdentifierNode(NodeType::field, pos, std::move(name), std::move(type))
+FieldDeclarationNode::FieldDeclarationNode(const FilePos& pos, std::string name, TypeNode* type)
+    : TypedIdentifierNode(NodeType::field, pos, std::move(name), type)
 {
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "ExpressionNode.h"
+#include "TypeNode.h"
 
 class ArrayReferenceNode : public AssignableExpressionNode {
 
@@ -9,7 +10,7 @@ class ArrayReferenceNode : public AssignableExpressionNode {
   public:
     ArrayReferenceNode(const FilePos& pos,
                        std::unique_ptr<ExpressionNode> index,
-                       std::string type,
+                       TypeNode* type,
                        std::unique_ptr<AssignableExpressionNode> array_ref);
 
     ~ArrayReferenceNode() override;

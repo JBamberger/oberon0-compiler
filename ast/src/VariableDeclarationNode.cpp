@@ -5,8 +5,8 @@
 
 VariableDeclarationNode::VariableDeclarationNode(const FilePos& pos,
                                                  std::string name,
-                                                 std::string type)
-    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), std::move(type))
+                                                 TypeNode* type)
+    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), type)
 {
 }
 

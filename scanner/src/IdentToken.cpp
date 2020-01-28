@@ -6,17 +6,13 @@
 
 #include "IdentToken.h"
 
-IdentToken::IdentToken(const FilePos pos, const std::string &value) :
-        Token(TokenType::const_ident, pos), value_(value) {
+IdentToken::IdentToken(const FilePos pos, const std::string& value)
+    : Token(TokenType::const_ident, pos), value_(value)
+{
 }
 
 IdentToken::~IdentToken() = default;
 
-std::string IdentToken::getValue() const
-{
-    return value_;
-}
+std::string IdentToken::getValue() const { return value_; }
 
-void IdentToken::print(std::ostream &stream) const {
-    stream << this->getType() << ": " << value_;
-}
+void IdentToken::print(std::ostream& stream) const { stream << this->getType() << ": " << value_; }

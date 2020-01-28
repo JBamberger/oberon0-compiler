@@ -1,4 +1,5 @@
 #pragma once
+
 #include "ExpressionNode.h"
 #include "NodeVisitor.h"
 
@@ -7,10 +8,12 @@ class BooleanConstantNode : public ConstantNode {
     int value_;
 
   public:
-    BooleanConstantNode(const FilePos& pos, const int value)
-        : ConstantNode(NodeType::number_constant, pos, "BOOLEAN"), value_(value)
+    BooleanConstantNode(const FilePos& pos, const int value, TypeNode* type)
+        : ConstantNode(NodeType::number_constant, pos, type), value_(value)
     {
+        assert(type->getId() == "BOOLEAN");
     }
+
     ~BooleanConstantNode() override = default;
 
     int getValue() const { return value_; }

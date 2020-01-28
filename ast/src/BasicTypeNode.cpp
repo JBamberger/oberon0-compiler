@@ -31,6 +31,4 @@ std::unique_ptr<BasicTypeNode> BasicTypeNode::makeBool()
     return std::make_unique<BasicTypeNode>("BOOLEAN", 8);
 }
 
-size_t BasicTypeNode::getByteSize() const {
-    return size_;
-}
+size_t BasicTypeNode::getByteSize() const { return size_; }

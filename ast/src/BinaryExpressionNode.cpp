@@ -3,34 +3,12 @@
 #include "Scope.h"
 #include <cassert>
 
-inline std::string selectType(const BinaryOperator op)
-{
-    switch (op) {
-    case BinaryOperator::plus:
-    case BinaryOperator::minus:
-    case BinaryOperator::times:
-    case BinaryOperator::div:
-    case BinaryOperator::mod:
-        return "INTEGER";
-    case BinaryOperator::logical_or:
-    case BinaryOperator::logical_and:
-    case BinaryOperator::eq:
-    case BinaryOperator::neq:
-    case BinaryOperator::lt:
-    case BinaryOperator::leq:
-    case BinaryOperator::gt:
-    case BinaryOperator::geq:
-        return "BOOLEAN";
-    default:
-        std::terminate();
-    }
-}
-
 BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
+                                           TypeNode* type,
                                            const BinaryOperator op,
                                            std::unique_ptr<ExpressionNode> operand1,
                                            std::unique_ptr<ExpressionNode> operand2)
-    : ExpressionNode(NodeType::binary_expression, pos, selectType(op)), op_(op),
+    : ExpressionNode(NodeType::binary_expression, pos, type), op_(op),
       operand1_(std::move(operand1)), operand2_(std::move(operand2))
 {
     assert(operand1_ != nullptr);

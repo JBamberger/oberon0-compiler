@@ -1,8 +1,8 @@
 #pragma once
 #include "FieldDeclarationNode.h"
+#include "MemberLayout.h"
 #include "Scope.h"
 #include "TypeNode.h"
-#include "MemberLayout.h"
 #include <vector>
 
 class RecordTypeNode : public TypeNode {

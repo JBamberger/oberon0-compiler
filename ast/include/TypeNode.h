@@ -2,7 +2,7 @@
 #include "Node.h"
 
 class TypeNode : public Node {
-public:
+  public:
     TypeNode() : Node(NodeType::type, FilePos()) {}
 
     /**
