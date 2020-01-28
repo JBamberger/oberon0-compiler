@@ -51,6 +51,7 @@ class Logger {
     virtual ~Logger();
 
     void error(FilePos pos, const std::string& msg) const;
+    void info(const FilePos& pos, const std::string& msg) const;
     void error(const std::string& fileName, const std::string& msg) const;
     void info(const std::string& fileName, const std::string& msg) const;
     void debug(const std::string& fileName, const std::string& msg) const;

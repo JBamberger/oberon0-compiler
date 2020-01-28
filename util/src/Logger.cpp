@@ -60,6 +60,11 @@ void Logger::error(const FilePos pos, const std::string& msg) const
     log(LogLevel::ERROR, pos.fileName, pos.lineNo, pos.charNo, msg);
 }
 
+void Logger::info(const FilePos& pos, const std::string& msg) const
+{
+    log(LogLevel::INFO, pos.fileName, pos.lineNo, pos.charNo, msg);
+}
+
 void Logger::error(const std::string& fileName, const std::string& msg) const
 {
     log(LogLevel::ERROR, fileName, msg);

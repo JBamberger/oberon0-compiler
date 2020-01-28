@@ -550,6 +550,9 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier &id) 
     // check for E031: name must reference a procedure declaration
     auto proc_decl = dynamic_cast<ProcedureDeclarationNode *>(resolveId(current_scope_.get(), id));
     if (proc_decl == nullptr) {
+        if (checkToken(TokenType::op_eq)) {
+            logger_->error(scanner_->peekToken()->getPosition(), "The comparision '=' should probably be an assignment: ':='.");
+        }
         throw ParseException(id.pos, error_id::E031, id.name);
     }
 

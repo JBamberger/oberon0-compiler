@@ -1,5 +1,5 @@
 MODULE Test;
-VAR a: ARRAY 5 OF INTEGER;
+VAR a: INTEGER; (*ARRAY 5 OF INTEGER;*)
 BEGIN
-        a[0] := 0
+        a := 0
 END Test.
