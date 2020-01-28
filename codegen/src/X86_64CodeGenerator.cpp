@@ -57,7 +57,7 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "section .text" << nl_
              << "main:                                   ; Module begin: " << node->getName() << nl_
              << "        push    rbp                     ; save caller stack frame" << nl_
-             << "        mov     rsp, rbp                ; move to next stack frame" << nl_;
+             << "        mov     rbp, rsp                ; move to next stack frame" << nl_;
     defineVariables(node);
     // here goes the module body
 
@@ -126,7 +126,7 @@ void X86_64CodeGenerator::visit(const VariableReferenceNode *node) {
     const auto offset = node->getVariable()->getParent()->getVariables().at(node->getVariable()->getName()).offset;
     *output_ << "        ; Variable reference " << node->getVariable()->getName() << nl_
              << "        pop     rax" << nl_
-             << "        lea     rax, qword [rax - "<< offset << "]" << nl_
+             << "        lea     rax,  [rax - "<< offset << "]" << nl_
              << "        push    rax" << nl_;
 }
 
@@ -144,12 +144,13 @@ void X86_64CodeGenerator::visit(const FieldReferenceNode *node) {
 }
 
 void X86_64CodeGenerator::visit(const AssignmentNode *node) {
-    *output_ << "        ; Begin evaluation for assignment" << nl_
-             << "        push    rbp                     ; push base address" << nl_;
 
-    node->getValue()->visit(this); // compute the value of the assignment
+    *output_ << "        ; Begin evaluation for assignment" << nl_;
 
-    *output_ << "        ; Begin address computation for assignment" << nl_;
+    node->getValue()->visit(this);
+
+    *output_ << "        push    rbp                     ; push base address" << nl_
+             << "        ; Begin address computation for assignment" << nl_;
 
     node->getAssignee()->visit(this); // compute the assignment address
 
