@@ -97,7 +97,7 @@ class Parser {
     std::unique_ptr<ExpressionNode> term();
     std::unique_ptr<ExpressionNode> factor();
     std::string type();
-    void field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>& list);
+    void field_list(MemberLayout<FieldDeclarationNode>& list);
     void actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>& list);
     void statement_sequence(std::vector<std::unique_ptr<StatementNode>>& list);
     std::unique_ptr<StatementNode> statement();

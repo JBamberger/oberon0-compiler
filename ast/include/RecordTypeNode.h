@@ -2,27 +2,27 @@
 #include "FieldDeclarationNode.h"
 #include "Scope.h"
 #include "TypeNode.h"
+#include "MemberLayout.h"
 #include <vector>
 
 class RecordTypeNode : public TypeNode {
-  public:
-    using FieldDeclList = std::vector<std::unique_ptr<FieldDeclarationNode>>;
-
   private:
     std::shared_ptr<Scope> scope_;
-    FieldDeclList members_;
+    MemberLayout<FieldDeclarationNode> members_;
 
   public:
-    RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent);
+    RecordTypeNode(std::shared_ptr<Scope> parent);
     ~RecordTypeNode() override;
 
-    FieldDeclList& getMembers();
+    MemberLayout<FieldDeclarationNode>& getMembers();
 
-    const FieldDeclList& getMembers() const;
+    const MemberLayout<FieldDeclarationNode>& getMembers() const;
 
     const std::shared_ptr<Scope>& getScope() const;
 
     std::string getId() const override;
+
+    size_t getByteSize() const override;
 
     void visit(NodeVisitor* visitor) const override;
 

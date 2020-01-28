@@ -1,8 +1,8 @@
 #include "ArrayTypeNode.h"
 #include "NodeVisitor.h"
 
-ArrayTypeNode::ArrayTypeNode(const FilePos& pos, const int size, std::string type)
-    : TypeNode(NodeType::array_type, pos), size_(size), type_(std::move(type))
+ArrayTypeNode::ArrayTypeNode(const int size, std::string type)
+    : TypeNode(), size_(size), type_(std::move(type))
 {
 }
 
@@ -22,4 +22,8 @@ void ArrayTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
 void ArrayTypeNode::print(std::ostream& stream) const
 {
     stream << "ArrayTypeNode(" << size_ << "," << type_ << ")";
+}
+
+size_t ArrayTypeNode::getByteSize() const {
+    return size_ * 8; // TODO: type.getByteSize();
 }

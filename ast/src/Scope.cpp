@@ -3,10 +3,10 @@
 #include <cassert>
 #include <utility>
 
-Scope::Scope(std::string name) : name_(std::move(name)), level_(0) {}
+Scope::Scope(std::string name) : name_(std::move(name)) {}
 
 Scope::Scope(std::string name, std::shared_ptr<Scope> parent)
-    : parent_(std::move(parent)), name_(std::move(name)), level_(parent_->level_ + 1)
+    : parent_(std::move(parent)), name_(std::move(name))
 {
     parent_->children_.push_back(this);
 }

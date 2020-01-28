@@ -3,36 +3,45 @@
 #include "PrintUtils.h"
 #include <utility>
 
-RecordTypeNode::RecordTypeNode(const FilePos& pos, std::shared_ptr<Scope> parent)
-    : TypeNode(NodeType::record_type, pos),
-      scope_(std::make_shared<Scope>("RecordScope", std::move(parent)))
-{
+RecordTypeNode::RecordTypeNode(std::shared_ptr<Scope> parent)
+        : TypeNode(), scope_(std::make_shared<Scope>("RecordScope", std::move(parent))) {
 }
 
 RecordTypeNode::~RecordTypeNode() = default;
 
-RecordTypeNode::FieldDeclList& RecordTypeNode::getMembers() { return members_; }
+MemberLayout<FieldDeclarationNode> &RecordTypeNode::getMembers() { return members_; }
 
-const RecordTypeNode::FieldDeclList& RecordTypeNode::getMembers() const { return members_; }
+const MemberLayout<FieldDeclarationNode> &RecordTypeNode::getMembers() const { return members_; }
 
-const std::shared_ptr<Scope>& RecordTypeNode::getScope() const { return scope_; }
+const std::shared_ptr<Scope> &RecordTypeNode::getScope() const { return scope_; }
 
-std::string RecordTypeNode::getId() const
-{
+std::string RecordTypeNode::getId() const {
     std::stringstream s;
     s << "[R;";
-    for (const auto& m : members_) {
-        s << m->getName() << "," << m->getType() << ";";
-    }
+    members_.visitMembers([&s](const Member<FieldDeclarationNode> &member) {
+        s << member.member->getName() << "," << member.member->getType() << ";";
+    });
     s << "]";
     return s.str();
 }
 
-void RecordTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void RecordTypeNode::visit(NodeVisitor *visitor) const { visitor->visit(this); }
 
-void RecordTypeNode::print(std::ostream& stream) const
-{
+void RecordTypeNode::print(std::ostream &stream) const {
     stream << "RecordTypeNode(";
-    printList(stream, "Fields", members_);
-    stream << ")";
+    stream << "Fields(";
+    bool first = true;
+    members_.visitMembers([&stream, &first](const Member<FieldDeclarationNode> &member) {
+        if (first) {
+            first = false;
+        } else {
+            stream << ", ";
+        }
+        stream << member.member;
+    });
+    stream << "))";
+}
+
+size_t RecordTypeNode::getByteSize() const {
+    return members_.getSize();
 }

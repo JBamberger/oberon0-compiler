@@ -106,34 +106,32 @@ void X86_64CodeGenerator::visit(const ConstantDeclarationNode *node) {
 
 void X86_64CodeGenerator::visit(const VariableDeclarationNode *node) {
     // TODO: use layout table:
-
     *output_ << "        ; declare local variable " << node->getName() << nl_
              << "        sub     rbp, size               ; alloc on stack" << nl_
-             << "        mov     [rbp, - 8], 0           ; zero out locals";
+             << "        mov     qword [rbp, - 8], 0     ; zero out locals";
 }
 
 void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
-    // rbx = array location
-    // rax = value
-    // mov qword [rbx + index * typeSize], rax
+    size_t size = 0; // TODO: size
+    *output_ << "        ; Array access index computation" << nl_;
+    node->getIndex()->visit(this); // evaluates the index
     node->getArrayRef()->visit(this);
     *output_ << "        ; Array value reference" << nl_
              << "        pop     rax                     ; array base address" << nl_
-             << "        lea     rax, [rax - offset * typeSize]" << nl_ // TODO: offset, typeSize
+             << "        pop     rbx                     ; array index" << nl_
+             << "        lea     rax, qword [rax-rbx*" << size << "]  ; array access" << nl_
              << "        push    rax" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const VariableReferenceNode *node) {
-    // rbp - variable offset
     *output_ << "        ; Variable reference " << node->getVariable()->getName() << nl_
              << "        pop     rax" << nl_
-             << "        lea     rax, [rax - offset]" << nl_ // TODO: offset
+             << "        lea     rax, qword [rax - offset]" << nl_ // TODO: offset
              << "        push    rax" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const FieldReferenceNode *node) {
-    // rbp - record offset - field offset
-    node->getRecordRef()->visit(this); // compute record location
+        node->getRecordRef()->visit(this); // compute record location
     *output_ << "        ; Record field reference " << node->getFieldName() << nl_
              << "        pop     rax" << nl_
              << "        lea     rax, [rax - offset]" << nl_ // TODO: offset
@@ -153,7 +151,7 @@ void X86_64CodeGenerator::visit(const AssignmentNode *node) {
     *output_ << "        ; Actual Assignment" << nl_
              << "        pop     rbx                     ; address" << nl_
              << "        pop     rax                     ; value" << nl_
-             << "        mov     rbx, rax                ; perform the assignment" << nl_;
+             << "        mov     qword [rbx], rax        ; perform the assignment" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {

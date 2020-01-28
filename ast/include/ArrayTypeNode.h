@@ -6,11 +6,13 @@ class ArrayTypeNode : public TypeNode {
     std::string type_;
 
   public:
-    ArrayTypeNode(const FilePos& pos, int size, std::string type);
+    ArrayTypeNode(int size, std::string type);
 
     ~ArrayTypeNode() override;
 
     int getSize() const;
+
+    size_t getByteSize() const override;
 
     std::string getType() const;
 

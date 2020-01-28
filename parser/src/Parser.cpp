@@ -397,8 +397,7 @@ std::string Parser::type()
     case TokenType::const_ident: {
         const auto id = ident();
 
-        // check for E005: the type must already exist because it is not allowed to define
-        // new basic types
+        // check for E005: the type must exist
         const auto resolved_type = dynamic_cast<TypeNode*>(resolveId(current_scope_.get(), id));
         if (resolved_type == nullptr) {
             throw ParseException(id.pos, error_id::E005, id.name);
@@ -425,12 +424,12 @@ std::string Parser::type()
             throw ParseException(array_value->getFilePos(), error_id::E004, size);
         }
 
-        return addType(std::make_unique<ArrayTypeNode>(pos, size, std::move(array_type)));
+        return addType(std::make_unique<ArrayTypeNode>(size, std::move(array_type)));
     }
     case TokenType::kw_record: {
         const auto pos = scanner_->peekToken()->getPosition();
 
-        auto type = std::make_unique<RecordTypeNode>(pos, current_scope_);
+        auto type = std::make_unique<RecordTypeNode>(current_scope_);
         current_scope_ = type->getScope(); // enter scope
 
         requireToken(TokenType::kw_record);
@@ -450,7 +449,7 @@ std::string Parser::type()
     }
 }
 
-void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>& list)
+void Parser::field_list(MemberLayout<FieldDeclarationNode>& list)
 {
     if (!checkToken(TokenType::const_ident)) {
         return;
@@ -461,7 +460,12 @@ void Parser::field_list(std::vector<std::unique_ptr<FieldDeclarationNode>>& list
 
     for (const auto& id : ids) {
         auto node = std::make_unique<FieldDeclarationNode>(id.pos, id.name, tp);
-        insertDeclaration(std::move(node), list);
+
+        if (current_scope_->declareIdentifier(node->getName(), node.get())) {
+            list.insert(std::move(node));
+        } else {
+            throw ParseException(node->getFilePos(), error_id::E001, node->getName());
+        }
     }
 }
 

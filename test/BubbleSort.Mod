@@ -3,6 +3,7 @@ MODULE BubbleSort;
 
 (* Length of the array to be sorted. *)
 CONST Dim = 2 * 10;
+      Message = "Hello, World.";
 
 (* Record definition for a two-dimensional point. *)
 TYPE Point2D = RECORD x, y: INTEGER END;

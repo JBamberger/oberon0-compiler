@@ -1,8 +1,8 @@
 #include "BasicTypeNode.h"
 #include "NodeVisitor.h"
 
-BasicTypeNode::BasicTypeNode(const FilePos& pos, std::string name)
-    : TypeNode(NodeType::basic_type, pos), name_(std::move(name))
+BasicTypeNode::BasicTypeNode(std::string name, const size_t size)
+    : TypeNode(), name_(std::move(name)), size_(size)
 {
 }
 
@@ -18,15 +18,19 @@ void BasicTypeNode::print(std::ostream& stream) const { stream << "BasicType(" <
 
 std::unique_ptr<BasicTypeNode> BasicTypeNode::makeInt()
 {
-    return std::make_unique<BasicTypeNode>(FilePos(), "INTEGER");
+    return std::make_unique<BasicTypeNode>("INTEGER", 8);
 }
 
 std::unique_ptr<BasicTypeNode> BasicTypeNode::makeString()
 {
-    return std::make_unique<BasicTypeNode>(FilePos(), "STRING");
+    return std::make_unique<BasicTypeNode>("STRING", 8); // just a pointer
 }
 
 std::unique_ptr<BasicTypeNode> BasicTypeNode::makeBool()
 {
-    return std::make_unique<BasicTypeNode>(FilePos(), "BOOLEAN");
+    return std::make_unique<BasicTypeNode>("BOOLEAN", 8);
+}
+
+size_t BasicTypeNode::getByteSize() const {
+    return size_;
 }

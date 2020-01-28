@@ -26,12 +26,8 @@ std::ostream& operator<<(std::ostream& stream, const NodeType& nt)
         return stream << "string_constant";
     case NodeType::type_reference:
         return stream << "type_reference";
-    case NodeType::record_type:
-        return stream << "record_type";
-    case NodeType::array_type:
-        return stream << "array_type";
-    case NodeType::basic_type:
-        return stream << "basic_type";
+    case NodeType::type:
+        return stream << "type";
     case NodeType::field:
         return stream << "field";
     case NodeType::parameter:
