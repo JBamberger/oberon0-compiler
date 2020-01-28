@@ -35,7 +35,9 @@ void X86_64CodeGenerator::defineConstants(const BlockNode *node) {
 
 
 void X86_64CodeGenerator::defineVariables(const BlockNode *node) {
-    //TODO:
+    const auto size = node->getVariables().getSize();
+    *output_ << "        sub     rsp, " << size << "     ; reserve local variable space" << nl_;
+    //TODO: initialize variables with zero?
 }
 
 void X86_64CodeGenerator::visit(const ModuleNode *node) {
@@ -51,23 +53,23 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "dmsg:" << nl_
              << "        db  'Debug output %d', 0" << nl_;
     defineConstants(node);
-    defineVariables(node);
     *output_ << nl_
              << "section .text" << nl_
              << "main:                                   ; Module begin: " << node->getName() << nl_
              << "        push    rbp                     ; save caller stack frame" << nl_
              << "        mov     rsp, rbp                ; move to next stack frame" << nl_;
+    defineVariables(node);
     // here goes the module body
 
     for (const auto &s : node->getStatements()) {
         s->visit(this);
     }
 
-    // << "; ----- debug ----------------------------------------------------------" << nl_
-    // << "        mov     rcx, dmsg               ; debug message -> param 1" << nl_
-    // << "        pop     rdx                     ; most recent result -> param 2" << nl_
-    // << "        call    printf                  ; print the debug value" << nl_
-    // << "; ----- debug end ------------------------------------------------------" << nl_
+     *output_ << "; ----- debug ----------------------------------------------------------" << nl_
+              << "        mov     rcx, dmsg               ; debug message -> param 1" << nl_
+              << "        mov     rdx, qword [rbp - 8]    ; first variable -> param 2" << nl_
+              << "        call    printf                  ; print the debug value" << nl_
+              << "; ----- debug end ------------------------------------------------------" << nl_;
 
     *output_ << "        xor     rax, rax                ; set return value to 0" << nl_
              << "        mov     rsp, rbp                ; reset stack pointer for caller" << nl_

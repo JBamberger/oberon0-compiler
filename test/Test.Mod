@@ -1,5 +1,5 @@
 MODULE Test;
 VAR a: INTEGER; (*ARRAY 5 OF INTEGER;*)
 BEGIN
-        a := 0
+        a := 42
 END Test.
