@@ -8,14 +8,15 @@
 #include "Parser.h"
 #include "PrintVisitor.h"
 #include "Scanner.h"
-#include <iostream>
 #include <CodeGenerator.h>
+#include <fstream>
+#include <iostream>
 
 int main(const int argc, const char* argv[])
 {
-    if (argc != 2) {
-        std::cout << "Usage: oberon0c <filename>" << std::endl;
-        return 1;
+    if (argc != 2 && argc != 3) {
+        std::cout << "Usage: oberon0c <oberonfile> [<outputfile>]" << std::endl;
+        return EXIT_FAILURE;
     }
     std::string filename = argv[1];
     auto logger = std::make_unique<Logger>();
@@ -32,12 +33,20 @@ int main(const int argc, const char* argv[])
         exit(EXIT_FAILURE);
     }
 
-//    std::cout << "Parse Tree:" << std::endl;
-//    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
-//    tree->visit(visitor.get());
+    //    std::cout << "Parse Tree:" << std::endl;
+    //    const auto visitor = std::make_unique<PrintVisitor>(std::cout);
+    //    tree->visit(visitor.get());
 
-    code_gen->generate(std::move(tree), &std::cout);
+    std::ofstream of;
+    std::ostream* output;
+    if (argc == 3) {
+        output = &of;
+        of.open(argv[2]);
+    } else {
+        output = &std::cout;
+    }
 
+    code_gen->generate(std::move(tree), output);
 
     logger->info(filename, "Parsing complete.");
     exit(EXIT_SUCCESS);
