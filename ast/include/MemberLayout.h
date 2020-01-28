@@ -22,7 +22,7 @@ class MemberLayout {
   public:
     void insert(std::unique_ptr<T> member)
     {
-        const auto size = 0; // TODO: member->getType()->getByteSize()
+        const auto size = member->getType()->getByteSize();
         const auto prev_offset = members_.empty() ? 0 : members_.at(members_.size() - 1).offset;
         auto next_offset = prev_offset + size;
 
@@ -38,15 +38,26 @@ class MemberLayout {
         members_.push_back({std::move(member), next_offset});
     }
 
-    Member<T>& at(size_t pos) { return members_.at(pos); }
+    Member<T>& at(size_t pos) const { return members_.at(pos); }
 
     Member<T>& at(const std::string& name)
+    {
+        for (auto& m : members_) {
+            if (m.member->getName() == name) {
+                return m;
+            }
+        }
+        throw std::runtime_error("Invalid field name '" + name + "'.");
+    }
+
+    const Member<T>& at(const std::string& name) const
     {
         for (const auto& m : members_) {
             if (m.member->getName() == name) {
                 return m;
             }
         }
+        throw std::runtime_error("Invalid field name '" + name + "'.");
     }
 
     size_t getSize() const

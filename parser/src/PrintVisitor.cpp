@@ -225,12 +225,10 @@ void PrintVisitor::printBlock(const BlockNode* node)
         }
         dec();
     }
-    if (!node->getVariables().empty()) {
+    if (node->getVariables().getSize() > 0) {
         line() << "Variables:\n";
         inc();
-        for (const auto& decl : node->getVariables()) {
-            decl->visit(this);
-        }
+        node->getVariables().visitMembers([this](const auto& m) { m.member->visit(this); });
         dec();
     }
     if (!node->getProcedures().empty()) {

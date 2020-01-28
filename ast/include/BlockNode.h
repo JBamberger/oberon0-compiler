@@ -4,6 +4,7 @@
 #include "ConstantDeclarationNode.h"
 #include "TypeDeclarationNode.h"
 
+#include "MemberLayout.h"
 #include "Scope.h"
 #include "StatementNode.h"
 #include "VariableDeclarationNode.h"
@@ -14,7 +15,6 @@ class ProcedureDeclarationNode;
 class BlockNode : public Node {
   public:
     using ConstDeclList = std::vector<std::unique_ptr<ConstantDeclarationNode>>;
-    using VarDeclList = std::vector<std::unique_ptr<VariableDeclarationNode>>;
     using TypeDeclList = std::vector<std::unique_ptr<TypeDeclarationNode>>;
     using StatementList = std::vector<std::unique_ptr<StatementNode>>;
     using ProcDeclList = std::vector<std::unique_ptr<ProcedureDeclarationNode>>;
@@ -23,7 +23,7 @@ class BlockNode : public Node {
     std::string name_;
     std::shared_ptr<Scope> scope_;
     ConstDeclList constants_;
-    VarDeclList variables_;
+    MemberLayout<VariableDeclarationNode> variables_;
     TypeDeclList types_;
     StatementList statements_;
 
@@ -34,13 +34,13 @@ class BlockNode : public Node {
     const std::string& getName() const;
     StatementList& getStatements();
     ConstDeclList& getConstants();
-    VarDeclList& getVariables();
+    MemberLayout<VariableDeclarationNode>& getVariables();
     TypeDeclList& getTypes();
     virtual ProcDeclList& getProcedures() = 0;
 
     const StatementList& getStatements() const;
     const ConstDeclList& getConstants() const;
-    const VarDeclList& getVariables() const;
+    const MemberLayout<VariableDeclarationNode>& getVariables() const;
     const TypeDeclList& getTypes() const;
     virtual const ProcDeclList& getProcedures() const = 0;
 

@@ -180,7 +180,7 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>> 
     list.push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, tp));
 }
 
-void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode>> &list) {
+void Parser::var_declaration(MemberLayout<VariableDeclarationNode> &list) {
     const auto ids = ident_list();
     requireToken(TokenType::colon);
     auto tp = type();
@@ -188,7 +188,12 @@ void Parser::var_declaration(std::vector<std::unique_ptr<VariableDeclarationNode
 
     for (const auto &id : ids) {
         auto node = std::make_unique<VariableDeclarationNode>(id.pos, id.name, tp);
-        insertDeclaration(std::move(node), list);
+
+        if (current_scope_->declareIdentifier(node->getName(), node.get())) {
+            list.insert(std::move(node));
+        } else {
+            throw ParseException(node->getFilePos(), error_id::E001, node->getName());
+        }
     }
 }
 

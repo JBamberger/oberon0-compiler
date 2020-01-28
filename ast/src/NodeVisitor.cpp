@@ -70,9 +70,8 @@ void NodeVisitor::visit(const ModuleNode* node)
     for (const auto& decl : node->getTypes()) {
         decl->visit(this);
     }
-    for (const auto& decl : node->getVariables()) {
-        decl->visit(this);
-    }
+    node->getVariables().visitMembers(
+        [this](const Member<VariableDeclarationNode>& member) { member.member->visit(this); });
     for (const auto& decl : node->getProcedures()) {
         decl->visit(this);
     }
@@ -107,9 +106,8 @@ void NodeVisitor::visit(const ProcedureDeclarationNode* node)
     for (const auto& decl : node->getTypes()) {
         decl->visit(this);
     }
-    for (const auto& decl : node->getVariables()) {
-        decl->visit(this);
-    }
+    node->getVariables().visitMembers(
+        [this](const Member<VariableDeclarationNode>& member) { member.member->visit(this); });
     for (const auto& decl : node->getProcedures()) {
         decl->visit(this);
     }

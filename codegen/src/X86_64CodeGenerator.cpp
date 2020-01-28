@@ -5,6 +5,7 @@
 #include "BinaryExpressionNode.h"
 #include "FieldReferenceNode.h"
 #include "NumberConstantNode.h"
+#include "RecordTypeNode.h"
 #include "StringConstantNode.h"
 #include "UnaryExpressionNode.h"
 #include <iomanip>
@@ -34,11 +35,7 @@ void X86_64CodeGenerator::defineConstants(const BlockNode *node) {
 
 
 void X86_64CodeGenerator::defineVariables(const BlockNode *node) {
-    size_t offset = 0;
-    for (const auto &v : node->getVariables()) {
-        const auto type = v->getType();
-
-    }
+    //TODO:
 }
 
 void X86_64CodeGenerator::visit(const ModuleNode *node) {
@@ -54,9 +51,7 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "dmsg:" << nl_
              << "        db  'Debug output %d', 0" << nl_;
     defineConstants(node);
-    for (const auto &v : node->getVariables()) {
-        v->visit(this);
-    }
+    defineVariables(node);
     *output_ << nl_
              << "section .text" << nl_
              << "main:                                   ; Module begin: " << node->getName() << nl_
@@ -114,7 +109,7 @@ void X86_64CodeGenerator::visit(const VariableDeclarationNode *node) {
 }
 
 void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
-    size_t size = 0; // TODO: size
+    size_t size = node->getType()->getByteSize();
     *output_ << "        ; Array access index computation" << nl_;
     node->getIndex()->visit(this); // evaluates the index
     node->getArrayRef()->visit(this);
@@ -133,10 +128,15 @@ void X86_64CodeGenerator::visit(const VariableReferenceNode *node) {
 }
 
 void X86_64CodeGenerator::visit(const FieldReferenceNode *node) {
-        node->getRecordRef()->visit(this); // compute record location
+    const auto record = dynamic_cast<RecordTypeNode*>(node->getRecordRef()->getType());
+    assert(record != nullptr);
+    const auto offset = record->getMembers().at(node->getFieldName()).offset;
+
+    node->getRecordRef()->visit(this); // compute record location
+
     *output_ << "        ; Record field reference " << node->getFieldName() << nl_
              << "        pop     rax" << nl_
-             << "        lea     rax, [rax - offset]" << nl_ // TODO: offset
+             << "        lea     rax, [rax - "<< offset <<"]" << nl_
              << "        push    rax" << nl_;
 }
 
