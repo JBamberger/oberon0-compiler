@@ -5,8 +5,9 @@
 
 VariableDeclarationNode::VariableDeclarationNode(const FilePos& pos,
                                                  std::string name,
-                                                 TypeNode* type)
-    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), type)
+                                                 TypeNode* type,
+                                                 BlockNode* parent)
+    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), type), parent_(parent)
 {
 }
 
@@ -18,3 +19,4 @@ void VariableDeclarationNode::print(std::ostream& stream) const
 {
     stream << "VariableNode(" << name_ << ", " << type_ << ")";
 }
+BlockNode* VariableDeclarationNode::getParent() const { return parent_; }

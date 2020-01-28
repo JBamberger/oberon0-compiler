@@ -136,7 +136,7 @@ void Parser::declarations(BlockNode *block) {
 
     if (checkAndConsumeToken(TokenType::kw_var)) {
         while (checkToken(TokenType::const_ident)) {
-            var_declaration(block->getVariables());
+            var_declaration(block);
         }
     }
 
@@ -180,17 +180,17 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>> 
     list.push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, tp));
 }
 
-void Parser::var_declaration(MemberLayout<VariableDeclarationNode> &list) {
+void Parser::var_declaration(BlockNode* parent) {
     const auto ids = ident_list();
     requireToken(TokenType::colon);
     auto tp = type();
     requireToken(TokenType::semicolon);
 
     for (const auto &id : ids) {
-        auto node = std::make_unique<VariableDeclarationNode>(id.pos, id.name, tp);
+        auto node = std::make_unique<VariableDeclarationNode>(id.pos, id.name, tp, parent);
 
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
-            list.insert(std::move(node));
+            parent->getVariables().insert(std::move(node));
         } else {
             throw ParseException(node->getFilePos(), error_id::E001, node->getName());
         }

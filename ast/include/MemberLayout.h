@@ -47,7 +47,7 @@ class MemberLayout {
                 return m;
             }
         }
-        throw std::runtime_error("Invalid field name '" + name + "'.");
+        throw std::runtime_error("Invalid member name '" + name + "'.");
     }
 
     const Member<T>& at(const std::string& name) const
@@ -57,7 +57,7 @@ class MemberLayout {
                 return m;
             }
         }
-        throw std::runtime_error("Invalid field name '" + name + "'.");
+        throw std::runtime_error("Invalid member name '" + name + "'.");
     }
 
     size_t getSize() const

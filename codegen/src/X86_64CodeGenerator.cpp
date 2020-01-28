@@ -121,9 +121,10 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
 }
 
 void X86_64CodeGenerator::visit(const VariableReferenceNode *node) {
+    const auto offset = node->getVariable()->getParent()->getVariables().at(node->getVariable()->getName()).offset;
     *output_ << "        ; Variable reference " << node->getVariable()->getName() << nl_
              << "        pop     rax" << nl_
-             << "        lea     rax, qword [rax - offset]" << nl_ // TODO: offset
+             << "        lea     rax, qword [rax - "<< offset << "]" << nl_
              << "        push    rax" << nl_;
 }
 

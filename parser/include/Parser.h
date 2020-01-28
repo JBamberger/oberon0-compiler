@@ -94,7 +94,7 @@ public:
     void declarations(BlockNode* block);
     void const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>& list);
     void type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>& list);
-    void var_declaration(MemberLayout<VariableDeclarationNode>& list);
+    void var_declaration(BlockNode* parent);
     void procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>& list);
     void formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
     void fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list);
