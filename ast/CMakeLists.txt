@@ -32,7 +32,9 @@ set(SOURCES
     "include/TypeDeclarationNode.h"      "src/TypeDeclarationNode.cpp"
     "include/StringConstantNode.h"       "src/StringConstantNode.cpp"
     "include/Scope.h"                    "src/Scope.cpp"
-        include/MemberLayout.h)
+    "include/MemberLayout.h"
+    "include/ThrowingNodeVisitor.h"
+)
 
 add_library(oberon0c_ast ${SOURCES})
 target_include_directories(oberon0c_ast PUBLIC "include" oberon0c_scanner)

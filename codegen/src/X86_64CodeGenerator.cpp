@@ -15,13 +15,16 @@ X86_64CodeGenerator::X86_64CodeGenerator() : output_(nullptr), nl_("\n"), label_
 
 X86_64CodeGenerator::~X86_64CodeGenerator() = default;
 
-// clang-format off
+std::string X86_64CodeGenerator::nextLabel() { return std::to_string(label_nr_++); }
 
-void X86_64CodeGenerator::generate(std::unique_ptr<ModuleNode> ast, std::ostream *output) {
+void X86_64CodeGenerator::generate(std::unique_ptr<ModuleNode> ast, std::ostream* output)
+{
     output_ = output;
     ast->visit(this);
     output_ = nullptr;
 }
+
+// clang-format off
 
 void X86_64CodeGenerator::defineConstants(const BlockNode *node) {
     // define local constants
@@ -54,7 +57,7 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "        xor     rax, rax                ; zero result" << nl_
              << "        call    printf                  ; print the formatted string" << nl_
              << "    %elifidn __OUTPUT_FORMAT__, win64" << nl_
-             << "        sub     rsp, 40                 ; 32 bytes shadow space + 8b alignment" << nl_
+             << "        sub     rsp, 40                 ; 32b shadow space + 8b alignment" << nl_
              << "        mov     rcx, %2                 ; first argument, message" << nl_
              << "        mov     rdx, %1                 ; second argument, integer" << nl_
              << "        xor     rax, rax                ; zero result" << nl_
@@ -82,8 +85,8 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "        nop                             ;" << nl_
              << "%endmacro" << nl_
              << nl_
-             << "        global  main" << nl_
-             << "        extern  printf                   ; libc printf(string, args)" << nl_
+             << "        global  main                    ; program entry point" << nl_
+             << "        extern  printf                  ; libc printf(string, args)" << nl_
              << nl_
              << "section .data" << nl_
              << "dmsg:" << nl_
@@ -136,24 +139,20 @@ void X86_64CodeGenerator::visit(const ConstantDeclarationNode *node) {
     const auto label = node->getName() + nextLabel();
     const auto type = node->getValue()->getType();
     if (type->getId() == "INTEGER") {
-        // INTEGER constants are used as immediate value in the instructions
+//        INTEGER constants are used as immediate value in the instructions
 //        const auto value = dynamic_cast<NumberConstantNode *>(node->getValue().get())->getValue();
 //        *output_ << padRight(label + ":", COMMENT_COL) << "; integer constant definition" << nl_
 //                 << "        dq      " << std::to_string(value) << nl_;
     } else if (type->getId() == "STRING") {
         //TODO: escape the string appropriately
         const auto value = dynamic_cast<StringConstantNode *>(node->getValue().get())->getValue();
-        *output_ << padRight(label + ":", COMMENT_COL) << "; string constant definition" << nl_
+        *output_ << std::setw(40) << (label + ":") << "; string constant definition" << nl_
                  << "        db      '" << value << "', 0" << nl_;
     } else {
         throw std::runtime_error("Only integer constants are supported.");
     }
 
     //TODO: save label name of the constant
-}
-
-void X86_64CodeGenerator::visit(const VariableDeclarationNode *node) {
-    // TODO: use layout table:
 }
 
 void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
@@ -174,7 +173,9 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
              << "        pop     rax                     ; array index" << nl_
              << "        cmp     rax, 0                  ; bounds check lower" << nl_
              << "        jl      OutOfBounds             ; exit" << nl_
-             << "        cmp     rax, " << array_len << " ; bounds check upper" << nl_
+             << "        cmp     "
+                     << std::setw(24) << ("rax, " + std::to_string(array_len))
+                     << " ; bounds check upper" << nl_
              << "        jge     OutOfBounds             ; exit" << nl_;
 
 
@@ -183,7 +184,9 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
                  << "        imul    rax, rcx                ; offset too large for lea" << nl_
                  << "        lea     rbx, [rbx+rax]          ; array access" << nl_;
     } else {
-        *output_ << "        lea     rbx, [rbx+rax*" << elem_size << "]  ; array access" << nl_;
+        *output_ << "        lea     "
+                         << std::setw(24) << "rbx, [rbx+rax*" + std::to_string(elem_size) + "]"
+                         << "; array access" << nl_;
     }
     *output_ << "        push    rbx" << nl_;
     should_deref = true;
@@ -195,8 +198,9 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
 
 void X86_64CodeGenerator::visit(const VariableReferenceNode *node) {
     bool deref = should_deref;
-    const auto offset = node->getVariable()->getParent()->getVariables().at(node->getVariable()->getName()).offset;
-    *output_ << "        ; Variable reference " << node->getVariable()->getName() << nl_
+    const auto var = node->getVariable();
+    const auto offset = var->getParent()->getVariables().at(var->getName()).offset;
+    *output_ << "        ; Variable reference " << var->getName() << nl_
              << "        lea     rax, [rbp - "<<  offset << "]" << nl_
              << "        push    rax" << nl_;
 
@@ -243,7 +247,6 @@ void X86_64CodeGenerator::visit(const AssignmentNode *node) {
              << "        pop     rbx                     ; address" << nl_
              << "        pop     rax                     ; value" << nl_
              << "        mov     qword [rbx], rax        ; perform the assignment" << nl_
-             << nl_
              << "        print   [rbx], dmsg             ; DEBUG PRINT STATEMENT" << nl_;
 }
 
@@ -304,7 +307,7 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
                      << "        idiv    rbx                     ; perform signed division" << nl_
                      << "        mov     rax, rdx                ; set return value" << nl_
                      << "        test    rdx, rdx                ; sets sign bit if negative" << nl_
-                     << "        jns     " << jumpLabel << "                ; finished if non-zero" << nl_
+                     << "        jns     "<< std::setw(24) << jumpLabel << "; finished if non-zero" << nl_
                      << "        sub     rax, rbx                ; rax -= rbx // first neg. branch" << nl_
                      << "        add     rdx, rbx                ; rdx += rbx // second neg. branch" << nl_
                      << "        test    rbx, rbx                ; check if rbx is negative" << nl_
@@ -337,27 +340,27 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
             std::string name;
             switch (node->getOperator()) {
                 case BinaryOperator::eq:
-                    op = "sete    ";
+                    op = "sete";
                     name = "equals";
                     break;
                 case BinaryOperator::neq:
-                    op = "setne   ";
+                    op = "setne";
                     name = "not equals";
                     break;
                 case BinaryOperator::lt:
-                    op = "setl    ";
+                    op = "setl";
                     name = "less than";
                     break;
                 case BinaryOperator::leq:
-                    op = "setle   ";
+                    op = "setle";
                     name = "less than or equals";
                     break;
                 case BinaryOperator::gt:
-                    op = "setg    ";
+                    op = "setg";
                     name = "greater than";
                     break;
                 case BinaryOperator::geq:
-                    op = "setge   ";
+                    op = "setge";
                     name = "greater than or equals";
                     break;
                 default:
@@ -368,7 +371,7 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
                      << "        pop     rbx" << nl_
                      << "        xor     eax, eax                ; zero out rdx" << nl_
                      << "        comp    rbx, rcx                ; compare a and b" << nl_
-                     << "        " << op << "al                      ; set rax to result" << nl_
+                     << "        " << std::setw(8) << op << std::setw(24) << "al" << "; set rax to result" << nl_
                      << "        push    rax" << nl_;
 
     }
@@ -409,21 +412,6 @@ void X86_64CodeGenerator::visit(const UnaryExpressionNode *node) {
 
 }
 
-void X86_64CodeGenerator::visit(const ArrayTypeNode *) {
-}
-
-void X86_64CodeGenerator::visit(const TypeDeclarationNode *) {
-}
-
-void X86_64CodeGenerator::visit(const ProcedureDeclarationNode *) {
-}
-
-void X86_64CodeGenerator::visit(const FieldDeclarationNode *) {
-}
-
-void X86_64CodeGenerator::visit(const IfStatementNode *) {
-}
-
 void X86_64CodeGenerator::visit(const NumberConstantNode *node) {
     *output_ << "        push    "
              << std::setw(24) << std::setfill(' ') <<std::left << node->getValue()
@@ -434,32 +422,31 @@ void X86_64CodeGenerator::visit(const StringConstantNode *) {
     throw std::runtime_error("String constants are not supported.");
 }
 
+
+
+
+void X86_64CodeGenerator::visit(const TypedIdentifierNode *) {
+}
+
+void X86_64CodeGenerator::visit(const VariableDeclarationNode *) {
+}
+
+void X86_64CodeGenerator::visit(const FieldDeclarationNode *) {
+}
+
 void X86_64CodeGenerator::visit(const ParameterDeclarationNode *) {
+}
+
+void X86_64CodeGenerator::visit(const ProcedureDeclarationNode *) {
 }
 
 void X86_64CodeGenerator::visit(const ProcedureCallNode *) {
 }
 
-void X86_64CodeGenerator::visit(const RecordTypeNode *) {
-}
-
-void X86_64CodeGenerator::visit(const TypedIdentifierNode *) {
-}
-
-void X86_64CodeGenerator::visit(const BasicTypeNode *) {
+void X86_64CodeGenerator::visit(const IfStatementNode *) {
 }
 
 void X86_64CodeGenerator::visit(const WhileStatementNode *) {
-}
-
-std::string X86_64CodeGenerator::nextLabel() {
-    return std::to_string(label_nr_++);
-}
-
-std::string X86_64CodeGenerator::padRight(const std::string &value, const size_t column) {
-    const auto pad_string = std::string(value.size() > column ? 0 : column - value.size(), ' ');
-
-    return value + pad_string;
 }
 
 // clang-format on

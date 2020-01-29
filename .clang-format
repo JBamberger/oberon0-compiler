@@ -12,11 +12,11 @@ AllowShortBlocksOnASingleLine: false
 BreakBeforeBraces: Custom
 BraceWrapping:
 	AfterFunction: true
-
+AllowShortFunctionsOnASingleLine: None
 AllowShortLoopsOnASingleLine: true
 BinPackParameters: false
 
 # Comments
-AlwaysBreakTemplateDeclarations: true
+AlwaysBreakTemplateDeclarations: Yes
 AlignTrailingComments: true
 SpacesBeforeTrailingComments: 1

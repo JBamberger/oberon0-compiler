@@ -3,11 +3,12 @@
 
 #include "CodeGenerator.h"
 #include "NodeVisitor.h"
+#include <ThrowingNodeVisitor.h>
 
 /**
  * Simple stack-based x86_64 code generator.
  */
-class X86_64CodeGenerator : public CodeGenerator, private NodeVisitor {
+class X86_64CodeGenerator : public CodeGenerator, private ThrowingNodeVisitor {
     const size_t LABEL_COL = 0;
     const size_t INSTR_COL = 8;
     const size_t PARAM_COL = 16;
@@ -29,14 +30,10 @@ class X86_64CodeGenerator : public CodeGenerator, private NodeVisitor {
   private:
     std::string nextLabel();
 
-    std::string padRight(const std::string& value, size_t column);
-
     void defineConstants(const BlockNode* node);
     void defineVariables(const BlockNode* node);
 
     void visit(const ArrayReferenceNode* node) override;
-
-    void visit(const ArrayTypeNode* node) override;
 
     void visit(const AssignmentNode* node) override;
 
@@ -45,8 +42,6 @@ class X86_64CodeGenerator : public CodeGenerator, private NodeVisitor {
     void visit(const UnaryExpressionNode* node) override;
 
     void visit(const ConstantDeclarationNode* node) override;
-
-    void visit(const TypeDeclarationNode* node) override;
 
     void visit(const VariableDeclarationNode* node) override;
 
@@ -68,11 +63,7 @@ class X86_64CodeGenerator : public CodeGenerator, private NodeVisitor {
 
     void visit(const ProcedureCallNode* node) override;
 
-    void visit(const RecordTypeNode* node) override;
-
     void visit(const TypedIdentifierNode* node) override;
-
-    void visit(const BasicTypeNode* node) override;
 
     void visit(const VariableReferenceNode* node) override;
 
