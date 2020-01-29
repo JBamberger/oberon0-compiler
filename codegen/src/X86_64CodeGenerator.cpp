@@ -53,6 +53,24 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "        call    printf                  ; print the formatted string" << nl_
              << "%endmacro" << nl_
              << nl_
+             << "%macro rtstackalign 1" << nl_
+             << "        mov     rax, rsp                ;" << nl_
+             << "        mov     rbx, 16                 ;" << nl_
+             << "        xor     rdx, rdx                ;" << nl_
+             << "        cqo                             ;" << nl_
+             << "        idiv    rbx                     ;" << nl_
+             << "        cmp     rdx, 0                  ;" << nl_
+             << "        je      %1                      ;" << nl_
+             << "        add     rax, 16                 ;" << nl_
+             << "        xor     rdx, rdx                ;" << nl_
+             << "        cqo                             ;" << nl_
+             << "        idiv    rbx                     ;" << nl_
+             << "        imul    rax, 16                 ;" << nl_
+             << "        mov     rsp, rax                ;" << nl_
+             << "%1:                                     ;" << nl_
+             << "        nop                             ;" << nl_
+             << "%endmacro" << nl_
+             << nl_
              << "        global  main" << nl_
              << "        extern  printf                   ; libc printf(string, args)" << nl_
              << nl_
@@ -85,12 +103,14 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              // here go the modules functions
              << nl_
              << "DivByZero:                              ; Division by zero handler" << nl_
+             << "        rtstackalign DivByZeroAlign" << nl_
              << "        print   0, eDivByZero           ; there is no second argument" << nl_
              << "        mov     rsp, rbp                ; reset stack pointer" << nl_
              << "        pop     rbp                     ; reset base pointer"
              << "        ret                             ; exit" << nl_
              << nl_
              << "OutOfBounds:" << nl_
+             << "        rtstackalign OutOfBoundsAlign" << nl_
              << "        print   0, eOutOfBounds         ; there is no second argument" << nl_
              << "        mov     rsp, rbp                ; reset stack pointer" << nl_
              << "        pop     rbp                     ; reset base pointer"
