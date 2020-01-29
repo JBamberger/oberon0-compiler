@@ -6,6 +6,7 @@
 #include "FieldReferenceNode.h"
 #include "NumberConstantNode.h"
 #include "RecordTypeNode.h"
+#include "ArrayTypeNode.h"
 #include "StringConstantNode.h"
 #include "UnaryExpressionNode.h"
 #include <iomanip>
@@ -117,7 +118,10 @@ void X86_64CodeGenerator::visit(const VariableDeclarationNode *node) {
 
 void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
     bool deref = should_deref;
-    size_t size = node->getType()->getByteSize();
+    const auto array = dynamic_cast<ArrayTypeNode*>(node->getArrayRef()->getType());
+    assert(array != nullptr);
+    const auto  elem_size = node->getType()->getByteSize();
+    const auto len = static_cast<size_t>(array->getSize()) * elem_size;
     *output_ << "        ; Array access index computation" << nl_;
     node->getIndex()->visit(this); // evaluates the index
 
@@ -128,7 +132,7 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
     *output_ << "        ; Array value reference" << nl_
              << "        pop     rax                     ; array base address" << nl_
              << "        pop     rbx                     ; array index" << nl_
-             << "        lea     rax, [rax-rbx*" << size << "]  ; array access" << nl_
+             << "        lea     rax, [rax+rbx*" << elem_size << "]  ; array access" << nl_
              << "        push    rax" << nl_;
     should_deref = true;
     if (!deref) return;

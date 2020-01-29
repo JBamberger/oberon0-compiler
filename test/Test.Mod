@@ -1,5 +1,6 @@
 MODULE Test;
 VAR a,b,c,d,e,f,g, end: INTEGER; (*ARRAY 5 OF INTEGER;*)
+    x: ARRAY 5 OF INTEGER;
 BEGIN
         (* Compile-time evaluation*)
         b := 5;
@@ -27,5 +28,16 @@ BEGIN
         a := g MOD 6;    (*  5 *)
         (* a := e DIV 0; * throws at run-time *)
         (* a := e MOD 0; * throws at run-time *)
+        end := 999999999;
+        x[0] := 10;
+        x[1] := 9;
+        x[2] := 8;
+        x[3] := 7;
+        x[4] := 6;
+        a := x[0];
+        a := x[1];
+        a := x[2];
+        a := x[3];
+        a := x[4];
         end := 999999999
 END Test.
