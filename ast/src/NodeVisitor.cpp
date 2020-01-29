@@ -27,7 +27,9 @@ void NodeVisitor::visit(const ArrayReferenceNode* node)
     node->getIndex()->visit(this);
 }
 
-void NodeVisitor::visit(const ArrayTypeNode*) {}
+void NodeVisitor::visit(const ArrayTypeNode*)
+{
+}
 
 void NodeVisitor::visit(const AssignmentNode* node)
 {
@@ -35,7 +37,9 @@ void NodeVisitor::visit(const AssignmentNode* node)
     node->getValue()->visit(this);
 }
 
-void NodeVisitor::visit(const BasicTypeNode*) {}
+void NodeVisitor::visit(const BasicTypeNode*)
+{
+}
 
 void NodeVisitor::visit(const BinaryExpressionNode* node)
 {
@@ -43,11 +47,19 @@ void NodeVisitor::visit(const BinaryExpressionNode* node)
     node->getOperand2()->visit(this);
 }
 
-void NodeVisitor::visit(const ConstantDeclarationNode* node) { node->getValue()->visit(this); }
+void NodeVisitor::visit(const ConstantDeclarationNode* node)
+{
+    node->getValue()->visit(this);
+}
 
-void NodeVisitor::visit(const FieldReferenceNode* node) { node->getRecordRef()->visit(this); }
+void NodeVisitor::visit(const FieldReferenceNode* node)
+{
+    node->getRecordRef()->visit(this);
+}
 
-void NodeVisitor::visit(const FieldDeclarationNode*) {}
+void NodeVisitor::visit(const FieldDeclarationNode*)
+{
+}
 
 void NodeVisitor::visit(const IfStatementNode* node)
 {
@@ -80,11 +92,17 @@ void NodeVisitor::visit(const ModuleNode* node)
     }
 }
 
-void NodeVisitor::visit(const NumberConstantNode*) {}
+void NodeVisitor::visit(const NumberConstantNode*)
+{
+}
 
-void NodeVisitor::visit(const BooleanConstantNode*) {}
+void NodeVisitor::visit(const BooleanConstantNode*)
+{
+}
 
-void NodeVisitor::visit(const ParameterDeclarationNode*) {}
+void NodeVisitor::visit(const ParameterDeclarationNode*)
+{
+}
 
 void NodeVisitor::visit(const ProcedureCallNode* node)
 {
@@ -122,19 +140,34 @@ void NodeVisitor::visit(const RecordTypeNode* node)
         [this](const Member<FieldDeclarationNode>& member) { member.member->visit(this); });
 }
 
-void NodeVisitor::visit(const StringConstantNode*) {}
+void NodeVisitor::visit(const StringConstantNode*)
+{
+}
 
-void NodeVisitor::visit(const TypeDeclarationNode*) {}
+void NodeVisitor::visit(const TypeDeclarationNode*)
+{
+}
 
-void NodeVisitor::visit(const TypedIdentifierNode*) {}
+void NodeVisitor::visit(const TypedIdentifierNode*)
+{
+}
 
-void NodeVisitor::visit(const UnaryExpressionNode* node) { node->getOperand()->visit(this); }
+void NodeVisitor::visit(const UnaryExpressionNode* node)
+{
+    node->getOperand()->visit(this);
+}
 
-void NodeVisitor::visit(const VariableDeclarationNode*) {}
+void NodeVisitor::visit(const VariableDeclarationNode*)
+{
+}
 
-void NodeVisitor::visit(const VariableReferenceNode*) {}
+void NodeVisitor::visit(const VariableReferenceNode*)
+{
+}
 
-void NodeVisitor::visit(const ParameterReferenceNode*) {}
+void NodeVisitor::visit(const ParameterReferenceNode*)
+{
+}
 
 void NodeVisitor::visit(const WhileStatementNode* node)
 {

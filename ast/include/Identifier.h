@@ -8,7 +8,9 @@ struct Identifier {
     std::string name;
     FilePos pos;
 
-    Identifier(std::string name, FilePos pos) : name(std::move(name)), pos(std::move(pos)) {}
+    Identifier(std::string name, FilePos pos) : name(std::move(name)), pos(std::move(pos))
+    {
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Identifier& obj)
     {

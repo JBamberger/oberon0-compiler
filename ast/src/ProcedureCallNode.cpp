@@ -12,15 +12,30 @@ ProcedureCallNode::ProcedureCallNode(const FilePos& pos,
 
 ProcedureCallNode::~ProcedureCallNode() = default;
 
-ProcedureDeclarationNode* ProcedureCallNode::getProcedure() const { return procedure_; }
+ProcedureDeclarationNode* ProcedureCallNode::getProcedure() const
+{
+    return procedure_;
+}
 
-const std::string& ProcedureCallNode::getName() const { return procedure_->getName(); }
+const std::string& ProcedureCallNode::getName() const
+{
+    return procedure_->getName();
+}
 
-ActualParamList& ProcedureCallNode::getParams() { return params_; }
+ActualParamList& ProcedureCallNode::getParams()
+{
+    return params_;
+}
 
-const ActualParamList& ProcedureCallNode::getParams() const { return params_; }
+const ActualParamList& ProcedureCallNode::getParams() const
+{
+    return params_;
+}
 
-void ProcedureCallNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void ProcedureCallNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void ProcedureCallNode::print(std::ostream& stream) const
 {

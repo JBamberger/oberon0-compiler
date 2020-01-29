@@ -36,7 +36,10 @@ Scanner::Scanner(std::istream* input, const Logger* logger)
     read();
 }
 
-Scanner::~Scanner() { delete token_; }
+Scanner::~Scanner()
+{
+    delete token_;
+}
 
 void Scanner::initTable()
 {

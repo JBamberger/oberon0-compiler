@@ -8,13 +8,25 @@ BasicTypeNode::BasicTypeNode(std::string name, const size_t size)
 
 BasicTypeNode::~BasicTypeNode() = default;
 
-const std::string& BasicTypeNode::getName() const { return name_; }
+const std::string& BasicTypeNode::getName() const
+{
+    return name_;
+}
 
-std::string BasicTypeNode::getId() const { return name_; }
+std::string BasicTypeNode::getId() const
+{
+    return name_;
+}
 
-void BasicTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void BasicTypeNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
-void BasicTypeNode::print(std::ostream& stream) const { stream << "BasicType(" << name_ << ")"; }
+void BasicTypeNode::print(std::ostream& stream) const
+{
+    stream << "BasicType(" << name_ << ")";
+}
 
 std::unique_ptr<BasicTypeNode> BasicTypeNode::makeInt()
 {
@@ -31,4 +43,7 @@ std::unique_ptr<BasicTypeNode> BasicTypeNode::makeBool()
     return std::make_unique<BasicTypeNode>("BOOLEAN", 8);
 }
 
-size_t BasicTypeNode::getByteSize() const { return size_; }
+size_t BasicTypeNode::getByteSize() const
+{
+    return size_;
+}

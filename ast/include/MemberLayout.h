@@ -38,7 +38,10 @@ class MemberLayout {
         members_.push_back({std::move(member), next_offset});
     }
 
-    Member<T>& at(size_t pos) const { return members_.at(pos); }
+    Member<T>& at(size_t pos) const
+    {
+        return members_.at(pos);
+    }
 
     Member<T>& at(const std::string& name)
     {

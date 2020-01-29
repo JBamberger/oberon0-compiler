@@ -13,6 +13,12 @@ NumberToken::NumberToken(FilePos pos, int value)
 
 NumberToken::~NumberToken() = default;
 
-int NumberToken::getValue() const { return value_; }
+int NumberToken::getValue() const
+{
+    return value_;
+}
 
-void NumberToken::print(std::ostream& stream) const { stream << this->getType() << ": " << value_; }
+void NumberToken::print(std::ostream& stream) const
+{
+    stream << this->getType() << ": " << value_;
+}

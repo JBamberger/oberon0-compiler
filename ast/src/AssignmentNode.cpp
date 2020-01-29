@@ -19,9 +19,15 @@ const std::unique_ptr<AssignableExpressionNode>& AssignmentNode::getAssignee() c
     return assignee_;
 }
 
-const std::unique_ptr<ExpressionNode>& AssignmentNode::getValue() const { return value_; }
+const std::unique_ptr<ExpressionNode>& AssignmentNode::getValue() const
+{
+    return value_;
+}
 
-void AssignmentNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void AssignmentNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void AssignmentNode::print(std::ostream& stream) const
 {

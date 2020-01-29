@@ -18,6 +18,12 @@ class TypedIdentifierNode : public Node {
     }
 
     ~TypedIdentifierNode() override = default;
-    std::string getName() const { return name_; }
-    TypeNode* getType() const { return type_; }
+    std::string getName() const
+    {
+        return name_;
+    }
+    TypeNode* getType() const
+    {
+        return type_;
+    }
 };

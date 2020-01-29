@@ -14,9 +14,15 @@ ParameterDeclarationNode::ParameterDeclarationNode(const FilePos& pos,
 
 ParameterDeclarationNode::~ParameterDeclarationNode() = default;
 
-bool ParameterDeclarationNode::isIsReference() const { return is_reference_; }
+bool ParameterDeclarationNode::isIsReference() const
+{
+    return is_reference_;
+}
 
-void ParameterDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void ParameterDeclarationNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void ParameterDeclarationNode::print(std::ostream& stream) const
 {

@@ -7,7 +7,9 @@
 #include "Logger.h"
 #include <iomanip>
 
-Logger::Logger() : Logger(LogLevel::ERROR, &std::cout, &std::cerr) {}
+Logger::Logger() : Logger(LogLevel::ERROR, &std::cout, &std::cerr)
+{
+}
 
 Logger::Logger(LogLevel level, std::ostream* out, std::ostream* err)
     : level_(level), out_(out), err_(err)
@@ -80,4 +82,7 @@ void Logger::debug(const std::string& fileName, const std::string& msg) const
     log(LogLevel::DEBUG, fileName, msg);
 }
 
-void Logger::setLevel(LogLevel level) { level_ = level; }
+void Logger::setLevel(LogLevel level)
+{
+    level_ = level;
+}

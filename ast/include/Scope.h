@@ -14,7 +14,9 @@ struct Symbol {
     std::string identifier;
     Node* value;
 
-    Symbol(std::string identifier, Node* value) : identifier(std::move(identifier)), value(value) {}
+    Symbol(std::string identifier, Node* value) : identifier(std::move(identifier)), value(value)
+    {
+    }
 };
 
 class Scope {

@@ -11,11 +11,20 @@ VariableReferenceNode::VariableReferenceNode(const FilePos& pos, VariableDeclara
 
 VariableReferenceNode::~VariableReferenceNode() = default;
 
-std::string VariableReferenceNode::getName() const { return variable_->getName(); }
+std::string VariableReferenceNode::getName() const
+{
+    return variable_->getName();
+}
 
-VariableDeclarationNode* VariableReferenceNode::getVariable() const { return variable_; }
+VariableDeclarationNode* VariableReferenceNode::getVariable() const
+{
+    return variable_;
+}
 
-void VariableReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void VariableReferenceNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void VariableReferenceNode::print(std::ostream& stream) const
 {

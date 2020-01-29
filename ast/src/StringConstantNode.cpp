@@ -9,9 +9,15 @@ StringConstantNode::StringConstantNode(const FilePos& pos, std::string value, Ty
     assert(type->getId() == "STRING");
 }
 
-const std::string& StringConstantNode::getValue() const { return value_; }
+const std::string& StringConstantNode::getValue() const
+{
+    return value_;
+}
 
-void StringConstantNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void StringConstantNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void StringConstantNode::print(std::ostream& stream) const
 {

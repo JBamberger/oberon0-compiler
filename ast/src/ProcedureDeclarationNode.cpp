@@ -11,7 +11,10 @@ ProcedureDeclarationNode::ProcedureDeclarationNode(const FilePos& pos,
 
 ProcedureDeclarationNode::~ProcedureDeclarationNode() = default;
 
-ProcedureDeclarationNode::ParamDeclList& ProcedureDeclarationNode::getParams() { return params_; }
+ProcedureDeclarationNode::ParamDeclList& ProcedureDeclarationNode::getParams()
+{
+    return params_;
+}
 
 const ProcedureDeclarationNode::ParamDeclList& ProcedureDeclarationNode::getParams() const
 {
@@ -23,9 +26,15 @@ const BlockNode::ProcDeclList& ProcedureDeclarationNode::getProcedures() const
     return procedures_;
 }
 
-BlockNode::ProcDeclList& ProcedureDeclarationNode::getProcedures() { return procedures_; }
+BlockNode::ProcDeclList& ProcedureDeclarationNode::getProcedures()
+{
+    return procedures_;
+}
 
-void ProcedureDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void ProcedureDeclarationNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void ProcedureDeclarationNode::print(std::ostream& stream) const
 {

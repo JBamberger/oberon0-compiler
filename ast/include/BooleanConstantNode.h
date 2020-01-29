@@ -16,11 +16,20 @@ class BooleanConstantNode : public ConstantNode {
 
     ~BooleanConstantNode() override = default;
 
-    int getValue() const { return value_; }
+    int getValue() const
+    {
+        return value_;
+    }
 
-    void setValue(const int value) { this->value_ = value; }
+    void setValue(const int value)
+    {
+        this->value_ = value;
+    }
 
-    void visit(NodeVisitor* visitor) const override { visitor->visit(this); }
+    void visit(NodeVisitor* visitor) const override
+    {
+        visitor->visit(this);
+    }
 
     void print(std::ostream& stream) const override
     {

@@ -11,9 +11,15 @@ ModuleNode::ModuleNode(const FilePos& pos, const std::string& name)
 
 ModuleNode::~ModuleNode() = default;
 
-BlockNode::ProcDeclList& ModuleNode::getProcedures() { return procedures_; }
+BlockNode::ProcDeclList& ModuleNode::getProcedures()
+{
+    return procedures_;
+}
 
-const BlockNode::ProcDeclList& ModuleNode::getProcedures() const { return procedures_; }
+const BlockNode::ProcDeclList& ModuleNode::getProcedures() const
+{
+    return procedures_;
+}
 
 void ModuleNode::print(std::ostream& stream) const
 {
@@ -23,4 +29,7 @@ void ModuleNode::print(std::ostream& stream) const
     stream << ")";
 }
 
-void ModuleNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void ModuleNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}

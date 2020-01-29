@@ -18,7 +18,10 @@ BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
 
 BinaryExpressionNode::~BinaryExpressionNode() = default;
 
-BinaryOperator BinaryExpressionNode::getOperator() const { return op_; }
+BinaryOperator BinaryExpressionNode::getOperator() const
+{
+    return op_;
+}
 
 const std::unique_ptr<ExpressionNode>& BinaryExpressionNode::getOperand1() const
 {
@@ -30,7 +33,10 @@ const std::unique_ptr<ExpressionNode>& BinaryExpressionNode::getOperand2() const
     return operand2_;
 }
 
-void BinaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void BinaryExpressionNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void BinaryExpressionNode::print(std::ostream& stream) const
 {

@@ -3,7 +3,9 @@
 
 class TypeNode : public Node {
   public:
-    TypeNode() : Node(NodeType::type, FilePos()) {}
+    TypeNode() : Node(NodeType::type, FilePos())
+    {
+    }
 
     /**
      * Get a string representation of the type.

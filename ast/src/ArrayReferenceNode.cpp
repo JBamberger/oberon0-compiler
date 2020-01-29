@@ -21,9 +21,15 @@ const std::unique_ptr<AssignableExpressionNode>& ArrayReferenceNode::getArrayRef
     return array_ref_;
 }
 
-const std::unique_ptr<ExpressionNode>& ArrayReferenceNode::getIndex() const { return index_; }
+const std::unique_ptr<ExpressionNode>& ArrayReferenceNode::getIndex() const
+{
+    return index_;
+}
 
-void ArrayReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void ArrayReferenceNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void ArrayReferenceNode::print(std::ostream& stream) const
 {

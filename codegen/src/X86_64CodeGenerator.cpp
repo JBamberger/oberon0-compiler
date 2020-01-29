@@ -11,11 +11,16 @@
 #include "UnaryExpressionNode.h"
 #include <iomanip>
 
-X86_64CodeGenerator::X86_64CodeGenerator() : output_(nullptr), nl_("\n"), label_nr_(1) {}
+X86_64CodeGenerator::X86_64CodeGenerator() : output_(nullptr), nl_("\n"), label_nr_(1)
+{
+}
 
 X86_64CodeGenerator::~X86_64CodeGenerator() = default;
 
-std::string X86_64CodeGenerator::nextLabel() { return std::to_string(label_nr_++); }
+std::string X86_64CodeGenerator::nextLabel()
+{
+    return std::to_string(label_nr_++);
+}
 
 void X86_64CodeGenerator::generate(std::unique_ptr<ModuleNode> ast, std::ostream* output)
 {

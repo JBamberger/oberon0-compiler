@@ -3,5 +3,7 @@
 
 class StatementNode : public Node {
   public:
-    StatementNode(NodeType nodeType, const FilePos& pos) : Node(nodeType, pos) {}
+    StatementNode(NodeType nodeType, const FilePos& pos) : Node(nodeType, pos)
+    {
+    }
 };

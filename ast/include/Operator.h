@@ -8,7 +8,9 @@ struct ArithmeticError : std::exception {
     std::string message;
 
   public:
-    explicit ArithmeticError(std::string message) : exception(), message(std::move(message)) {}
+    explicit ArithmeticError(std::string message) : exception(), message(std::move(message))
+    {
+    }
 };
 
 enum class OperatorType : char { logical, arithmetic, comparison };

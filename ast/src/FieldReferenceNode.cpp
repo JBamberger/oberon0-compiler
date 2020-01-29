@@ -17,11 +17,20 @@ const std::unique_ptr<AssignableExpressionNode>& FieldReferenceNode::getRecordRe
 
 FieldReferenceNode::~FieldReferenceNode() = default;
 
-std::string FieldReferenceNode::getFieldName() const { return field_->getName(); }
+std::string FieldReferenceNode::getFieldName() const
+{
+    return field_->getName();
+}
 
-FieldDeclarationNode* FieldReferenceNode::getField() const { return field_; }
+FieldDeclarationNode* FieldReferenceNode::getField() const
+{
+    return field_;
+}
 
-void FieldReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void FieldReferenceNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void FieldReferenceNode::print(std::ostream& stream) const
 {

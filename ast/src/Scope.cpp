@@ -3,7 +3,9 @@
 #include <cassert>
 #include <utility>
 
-Scope::Scope(std::string name) : name_(std::move(name)) {}
+Scope::Scope(std::string name) : name_(std::move(name))
+{
+}
 
 Scope::Scope(std::string name, std::shared_ptr<Scope> parent)
     : parent_(std::move(parent)), name_(std::move(name))
@@ -48,7 +50,10 @@ Symbol* Scope::resolveIdentifierLocally(const std::string& identifier) const
     return nullptr;
 }
 
-const std::shared_ptr<Scope>& Scope::getParent() const { return parent_; }
+const std::shared_ptr<Scope>& Scope::getParent() const
+{
+    return parent_;
+}
 
 void Scope::declareDefaultType(const std::shared_ptr<BasicTypeNode>& type)
 {

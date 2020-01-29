@@ -16,11 +16,20 @@ UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
 
 UnaryExpressionNode::~UnaryExpressionNode() = default;
 
-UnaryOperator UnaryExpressionNode::getOperator() const { return operator_; }
+UnaryOperator UnaryExpressionNode::getOperator() const
+{
+    return operator_;
+}
 
-const std::unique_ptr<ExpressionNode>& UnaryExpressionNode::getOperand() const { return operand_; }
+const std::unique_ptr<ExpressionNode>& UnaryExpressionNode::getOperand() const
+{
+    return operand_;
+}
 
-void UnaryExpressionNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void UnaryExpressionNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void UnaryExpressionNode::print(std::ostream& stream) const
 {

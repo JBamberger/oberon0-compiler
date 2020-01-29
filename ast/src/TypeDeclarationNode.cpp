@@ -9,11 +9,20 @@ TypeDeclarationNode::TypeDeclarationNode(const FilePos& pos, std::string name, T
 
 TypeDeclarationNode::~TypeDeclarationNode() = default;
 
-std::string TypeDeclarationNode::getName() const { return name_; }
+std::string TypeDeclarationNode::getName() const
+{
+    return name_;
+}
 
-TypeNode* TypeDeclarationNode::getType() const { return type_; }
+TypeNode* TypeDeclarationNode::getType() const
+{
+    return type_;
+}
 
-void TypeDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void TypeDeclarationNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void TypeDeclarationNode::print(std::ostream& stream) const
 {

@@ -11,9 +11,15 @@ class ExpressionNode : public Node {
     {
     }
 
-    TypeNode* getType() const { return type_; }
+    TypeNode* getType() const
+    {
+        return type_;
+    }
 
-    void setType(TypeNode* type_node) { type_ = type_node; }
+    void setType(TypeNode* type_node)
+    {
+        type_ = type_node;
+    }
 };
 
 class ConstantNode : public ExpressionNode {

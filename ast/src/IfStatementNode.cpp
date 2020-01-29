@@ -11,17 +11,35 @@ IfStatementNode::IfStatementNode(const FilePos& pos, std::unique_ptr<ExpressionN
 
 IfStatementNode::~IfStatementNode() = default;
 
-const std::unique_ptr<ExpressionNode>& IfStatementNode::getCondition() const { return condition_; }
+const std::unique_ptr<ExpressionNode>& IfStatementNode::getCondition() const
+{
+    return condition_;
+}
 
-IfStatementNode::StmtList& IfStatementNode::getThenPart() { return thenPart_; }
+IfStatementNode::StmtList& IfStatementNode::getThenPart()
+{
+    return thenPart_;
+}
 
-IfStatementNode::StmtList& IfStatementNode::getElsePart() { return elsePart_; }
+IfStatementNode::StmtList& IfStatementNode::getElsePart()
+{
+    return elsePart_;
+}
 
-const IfStatementNode::StmtList& IfStatementNode::getThenPart() const { return thenPart_; }
+const IfStatementNode::StmtList& IfStatementNode::getThenPart() const
+{
+    return thenPart_;
+}
 
-const IfStatementNode::StmtList& IfStatementNode::getElsePart() const { return elsePart_; }
+const IfStatementNode::StmtList& IfStatementNode::getElsePart() const
+{
+    return elsePart_;
+}
 
-void IfStatementNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void IfStatementNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void IfStatementNode::print(std::ostream& stream) const
 {

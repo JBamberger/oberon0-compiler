@@ -13,6 +13,12 @@ StringToken::StringToken(const FilePos pos, const std::string& value)
 
 StringToken::~StringToken() = default;
 
-const std::string StringToken::getValue() const { return value_; }
+const std::string StringToken::getValue() const
+{
+    return value_;
+}
 
-void StringToken::print(std::ostream& stream) const { stream << this->getType() << ": " << value_; }
+void StringToken::print(std::ostream& stream) const
+{
+    stream << this->getType() << ": " << value_;
+}

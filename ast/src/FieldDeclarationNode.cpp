@@ -10,7 +10,10 @@ FieldDeclarationNode::FieldDeclarationNode(const FilePos& pos, std::string name,
 
 FieldDeclarationNode::~FieldDeclarationNode() = default;
 
-void FieldDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void FieldDeclarationNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void FieldDeclarationNode::print(std::ostream& stream) const
 {

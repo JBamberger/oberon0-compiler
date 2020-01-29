@@ -10,11 +10,20 @@ RecordTypeNode::RecordTypeNode(std::shared_ptr<Scope> parent)
 
 RecordTypeNode::~RecordTypeNode() = default;
 
-MemberLayout<FieldDeclarationNode>& RecordTypeNode::getMembers() { return members_; }
+MemberLayout<FieldDeclarationNode>& RecordTypeNode::getMembers()
+{
+    return members_;
+}
 
-const MemberLayout<FieldDeclarationNode>& RecordTypeNode::getMembers() const { return members_; }
+const MemberLayout<FieldDeclarationNode>& RecordTypeNode::getMembers() const
+{
+    return members_;
+}
 
-const std::shared_ptr<Scope>& RecordTypeNode::getScope() const { return scope_; }
+const std::shared_ptr<Scope>& RecordTypeNode::getScope() const
+{
+    return scope_;
+}
 
 std::string RecordTypeNode::getId() const
 {
@@ -27,7 +36,10 @@ std::string RecordTypeNode::getId() const
     return s.str();
 }
 
-void RecordTypeNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void RecordTypeNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void RecordTypeNode::print(std::ostream& stream) const
 {
@@ -45,4 +57,7 @@ void RecordTypeNode::print(std::ostream& stream) const
     stream << "))";
 }
 
-size_t RecordTypeNode::getByteSize() const { return members_.getSize(); }
+size_t RecordTypeNode::getByteSize() const
+{
+    return members_.getSize();
+}

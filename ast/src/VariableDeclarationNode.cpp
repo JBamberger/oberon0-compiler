@@ -13,10 +13,16 @@ VariableDeclarationNode::VariableDeclarationNode(const FilePos& pos,
 
 VariableDeclarationNode::~VariableDeclarationNode() = default;
 
-void VariableDeclarationNode::visit(NodeVisitor* visitor) const { visitor->visit(this); }
+void VariableDeclarationNode::visit(NodeVisitor* visitor) const
+{
+    visitor->visit(this);
+}
 
 void VariableDeclarationNode::print(std::ostream& stream) const
 {
     stream << "VariableNode(" << name_ << ", " << type_ << ")";
 }
-BlockNode* VariableDeclarationNode::getParent() const { return parent_; }
+BlockNode* VariableDeclarationNode::getParent() const
+{
+    return parent_;
+}
