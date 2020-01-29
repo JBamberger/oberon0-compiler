@@ -1,5 +1,27 @@
 MODULE Test;
-VAR a: INTEGER; (*ARRAY 5 OF INTEGER;*)
+VAR a,b,c,d,e,f,g: INTEGER; (*ARRAY 5 OF INTEGER;*)
 BEGIN
-        a := 42
+        (* Compile-time evaluation*)
+        b := 5;
+        c := 10;
+        d := 4;
+        e := 14;
+        f := 13;
+        g := -7;
+        a := 11;        (* 11 *)
+        a := 5 + 5;     (* 10 *)
+        a := 10 - 1;    (*  9 *)
+        a := 4 * 2;     (*  8 *)
+        a := 14 DIV 2;  (*  7 *)
+        a := 13 MOD 7;  (*  6 *)
+        a := (-7) MOD 6;(*  5 *)
+        (* Runtime evaluation *)
+        a := b + 5;     (* 10 *)
+        a := c - 1;     (*  9 *)
+        a := d * 2;     (*  8 *)
+        a := e DIV 2;   (*  7 *)
+        a := f MOD 7;   (*  6 *)
+        a := g MOD 6    (*  5 *)
+        (* a := 14 DIV 0; THROWS *)
+        (* a := 14 MOD 0; THROWS *)
 END Test.

@@ -19,5 +19,5 @@ void VariableReferenceNode::visit(NodeVisitor* visitor) const { visitor->visit(t
 
 void VariableReferenceNode::print(std::ostream& stream) const
 {
-    stream << "VariableReferenceNode(" << variable_->getType() << ")";
+    stream << "VariableReferenceNode(" << getName() << ": " << variable_->getType()->getId() << ")";
 }

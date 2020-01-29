@@ -2,6 +2,14 @@
 
 #include "Token.h"
 #include <ostream>
+#include <utility>
+
+struct ArithmeticError : std::exception {
+    std::string message;
+
+  public:
+    explicit ArithmeticError(std::string message) : exception(), message(std::move(message)) {}
+};
 
 enum class OperatorType : char { logical, arithmetic, comparison };
 
@@ -134,9 +142,18 @@ inline int evalBinary(const BinaryOperator op, const int v1, const int v2)
     case BinaryOperator::times:
         return v1 * v2;
     case BinaryOperator::div:
+        if (v2 == 0)
+            throw ArithmeticError("Division by zero.");
         return v1 / v2;
-    case BinaryOperator::mod:
-        return v1 % v2;
+    case BinaryOperator::mod: {
+        if (v2 == 0)
+            throw ArithmeticError("Division by zero.");
+        const auto m = v1 % v2;
+        if (m < 0) {
+            return (v2 < 0) ? m - v2 : m + v2;
+        }
+        return m;
+    }
     case BinaryOperator::plus:
         return v1 + v2;
     case BinaryOperator::minus:

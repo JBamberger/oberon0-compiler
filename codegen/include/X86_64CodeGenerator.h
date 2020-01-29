@@ -17,7 +17,7 @@ class X86_64CodeGenerator : public CodeGenerator, private NodeVisitor {
     std::string nl_;
     size_t label_nr_;
     std::shared_ptr<Scope> root_scope;
-    std::shared_ptr<Scope> current_scope;
+    bool should_deref = true;
 
   public:
     X86_64CodeGenerator();

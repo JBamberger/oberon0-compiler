@@ -33,7 +33,6 @@ void X86_64CodeGenerator::defineConstants(const BlockNode *node) {
     }
 }
 
-
 void X86_64CodeGenerator::defineVariables(const BlockNode *node) {
     const auto size = node->getVariables().getSize();
     *output_ << "        sub     rsp, " << size << "     ; reserve local variable space" << nl_;
@@ -42,16 +41,23 @@ void X86_64CodeGenerator::defineVariables(const BlockNode *node) {
 
 void X86_64CodeGenerator::visit(const ModuleNode *node) {
     root_scope = node->getScope();
-    current_scope = root_scope;
 
 
     *output_ << "%pragma macho64 prefix _" << nl_
+             << nl_
+             << "%macro print 2" << nl_
+             << "        mov     rsi, %1                 ; first argument, message" << nl_
+             << "        mov     rdi, %2                 ; second argument, integer" << nl_
+             << "        xor     rax, rax                ; zero result" << nl_
+             << "        call    printf                  ; print the formatted string" << nl_
+             << "%endmacro" << nl_
+             << nl_
              << "        global  main" << nl_
-             << "        extern printf                   ; libc printf(string, args)" << nl_
+             << "        extern  printf                   ; libc printf(string, args)" << nl_
              << nl_
              << "section .data" << nl_
              << "dmsg:" << nl_
-             << "        db  'Debug output %d', 0" << nl_;
+             << "        db  'Debug output %d', 10, 0" << nl_;
     defineConstants(node);
     *output_ << nl_
              << "section .text" << nl_
@@ -65,13 +71,8 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
         s->visit(this);
     }
 
-     *output_ << "; ----- debug ----------------------------------------------------------" << nl_
-              << "        mov     rcx, dmsg               ; debug message -> param 1" << nl_
-              << "        mov     rdx, qword [rbp - 8]    ; first variable -> param 2" << nl_
-              << "        call    printf                  ; print the debug value" << nl_
-              << "; ----- debug end ------------------------------------------------------" << nl_;
-
-    *output_ << "        xor     rax, rax                ; set return value to 0" << nl_
+    *output_ << nl_
+             << "        xor     rax, rax                ; set return value to 0" << nl_
              << "        mov     rsp, rbp                ; reset stack pointer for caller" << nl_
              << "        pop     rbp                     ; reset stack base for caller" << nl_
              << "        ret                             ; Module end: " << node->getName() << nl_
@@ -79,7 +80,6 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << nl_;
 
 
-    current_scope = nullptr;
     root_scope = nullptr;
 }
 
@@ -105,59 +105,82 @@ void X86_64CodeGenerator::visit(const ConstantDeclarationNode *node) {
 
 void X86_64CodeGenerator::visit(const VariableDeclarationNode *node) {
     // TODO: use layout table:
-    *output_ << "        ; declare local variable " << node->getName() << nl_
-             << "        sub     rbp, size               ; alloc on stack" << nl_
-             << "        mov     qword [rbp, - 8], 0     ; zero out locals";
 }
 
 void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
+    bool deref = should_deref;
     size_t size = node->getType()->getByteSize();
     *output_ << "        ; Array access index computation" << nl_;
     node->getIndex()->visit(this); // evaluates the index
+
+    // compute array base address
+    should_deref = false;
     node->getArrayRef()->visit(this);
+
     *output_ << "        ; Array value reference" << nl_
              << "        pop     rax                     ; array base address" << nl_
              << "        pop     rbx                     ; array index" << nl_
-             << "        lea     rax, qword [rax-rbx*" << size << "]  ; array access" << nl_
+             << "        lea     rax, [rax-rbx*" << size << "]  ; array access" << nl_
              << "        push    rax" << nl_;
+    should_deref = true;
+    if (!deref) return;
+    *output_ << "        pop     rax" << nl_
+             << "        mov     rbx, qword [rax]" << nl_
+             << "        push    rbx" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const VariableReferenceNode *node) {
+    bool deref = should_deref;
     const auto offset = node->getVariable()->getParent()->getVariables().at(node->getVariable()->getName()).offset;
     *output_ << "        ; Variable reference " << node->getVariable()->getName() << nl_
-             << "        pop     rax" << nl_
-             << "        lea     rax,  [rax - "<< offset << "]" << nl_
+             << "        lea     rax, [rbp - "<<  offset << "]" << nl_
              << "        push    rax" << nl_;
+
+    should_deref = true;
+    if (!deref) return;
+    *output_ << "        pop     rax" << nl_
+             << "        mov     rbx, qword [rax]" << nl_
+             << "        push    rbx" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const FieldReferenceNode *node) {
+    bool deref = should_deref;
     const auto record = dynamic_cast<RecordTypeNode*>(node->getRecordRef()->getType());
     assert(record != nullptr);
     const auto offset = record->getMembers().at(node->getFieldName()).offset;
 
-    node->getRecordRef()->visit(this); // compute record location
+    // compute record base address
+    should_deref = false;
+    node->getRecordRef()->visit(this);
 
     *output_ << "        ; Record field reference " << node->getFieldName() << nl_
              << "        pop     rax" << nl_
              << "        lea     rax, [rax - "<< offset <<"]" << nl_
              << "        push    rax" << nl_;
+    should_deref = true;
+    if (!deref) return;
+    *output_ << "        pop     rax" << nl_
+             << "        mov     rbx, qword [rax]" << nl_
+             << "        push    rbx" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const AssignmentNode *node) {
-
-    *output_ << "        ; Begin evaluation for assignment" << nl_;
+    *output_ << "        ; "; node->print(*output_); *output_ << nl_;
+    *output_ << "        ; Compute R-Value" << nl_;
 
     node->getValue()->visit(this);
 
-    *output_ << "        push    rbp                     ; push base address" << nl_
-             << "        ; Begin address computation for assignment" << nl_;
+    *output_ << "        ; Compute L-Value" << nl_;
 
+    should_deref = false;
     node->getAssignee()->visit(this); // compute the assignment address
 
     *output_ << "        ; Actual Assignment" << nl_
              << "        pop     rbx                     ; address" << nl_
              << "        pop     rax                     ; value" << nl_
-             << "        mov     qword [rbx], rax        ; perform the assignment" << nl_;
+             << "        mov     qword [rbx], rax        ; perform the assignment" << nl_
+             << nl_
+             << "        print   [rbx], dmsg             ; DEBUG PRINT STATEMENT" << nl_;
 }
 
 void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
@@ -334,9 +357,9 @@ void X86_64CodeGenerator::visit(const IfStatementNode *) {
 }
 
 void X86_64CodeGenerator::visit(const NumberConstantNode *node) {
-    *output_ << "        push    0x"
-             << std::setw(16) << std::setfill('0') << std::hex << node->getValue()
-             << "      ; Number constant " << node->getValue() << nl_;
+    *output_ << "        push    "
+             << std::setw(24) << std::setfill(' ') <<std::left << node->getValue()
+             << "; Number constant " << node->getValue() << nl_;
 }
 
 void X86_64CodeGenerator::visit(const StringConstantNode *) {

@@ -195,7 +195,8 @@ const Token* Scanner::next()
             default:
                 token = nullptr;
                 read();
-                break;
+                logger_->error(filename_, "Invalid character: " + std::to_string(ch_));
+                throw std::exception();
             }
         }
     } else {

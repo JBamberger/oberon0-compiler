@@ -65,7 +65,14 @@ class MemberLayout {
         // the last offset is also the size of the structure
         // no alignment is necessary here, because the members are aligned correctly if the starting
         // position is valid.
-        return members_.empty() ? 0 : members_.at(members_.size() - 1).offset;
+        if (members_.empty()) {
+            return 0;
+        }
+        const auto last = members_.at(members_.size() - 1).offset;
+        if (prev_bound == last) {
+            return last;
+        }
+        return prev_bound + stack_width;
     }
 
     template <typename Functor>

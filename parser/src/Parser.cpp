@@ -23,11 +23,12 @@
 #include "UnaryExpressionNode.h"
 #include <cassert>
 
-Parser::Parser(Scanner *scanner, Logger *logger) : scanner_(scanner), logger_(logger) {}
+Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
 
 Parser::~Parser() = default;
 
-std::unique_ptr<ModuleNode> Parser::parse() {
+std::unique_ptr<ModuleNode> Parser::parse()
+{
     const auto file_name = scanner_->peekToken()->getPosition().fileName;
     logger_->info(file_name, "Begin parsing");
     // new type map
@@ -37,11 +38,13 @@ std::unique_ptr<ModuleNode> Parser::parse() {
     return std::move(mod);
 }
 
-bool Parser::checkToken(const TokenType &type) const {
+bool Parser::checkToken(const TokenType& type) const
+{
     return scanner_->peekToken()->getType() == type;
 }
 
-bool Parser::checkAndConsumeToken(const TokenType &type) const {
+bool Parser::checkAndConsumeToken(const TokenType& type) const
+{
     const auto consume = checkToken(type);
     if (consume) {
         static_cast<void>(scanner_->nextToken());
@@ -49,7 +52,8 @@ bool Parser::checkAndConsumeToken(const TokenType &type) const {
     return consume;
 }
 
-void Parser::requireToken(const TokenType &type) const {
+void Parser::requireToken(const TokenType& type) const
+{
     const auto token = scanner_->nextToken();
 
     // check for E000: syntax error
@@ -59,7 +63,8 @@ void Parser::requireToken(const TokenType &type) const {
     }
 }
 
-std::unique_ptr<const Token> Parser::requireAndGetToken(const TokenType &type) const {
+std::unique_ptr<const Token> Parser::requireAndGetToken(const TokenType& type) const
+{
     auto token = scanner_->nextToken();
 
     // check for E000: syntax error
@@ -70,15 +75,17 @@ std::unique_ptr<const Token> Parser::requireAndGetToken(const TokenType &type) c
     return token;
 }
 
-Identifier Parser::ident() const {
+Identifier Parser::ident() const
+{
     const auto token = requireAndGetToken(TokenType::const_ident);
-    const auto ident_token = dynamic_cast<const IdentToken *>(token.get());
+    const auto ident_token = dynamic_cast<const IdentToken*>(token.get());
     assert(ident_token != nullptr);
 
     return Identifier(ident_token->getValue(), ident_token->getPosition());
 }
 
-std::vector<Identifier> Parser::ident_list() const {
+std::vector<Identifier> Parser::ident_list() const
+{
     std::vector<Identifier> ids;
     const auto pos = scanner_->peekToken()->getPosition();
     ids.push_back(ident());
@@ -90,7 +97,8 @@ std::vector<Identifier> Parser::ident_list() const {
     return ids;
 }
 
-std::unique_ptr<ModuleNode> Parser::module() {
+std::unique_ptr<ModuleNode> Parser::module()
+{
     const auto pos = requireAndGetToken(TokenType::kw_module)->getPosition();
     const auto id1 = ident();
 
@@ -121,7 +129,8 @@ std::unique_ptr<ModuleNode> Parser::module() {
     return module_node;
 }
 
-void Parser::declarations(BlockNode *block) {
+void Parser::declarations(BlockNode* block)
+{
     if (checkAndConsumeToken(TokenType::kw_const)) {
         while (checkToken(TokenType::const_ident)) {
             const_declaration(block->getConstants());
@@ -146,27 +155,29 @@ void Parser::declarations(BlockNode *block) {
     }
 }
 
-void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>> &list) {
+void Parser::const_declaration(std::vector<std::unique_ptr<ConstantDeclarationNode>>& list)
+{
     const auto id = ident();
     requireToken(TokenType::op_eq);
     auto value = expression();
     requireToken(TokenType::semicolon);
 
     // check for E002: constant declarations must evaluate to constants
-    if (dynamic_cast<ConstantNode *>(value.get()) == nullptr) {
+    if (dynamic_cast<ConstantNode*>(value.get()) == nullptr) {
         throw ParseException(value->getFilePos(), error_id::E002);
     }
 
-    std::unique_ptr<ConstantNode> constant_node(dynamic_cast<ConstantNode *>(value.release()));
+    std::unique_ptr<ConstantNode> constant_node(dynamic_cast<ConstantNode*>(value.release()));
     if (constant_node == nullptr)
         throw std::bad_cast();
 
     auto node =
-            std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(constant_node));
+        std::make_unique<ConstantDeclarationNode>(id.pos, id.name, std::move(constant_node));
     insertDeclaration(std::move(node), list);
 }
 
-void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>> &list) {
+void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>>& list)
+{
     const auto id = ident();
     requireToken(TokenType::op_eq);
     auto tp = type();
@@ -180,13 +191,14 @@ void Parser::type_declaration(std::vector<std::unique_ptr<TypeDeclarationNode>> 
     list.push_back(std::make_unique<TypeDeclarationNode>(id.pos, id.name, tp));
 }
 
-void Parser::var_declaration(BlockNode* parent) {
+void Parser::var_declaration(BlockNode* parent)
+{
     const auto ids = ident_list();
     requireToken(TokenType::colon);
     auto tp = type();
     requireToken(TokenType::semicolon);
 
-    for (const auto &id : ids) {
+    for (const auto& id : ids) {
         auto node = std::make_unique<VariableDeclarationNode>(id.pos, id.name, tp, parent);
 
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
@@ -197,7 +209,8 @@ void Parser::var_declaration(BlockNode* parent) {
     }
 }
 
-void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>> &list) {
+void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarationNode>>& list)
+{
     // procedure heading
     const auto pos = requireAndGetToken(TokenType::kw_procedure)->getPosition();
     const auto id1 = ident();
@@ -225,17 +238,17 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
         throw ParseException(pos, error_id::E029, id1.name, id2.name);
     }
 
-    for (const auto &a : node->getParams()) {
+    for (const auto& a : node->getParams()) {
         const auto arg_type = findType(a->getType(), a->getFilePos());
 
         // check for E010: ARRAYs cannot be passed as VAR
-        const auto array_type = dynamic_cast<ArrayTypeNode *>(arg_type);
+        const auto array_type = dynamic_cast<ArrayTypeNode*>(arg_type);
         if (array_type != nullptr && a->isIsReference()) {
             throw ParseException(a->getFilePos(), error_id::E010);
         }
 
         // check for E011: RECORDs cannot be passed as VAR
-        const auto record_type = dynamic_cast<RecordTypeNode *>(arg_type);
+        const auto record_type = dynamic_cast<RecordTypeNode*>(arg_type);
         if (record_type != nullptr && a->isIsReference()) {
             throw ParseException(a->getFilePos(), error_id::E011);
         }
@@ -247,7 +260,8 @@ void Parser::procedure_declaration(std::vector<std::unique_ptr<ProcedureDeclarat
     insertDeclaration(std::move(node), list);
 }
 
-std::unique_ptr<ExpressionNode> Parser::expression() {
+std::unique_ptr<ExpressionNode> Parser::expression()
+{
     auto operand_1 = simple_expression();
     const auto maybe_operand = scanner_->peekToken()->getType();
     if (maybe_operand == TokenType::op_eq || maybe_operand == TokenType::op_neq ||
@@ -262,7 +276,8 @@ std::unique_ptr<ExpressionNode> Parser::expression() {
     return operand_1;
 }
 
-std::unique_ptr<ExpressionNode> Parser::simple_expression() {
+std::unique_ptr<ExpressionNode> Parser::simple_expression()
+{
     std::unique_ptr<ExpressionNode> operand_1;
 
     auto next = scanner_->peekToken()->getType();
@@ -279,13 +294,14 @@ std::unique_ptr<ExpressionNode> Parser::simple_expression() {
         auto op = scanner_->nextToken();
         auto operand_2 = term();
         operand_1 =
-                evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
+            evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
         next = scanner_->peekToken()->getType();
     }
     return operand_1;
 }
 
-std::unique_ptr<ExpressionNode> Parser::term() {
+std::unique_ptr<ExpressionNode> Parser::term()
+{
     auto operand_1 = factor();
     auto next = scanner_->peekToken()->getType();
     while (next == TokenType::op_times || next == TokenType::op_div || next == TokenType::op_mod ||
@@ -293,86 +309,89 @@ std::unique_ptr<ExpressionNode> Parser::term() {
         auto op = scanner_->nextToken();
         auto operand_2 = factor();
         operand_1 =
-                evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
+            evaluateBinaryExpression(std::move(operand_1), std::move(operand_2), std::move(op));
         next = scanner_->peekToken()->getType();
     }
 
     return operand_1;
 }
 
-std::unique_ptr<ExpressionNode> Parser::factor() {
+std::unique_ptr<ExpressionNode> Parser::factor()
+{
     const auto next = scanner_->peekToken();
     const auto pos = next->getPosition();
 
     switch (next->getType()) {
-        case TokenType::const_ident: {
-            const auto id = ident();
-            const auto resolved = resolveId(current_scope_.get(), id);
+    case TokenType::const_ident: {
+        const auto id = ident();
+        const auto resolved = resolveId(current_scope_.get(), id);
 
-            // check for E023: must be const, variable or parameter
+        // check for E023: must be const, variable or parameter
 
-            // check if the identifier is a constant
-            const auto const_decl = dynamic_cast<ConstantDeclarationNode *>(resolved);
-            if (const_decl != nullptr) {
-                const auto num_const = dynamic_cast<NumberConstantNode *>(const_decl->getValue().get());
-                if (num_const != nullptr) {
-                    return std::make_unique<NumberConstantNode>(id.pos, num_const->getValue(), integer_);
-                }
-
-                const auto str_const = dynamic_cast<StringConstantNode *>(const_decl->getValue().get());
-                if (str_const != nullptr) {
-                    return std::make_unique<StringConstantNode>(id.pos, str_const->getValue(), string_);
-                }
+        // check if the identifier is a constant
+        const auto const_decl = dynamic_cast<ConstantDeclarationNode*>(resolved);
+        if (const_decl != nullptr) {
+            const auto num_const = dynamic_cast<NumberConstantNode*>(const_decl->getValue().get());
+            if (num_const != nullptr) {
+                return std::make_unique<NumberConstantNode>(id.pos, num_const->getValue(),
+                                                            integer_);
             }
 
-            // check if the identifier is a variable
-            const auto var_decl = dynamic_cast<VariableDeclarationNode *>(resolved);
-            if (var_decl != nullptr) {
-                return selector(std::make_unique<VariableReferenceNode>(id.pos, var_decl));
+            const auto str_const = dynamic_cast<StringConstantNode*>(const_decl->getValue().get());
+            if (str_const != nullptr) {
+                return std::make_unique<StringConstantNode>(id.pos, str_const->getValue(), string_);
             }
+        }
 
-            // check if the identifier is a parameter
-            const auto param_decl = dynamic_cast<ParameterDeclarationNode *>(resolved);
-            if (param_decl != nullptr) {
-                return selector(std::make_unique<ParameterReferenceNode>(id.pos, param_decl));
-            }
+        // check if the identifier is a variable
+        const auto var_decl = dynamic_cast<VariableDeclarationNode*>(resolved);
+        if (var_decl != nullptr) {
+            return selector(std::make_unique<VariableReferenceNode>(id.pos, var_decl));
+        }
 
-            throw ParseException(id.pos, error_id::E023, id.name);
+        // check if the identifier is a parameter
+        const auto param_decl = dynamic_cast<ParameterDeclarationNode*>(resolved);
+        if (param_decl != nullptr) {
+            return selector(std::make_unique<ParameterReferenceNode>(id.pos, param_decl));
         }
-        case TokenType::const_number: {
-            const auto token = scanner_->nextToken();
-            const auto num_token = dynamic_cast<const NumberToken *>(token.get());
-            assert(num_token != nullptr);
-            const auto value = num_token->getValue();
 
-            return std::make_unique<NumberConstantNode>(pos, value, integer_);
-        }
-        case TokenType::const_string: {
-            const auto token = scanner_->nextToken();
-            const auto str_token = dynamic_cast<const StringToken *>(token.get());
-            assert(str_token != nullptr);
-            const auto value = str_token->getValue();
+        throw ParseException(id.pos, error_id::E023, id.name);
+    }
+    case TokenType::const_number: {
+        const auto token = scanner_->nextToken();
+        const auto num_token = dynamic_cast<const NumberToken*>(token.get());
+        assert(num_token != nullptr);
+        const auto value = num_token->getValue();
 
-            return std::make_unique<StringConstantNode>(pos, value, string_);
-        }
-        case TokenType::lparen: {
-            requireToken(TokenType::lparen);
-            auto expr = expression();
-            requireToken(TokenType::rparen);
-            return expr;
-        }
-        case TokenType::op_not: {
-            auto op = requireAndGetToken(TokenType::op_not);
-            auto value = factor();
-            return evaluateUnaryExpression(std::move(value), std::move(op));
-        }
-        default:
-            throw ParseException(next->getPosition(), error_id::E000, "identifier, number, lparen or ~",
-                                 to_string(*next));
+        return std::make_unique<NumberConstantNode>(pos, value, integer_);
+    }
+    case TokenType::const_string: {
+        const auto token = scanner_->nextToken();
+        const auto str_token = dynamic_cast<const StringToken*>(token.get());
+        assert(str_token != nullptr);
+        const auto value = str_token->getValue();
+
+        return std::make_unique<StringConstantNode>(pos, value, string_);
+    }
+    case TokenType::lparen: {
+        requireToken(TokenType::lparen);
+        auto expr = expression();
+        requireToken(TokenType::rparen);
+        return expr;
+    }
+    case TokenType::op_not: {
+        auto op = requireAndGetToken(TokenType::op_not);
+        auto value = factor();
+        return evaluateUnaryExpression(std::move(value), std::move(op));
+    }
+    default:
+        throw ParseException(next->getPosition(), error_id::E000, "identifier, number, lparen or ~",
+                             to_string(*next));
     }
 }
 
-TypeNode *Parser::type() {
+TypeNode* Parser::type()
+{
     // unique names from record/arrays:
     // ARRAY 10 OF INTEGER --> [A,10,INTEGER;]
     // RECORD a,b: INTEGER; c: RECORD x: BOOLEAN END; END -->
@@ -381,62 +400,63 @@ TypeNode *Parser::type() {
     const auto next = scanner_->peekToken();
 
     switch (next->getType()) {
-        case TokenType::const_ident: {
-            const auto id = ident();
+    case TokenType::const_ident: {
+        const auto id = ident();
 
-            // check for E005: the type must exist
-            const auto resolved_type = dynamic_cast<TypeNode *>(resolveId(current_scope_.get(), id));
-            if (resolved_type == nullptr) {
-                throw ParseException(id.pos, error_id::E005, id.name);
-            }
-
-            // this must be getId because the identifier could be the name of a typedef
-            return resolved_type;
+        // check for E005: the type must exist
+        const auto resolved_type = dynamic_cast<TypeNode*>(resolveId(current_scope_.get(), id));
+        if (resolved_type == nullptr) {
+            throw ParseException(id.pos, error_id::E005, id.name);
         }
-        case TokenType::kw_array: {
-            const auto pos = requireAndGetToken(TokenType::kw_array)->getPosition();
-            const auto array_value = expression();
-            requireToken(TokenType::kw_of);
-            auto array_type = type();
 
-            // check for E003: array size must be constant
-            const auto constant = dynamic_cast<NumberConstantNode *>(array_value.get());
-            if (constant == nullptr) {
-                throw ParseException(array_value->getFilePos(), error_id::E003);
-            }
+        // this must be getId because the identifier could be the name of a typedef
+        return resolved_type;
+    }
+    case TokenType::kw_array: {
+        const auto pos = requireAndGetToken(TokenType::kw_array)->getPosition();
+        const auto array_value = expression();
+        requireToken(TokenType::kw_of);
+        auto array_type = type();
 
-            // check for E004: array size must be gt 0
-            const auto size = constant->getValue();
-            if (0 >= size) {
-                throw ParseException(array_value->getFilePos(), error_id::E004, size);
-            }
-
-            return addType(std::make_unique<ArrayTypeNode>(size, array_type));
+        // check for E003: array size must be constant
+        const auto constant = dynamic_cast<NumberConstantNode*>(array_value.get());
+        if (constant == nullptr) {
+            throw ParseException(array_value->getFilePos(), error_id::E003);
         }
-        case TokenType::kw_record: {
-            const auto pos = scanner_->peekToken()->getPosition();
 
-            auto type = std::make_unique<RecordTypeNode>(current_scope_);
-            current_scope_ = type->getScope(); // enter scope
+        // check for E004: array size must be gt 0
+        const auto size = constant->getValue();
+        if (0 >= size) {
+            throw ParseException(array_value->getFilePos(), error_id::E004, size);
+        }
 
-            requireToken(TokenType::kw_record);
+        return addType(std::make_unique<ArrayTypeNode>(size, array_type));
+    }
+    case TokenType::kw_record: {
+        const auto pos = scanner_->peekToken()->getPosition();
+
+        auto type = std::make_unique<RecordTypeNode>(current_scope_);
+        current_scope_ = type->getScope(); // enter scope
+
+        requireToken(TokenType::kw_record);
+        field_list(type->getMembers());
+        while (checkAndConsumeToken(TokenType::semicolon)) {
             field_list(type->getMembers());
-            while (checkAndConsumeToken(TokenType::semicolon)) {
-                field_list(type->getMembers());
-            }
-            requireToken(TokenType::kw_end);
+        }
+        requireToken(TokenType::kw_end);
 
-            current_scope_ = type->getScope()->getParent(); // exit scope
-            return addType(std::move(type));
-        }
-        default: {
-            throw ParseException(next->getPosition(), error_id::E000, "name, ARRAY or RECORD",
-                                 to_string(*next));
-        }
+        current_scope_ = type->getScope()->getParent(); // exit scope
+        return addType(std::move(type));
+    }
+    default: {
+        throw ParseException(next->getPosition(), error_id::E000, "name, ARRAY or RECORD",
+                             to_string(*next));
+    }
     }
 }
 
-void Parser::field_list(MemberLayout<FieldDeclarationNode> &list) {
+void Parser::field_list(MemberLayout<FieldDeclarationNode>& list)
+{
     if (!checkToken(TokenType::const_ident)) {
         return;
     }
@@ -444,7 +464,7 @@ void Parser::field_list(MemberLayout<FieldDeclarationNode> &list) {
     requireToken(TokenType::colon);
     auto tp = type();
 
-    for (const auto &id : ids) {
+    for (const auto& id : ids) {
         auto node = std::make_unique<FieldDeclarationNode>(id.pos, id.name, tp);
 
         if (current_scope_->declareIdentifier(node->getName(), node.get())) {
@@ -455,7 +475,8 @@ void Parser::field_list(MemberLayout<FieldDeclarationNode> &list) {
     }
 }
 
-void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>> &list) {
+void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list)
+{
     requireToken(TokenType::lparen);
 
     if (checkToken(TokenType::kw_var) || checkToken(TokenType::const_ident)) {
@@ -467,60 +488,64 @@ void Parser::formal_parameters(std::vector<std::unique_ptr<ParameterDeclarationN
     requireToken(TokenType::rparen);
 }
 
-void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>> &list) {
+void Parser::fp_section(std::vector<std::unique_ptr<ParameterDeclarationNode>>& list)
+{
     const auto is_reference = checkAndConsumeToken(TokenType::kw_var);
     const auto ids = ident_list();
     requireToken(TokenType::colon);
     auto tp = type();
 
-    for (const auto &id : ids) {
+    for (const auto& id : ids) {
         auto node = std::make_unique<ParameterDeclarationNode>(id.pos, id.name, tp, is_reference);
         insertDeclaration(std::move(node), list);
     }
 }
 
-void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>> &list) {
+void Parser::statement_sequence(std::vector<std::unique_ptr<StatementNode>>& list)
+{
     list.emplace_back(statement());
     while (checkAndConsumeToken(TokenType::semicolon)) {
         list.emplace_back(statement());
     }
 }
 
-std::unique_ptr<StatementNode> Parser::statement() {
+std::unique_ptr<StatementNode> Parser::statement()
+{
     switch (scanner_->peekToken()->getType()) {
-        case TokenType::const_ident: {
-            const auto id = ident();
+    case TokenType::const_ident: {
+        const auto id = ident();
 
-            switch (scanner_->peekToken()->getType()) {
-                case TokenType::period:
-                case TokenType::lbrack:
-                case TokenType::op_becomes:
-                    return assignment(id);
-                default:
-                    return procedure_call(id);
-            }
+        switch (scanner_->peekToken()->getType()) {
+        case TokenType::period:
+        case TokenType::lbrack:
+        case TokenType::op_becomes:
+            return assignment(id);
+        default:
+            return procedure_call(id);
         }
-        case TokenType::kw_if:
-            return if_statement();
-        case TokenType::kw_while:
-            return while_statement();
-        default: {
-            const auto next = scanner_->peekToken();
-            throw ParseException(next->getPosition(), error_id::E000, "name, IF or WHILE",
-                                 to_string(*next));
-        }
+    }
+    case TokenType::kw_if:
+        return if_statement();
+    case TokenType::kw_while:
+        return while_statement();
+    default: {
+        const auto next = scanner_->peekToken();
+        throw ParseException(next->getPosition(), error_id::E000, "name, IF or WHILE",
+                             to_string(*next));
+    }
     }
 }
 
-std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier &id) {
+std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier& id)
+{
     // check for E024: lhs must be assignable
     const auto symbol = resolveId(current_scope_.get(), id);
     std::unique_ptr<AssignableExpressionNode> parent;
-    const auto var_decl = dynamic_cast<VariableDeclarationNode *>(symbol);
+    const auto var_decl = dynamic_cast<VariableDeclarationNode*>(symbol);
     if (var_decl != nullptr) {
         parent = std::make_unique<VariableReferenceNode>(id.pos, var_decl);
     } else {
-        const auto param_decl = dynamic_cast<ParameterDeclarationNode *>(symbol);
+        const auto param_decl = dynamic_cast<ParameterDeclarationNode*>(symbol);
         if (param_decl != nullptr) {
             parent = std::make_unique<ParameterReferenceNode>(id.pos, param_decl);
         } else {
@@ -535,28 +560,31 @@ std::unique_ptr<AssignmentNode> Parser::assignment(const Identifier &id) {
 
     // check for E025: assignment types must match
     if (lhs->getType() != rhs->getType()) {
-        throw ParseException(rhs->getFilePos(), error_id::E025, lhs->getType()->getId(), rhs->getType()->getId());
+        throw ParseException(rhs->getFilePos(), error_id::E025, lhs->getType()->getId(),
+                             rhs->getType()->getId());
     }
 
     return std::make_unique<AssignmentNode>(id.pos, std::move(lhs), std::move(rhs));
 }
 
-std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier &id) {
+std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier& id)
+{
     std::vector<std::unique_ptr<ExpressionNode>> actual;
     if (checkToken(TokenType::lparen)) {
         actual_parameters(actual);
     }
 
     // check for E031: name must reference a procedure declaration
-    auto proc_decl = dynamic_cast<ProcedureDeclarationNode *>(resolveId(current_scope_.get(), id));
+    auto proc_decl = dynamic_cast<ProcedureDeclarationNode*>(resolveId(current_scope_.get(), id));
     if (proc_decl == nullptr) {
         if (checkToken(TokenType::op_eq)) {
-            logger_->error(scanner_->peekToken()->getPosition(), "The comparision '=' should probably be an assignment: ':='.");
+            logger_->error(scanner_->peekToken()->getPosition(),
+                           "The comparision '=' should probably be an assignment: ':='.");
         }
         throw ParseException(id.pos, error_id::E031, id.name);
     }
 
-    const auto &formal = proc_decl->getParams();
+    const auto& formal = proc_decl->getParams();
 
     // check for E020: actual and formal param counts must match
     if (actual.size() != formal.size()) {
@@ -564,17 +592,18 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier &id) 
     }
 
     for (size_t i = 0; i < actual.size(); ++i) {
-        const auto &a = actual.at(i);
-        const auto &b = formal.at(i);
+        const auto& a = actual.at(i);
+        const auto& b = formal.at(i);
 
         // check for E021: actual and formal param types must match
         if (a->getType() != b->getType()) {
-            throw ParseException(a->getFilePos(), error_id::E021, b->getType()->getId(), a->getType()->getId());
+            throw ParseException(a->getFilePos(), error_id::E021, b->getType()->getId(),
+                                 a->getType()->getId());
         }
 
         if (b->isIsReference()) {
             // check for E022: VAR parameter must be addressable and assignable
-            const auto assignable = dynamic_cast<AssignableExpressionNode *>(a.get());
+            const auto assignable = dynamic_cast<AssignableExpressionNode*>(a.get());
             if (assignable == nullptr) {
                 throw ParseException(a->getFilePos(), error_id::E022, b->getName());
             }
@@ -584,7 +613,8 @@ std::unique_ptr<ProcedureCallNode> Parser::procedure_call(const Identifier &id) 
     return std::make_unique<ProcedureCallNode>(id.pos, proc_decl, std::move(actual));
 }
 
-std::unique_ptr<IfStatementNode> Parser::if_statement() {
+std::unique_ptr<IfStatementNode> Parser::if_statement()
+{
     // if condition
     auto pos = requireAndGetToken(TokenType::kw_if)->getPosition();
     auto cond = expression();
@@ -633,7 +663,8 @@ std::unique_ptr<IfStatementNode> Parser::if_statement() {
     return node;
 }
 
-std::unique_ptr<WhileStatementNode> Parser::while_statement() {
+std::unique_ptr<WhileStatementNode> Parser::while_statement()
+{
     const auto pos = requireAndGetToken(TokenType::kw_while)->getPosition();
     auto cond = expression();
 
@@ -651,7 +682,8 @@ std::unique_ptr<WhileStatementNode> Parser::while_statement() {
     return stmt;
 }
 
-void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>> &list) {
+void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>>& list)
+{
     requireToken(TokenType::lparen);
 
     if (!checkToken(TokenType::rparen)) {
@@ -664,7 +696,8 @@ void Parser::actual_parameters(std::vector<std::unique_ptr<ExpressionNode>> &lis
 }
 
 std::unique_ptr<AssignableExpressionNode>
-Parser::selector(std::unique_ptr<AssignableExpressionNode> parent) {
+Parser::selector(std::unique_ptr<AssignableExpressionNode> parent)
+{
     auto prev = std::move(parent);
     while (true) {
         if (checkAndConsumeToken(TokenType::period)) {
@@ -672,14 +705,14 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent) {
 
             // check for E018: field reference only on records
             const auto record_ref =
-                    dynamic_cast<RecordTypeNode *>(findType(prev->getType(), prev->getFilePos()));
+                dynamic_cast<RecordTypeNode*>(findType(prev->getType(), prev->getFilePos()));
             if (record_ref == nullptr) {
                 throw ParseException(id.pos, error_id::E018, prev->getType()->getId());
             }
 
             // check for E019: field references can only use the local field declarations
-            const auto field = dynamic_cast<FieldDeclarationNode *>(
-                    resolveLocalId(record_ref->getScope().get(), id));
+            const auto field = dynamic_cast<FieldDeclarationNode*>(
+                resolveLocalId(record_ref->getScope().get(), id));
             if (field == nullptr) {
                 // actually this shouldn't be possible because the name is resolved locally in the
                 // record and records only hold fields
@@ -695,20 +728,22 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent) {
 
             // check for E016: array indexing only on array types
             const auto arr =
-                    dynamic_cast<ArrayTypeNode *>(findType(prev->getType(), prev->getFilePos()));
+                dynamic_cast<ArrayTypeNode*>(findType(prev->getType(), prev->getFilePos()));
             if (arr == nullptr) {
-                throw ParseException(open_token->getPosition(), error_id::E016, prev->getType()->getId());
+                throw ParseException(open_token->getPosition(), error_id::E016,
+                                     prev->getType()->getId());
             }
 
             // check for E030: array indices must be int
             const auto int_type =
-                    dynamic_cast<BasicTypeNode *>(findType(index->getType(), index->getFilePos()));
+                dynamic_cast<BasicTypeNode*>(findType(index->getType(), index->getFilePos()));
             if (int_type == nullptr || int_type != integer_) {
-                throw ParseException(index->getFilePos(), error_id::E030, index->getType()->getId());
+                throw ParseException(index->getFilePos(), error_id::E030,
+                                     index->getType()->getId());
             }
 
             // check for E017: perform range check if the index is constant
-            const auto const_idx = dynamic_cast<NumberConstantNode *>(index.get());
+            const auto const_idx = dynamic_cast<NumberConstantNode*>(index.get());
             if (const_idx != nullptr) {
                 const auto value = const_idx->getValue();
                 if (value < 0 || arr->getSize() <= value) {
@@ -728,14 +763,15 @@ Parser::selector(std::unique_ptr<AssignableExpressionNode> parent) {
 
 std::unique_ptr<ExpressionNode>
 Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
-                                const std::unique_ptr<const Token> op) const {
+                                const std::unique_ptr<const Token> op) const
+{
     assert(operand != nullptr);
     const auto unary_op = toUnaryOperator(op->getType());
 
     const auto result_type = typeCheckUnary(operand.get(), getOperatorType(unary_op));
 
     // T001: evaluate constants
-    const auto first = dynamic_cast<NumberConstantNode *>(operand.get());
+    const auto first = dynamic_cast<NumberConstantNode*>(operand.get());
     if (first != nullptr) {
         const auto value = evalUnary(unary_op, first->getValue());
 
@@ -745,100 +781,117 @@ Parser::evaluateUnaryExpression(std::unique_ptr<ExpressionNode> operand,
         return std::make_unique<BooleanConstantNode>(first->getFilePos(), value, boolean_);
     }
 
-    return std::make_unique<UnaryExpressionNode>(op->getPosition(), selectUnaryOperationType(unary_op),
-            unary_op, std::move(operand));
+    return std::make_unique<UnaryExpressionNode>(
+        op->getPosition(), selectUnaryOperationType(unary_op), unary_op, std::move(operand));
 }
 
 std::unique_ptr<ExpressionNode>
 Parser::evaluateBinaryExpression(std::unique_ptr<ExpressionNode> operand_1,
                                  std::unique_ptr<ExpressionNode> operand_2,
-                                 const std::unique_ptr<const Token> op) const {
+                                 const std::unique_ptr<const Token> op) const
+{
     assert(operand_1 != nullptr);
     assert(operand_2 != nullptr);
 
     const auto bin_op = toBinaryOperator(op->getType());
 
     const auto result_type =
-            typeCheckBinary(operand_1.get(), operand_2.get(), getOperatorType(bin_op));
+        typeCheckBinary(operand_1.get(), operand_2.get(), getOperatorType(bin_op));
 
     // T001: evaluate constants
-    const auto first = dynamic_cast<NumberConstantNode *>(operand_1.get());
-    const auto second = dynamic_cast<NumberConstantNode *>(operand_2.get());
+    const auto first = dynamic_cast<NumberConstantNode*>(operand_1.get());
+    const auto second = dynamic_cast<NumberConstantNode*>(operand_2.get());
     if (first != nullptr && second != nullptr) {
-        const auto value = evalBinary(bin_op, first->getValue(), second->getValue());
-        if (result_type == integer_) {
-            return std::make_unique<NumberConstantNode>(first->getFilePos(), value, integer_);
+
+        try {
+            const auto value = evalBinary(bin_op, first->getValue(), second->getValue());
+            if (result_type == integer_) {
+                return std::make_unique<NumberConstantNode>(first->getFilePos(), value, integer_);
+            }
+            return std::make_unique<BooleanConstantNode>(first->getFilePos(), value, boolean_);
+        } catch (const ArithmeticError& error) {
+            throw ParseException(second->getFilePos(), error.message);
         }
-        return std::make_unique<BooleanConstantNode>(first->getFilePos(), value, boolean_);
     }
 
-    return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(), selectBinaryOperationType(bin_op), bin_op,
+    return std::make_unique<BinaryExpressionNode>(operand_1->getFilePos(),
+                                                  selectBinaryOperationType(bin_op), bin_op,
                                                   std::move(operand_1), std::move(operand_2));
 }
 
 TypeNode*
-Parser::typeCheckBinary(ExpressionNode *operand_1, ExpressionNode *operand_2, OperatorType op) const {
+Parser::typeCheckBinary(ExpressionNode* operand_1, ExpressionNode* operand_2, OperatorType op) const
+{
     switch (op) {
-        case OperatorType::logical: {
-            // check for E014: boolean ops only on BOOLEAN
-            if (operand_1->getType() != boolean_) {
-                throw ParseException(operand_1->getFilePos(), error_id::E014, operand_1->getType()->getId());
-            }
-            if (operand_2->getType() != boolean_) {
-                throw ParseException(operand_2->getFilePos(), error_id::E014, operand_2->getType()->getId());
-            }
-            return boolean_;
+    case OperatorType::logical: {
+        // check for E014: boolean ops only on BOOLEAN
+        if (operand_1->getType() != boolean_) {
+            throw ParseException(operand_1->getFilePos(), error_id::E014,
+                                 operand_1->getType()->getId());
         }
-        case OperatorType::arithmetic: {
-            // check for E012: arithmetic ops only on INTEGER
-            if (operand_1->getType() != integer_) {
-                throw ParseException(operand_1->getFilePos(), error_id::E012, operand_1->getType()->getId());
-            }
-            if (operand_2->getType() != integer_) {
-                throw ParseException(operand_2->getFilePos(), error_id::E012, operand_2->getType()->getId());
-            }
-            return integer_;
+        if (operand_2->getType() != boolean_) {
+            throw ParseException(operand_2->getFilePos(), error_id::E014,
+                                 operand_2->getType()->getId());
         }
-        case OperatorType::comparison: {
-            // check for E013: comparison types must be equal
-            if (operand_1->getType() != operand_2->getType()) {
-                throw ParseException(operand_1->getFilePos(), error_id::E013, operand_1->getType()->getId(),
-                                     operand_2->getType()->getId());
-            }
-            return boolean_;
+        return boolean_;
+    }
+    case OperatorType::arithmetic: {
+        // check for E012: arithmetic ops only on INTEGER
+        if (operand_1->getType() != integer_) {
+            throw ParseException(operand_1->getFilePos(), error_id::E012,
+                                 operand_1->getType()->getId());
         }
-        default:
-            std::terminate();
+        if (operand_2->getType() != integer_) {
+            throw ParseException(operand_2->getFilePos(), error_id::E012,
+                                 operand_2->getType()->getId());
+        }
+        return integer_;
+    }
+    case OperatorType::comparison: {
+        // check for E013: comparison types must be equal
+        if (operand_1->getType() != operand_2->getType()) {
+            throw ParseException(operand_1->getFilePos(), error_id::E013,
+                                 operand_1->getType()->getId(), operand_2->getType()->getId());
+        }
+        return boolean_;
+    }
+    default:
+        std::terminate();
     }
 }
 
-TypeNode* Parser::typeCheckUnary(ExpressionNode *operand, OperatorType op) const {
+TypeNode* Parser::typeCheckUnary(ExpressionNode* operand, OperatorType op) const
+{
     switch (op) {
-        case OperatorType::logical: {
-            // check for E014: boolean ops only on BOOLEAN
-            if (operand->getType() != boolean_) {
-                throw ParseException(operand->getFilePos(), error_id::E014, operand->getType()->getId());
-            }
-            return boolean_;
+    case OperatorType::logical: {
+        // check for E014: boolean ops only on BOOLEAN
+        if (operand->getType() != boolean_) {
+            throw ParseException(operand->getFilePos(), error_id::E014,
+                                 operand->getType()->getId());
         }
-        case OperatorType::arithmetic: {
-            // check for E012: arithmetic ops only on INTEGER
-            if (operand->getType() != integer_) {
-                throw ParseException(operand->getFilePos(), error_id::E012, operand->getType()->getId());
-            }
-            return integer_;
+        return boolean_;
+    }
+    case OperatorType::arithmetic: {
+        // check for E012: arithmetic ops only on INTEGER
+        if (operand->getType() != integer_) {
+            throw ParseException(operand->getFilePos(), error_id::E012,
+                                 operand->getType()->getId());
         }
-        default:
-            // there is no unary comparison operator
-            std::terminate();
+        return integer_;
+    }
+    default:
+        // there is no unary comparison operator
+        std::terminate();
     }
 }
 
-Node *Parser::resolveLocalId(const Scope *scope, const Identifier &id) const {
+Node* Parser::resolveLocalId(const Scope* scope, const Identifier& id) const
+{
     return resolveLocalId(scope, id.name, id.pos);
 }
 
-Node *Parser::resolveLocalId(const Scope *scope, const std::string &name, const FilePos &pos) const {
+Node* Parser::resolveLocalId(const Scope* scope, const std::string& name, const FilePos& pos) const
+{
     const auto resolved = scope->resolveIdentifierLocally(name);
 
     // check for E015: identifiers must exist
@@ -849,11 +902,13 @@ Node *Parser::resolveLocalId(const Scope *scope, const std::string &name, const 
     return resolved->value;
 }
 
-Node *Parser::resolveId(const Scope *scope, const Identifier &id) const {
+Node* Parser::resolveId(const Scope* scope, const Identifier& id) const
+{
     return resolveId(scope, id.name, id.pos);
 }
 
-Node *Parser::resolveId(const Scope *scope, const std::string &name, const FilePos &pos) const {
+Node* Parser::resolveId(const Scope* scope, const std::string& name, const FilePos& pos) const
+{
     const auto resolved = scope->resolveIdentifier(name);
 
     // check for E015: identifiers must exist
@@ -864,7 +919,8 @@ Node *Parser::resolveId(const Scope *scope, const std::string &name, const FileP
     return resolved->value;
 }
 
-TypeNode *Parser::addType(std::unique_ptr<TypeNode> type) {
+TypeNode* Parser::addType(std::unique_ptr<TypeNode> type)
+{
     const auto name = type->getId();
     // it doesn't matter if the type cannot be inserted as the types are the same if the descriptor
     // is the same
@@ -874,7 +930,8 @@ TypeNode *Parser::addType(std::unique_ptr<TypeNode> type) {
     return type_ptr;
 }
 
-TypeNode *Parser::findType(TypeNode *type, const FilePos &pos) const {
+TypeNode* Parser::findType(TypeNode* type, const FilePos& pos) const
+{
     const auto name = type->getId();
     const auto record = types_.find(name);
 
@@ -886,38 +943,38 @@ TypeNode *Parser::findType(TypeNode *type, const FilePos &pos) const {
     return record->second.get();
 }
 
-TypeNode *Parser::selectUnaryOperationType(const UnaryOperator op) const
+TypeNode* Parser::selectUnaryOperationType(const UnaryOperator op) const
 {
     switch (op) {
-        case UnaryOperator::plus:
-        case UnaryOperator::minus:
-            return integer_;
-        case UnaryOperator::inverse:
-            return boolean_;
-        default:
-            std::terminate();
+    case UnaryOperator::plus:
+    case UnaryOperator::minus:
+        return integer_;
+    case UnaryOperator::inverse:
+        return boolean_;
+    default:
+        std::terminate();
     }
 }
 
 TypeNode* Parser::selectBinaryOperationType(const BinaryOperator op) const
 {
     switch (op) {
-        case BinaryOperator::plus:
-        case BinaryOperator::minus:
-        case BinaryOperator::times:
-        case BinaryOperator::div:
-        case BinaryOperator::mod:
-            return integer_;
-        case BinaryOperator::logical_or:
-        case BinaryOperator::logical_and:
-        case BinaryOperator::eq:
-        case BinaryOperator::neq:
-        case BinaryOperator::lt:
-        case BinaryOperator::leq:
-        case BinaryOperator::gt:
-        case BinaryOperator::geq:
-            return boolean_;
-        default:
-            std::terminate();
+    case BinaryOperator::plus:
+    case BinaryOperator::minus:
+    case BinaryOperator::times:
+    case BinaryOperator::div:
+    case BinaryOperator::mod:
+        return integer_;
+    case BinaryOperator::logical_or:
+    case BinaryOperator::logical_and:
+    case BinaryOperator::eq:
+    case BinaryOperator::neq:
+    case BinaryOperator::lt:
+    case BinaryOperator::leq:
+    case BinaryOperator::gt:
+    case BinaryOperator::geq:
+        return boolean_;
+    default:
+        std::terminate();
     }
 }
