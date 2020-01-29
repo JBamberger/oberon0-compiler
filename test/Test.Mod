@@ -1,11 +1,15 @@
 MODULE Test;
 TYPE A3      = ARRAY 3 OF INTEGER;
      Point2D = RECORD x, y: INTEGER END;
+     Point3D = RECORD a: Point2D; z: INTEGER END;
+     RA      = RECORD a: A3; END;
 VAR a,b,c,d,e,f,g, end: INTEGER; (*ARRAY 5 OF INTEGER;*)
     x: ARRAY 5 OF INTEGER;
     y: ARRAY 5 OF A3;
     z: ARRAY 5 OF ARRAY 2 OF A3;
     q: Point2D;
+    r: Point3D;
+    s: RA;
 BEGIN
         (* Compile-time evaluation*)
         b := 5;
@@ -30,7 +34,7 @@ BEGIN
         a := d * 2;     (*  8 *)
         a := e DIV 2;   (*  7 *)
         a := f MOD 7;   (*  6 *)
-        a := g MOD 6;    (*  5 *)
+        a := g MOD 6;   (*  5 *)
         (* a := e DIV 0; * throws at run-time *)
         (* a := e MOD 0; * throws at run-time *)
         end := 999999999;
@@ -47,6 +51,7 @@ BEGIN
         end := 999999999;
         y[0][0] := 42;
         a := y[0][0];
+        (* y[a][0] := 1; throws at run-time *)
         end := 999999999;
         z[1][0][0] := 211;
         a := z[1][0][0];
@@ -61,5 +66,19 @@ BEGIN
         a   := q.x;
         q.y := 7;
         a   := q.y;
+        end := 999999999;
+        r.a.x := 5;
+        a   := r.a.x;
+        r.a.y := 7;
+        a   := r.a.y;
+        r.z := 9;
+        a   := r.z;
+        end := 999999999;
+        s.a[0] := 5;
+        a   := s.a[0];
+        s.a[1] := 7;
+        a   := s.a[1];
+        s.a[2] := 9;
+        a   := s.a[2];
         end := 999999999
 END Test.

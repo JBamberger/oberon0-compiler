@@ -61,6 +61,8 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "        db  'Debug output %d', 10, 0" << nl_
              << "eDivByZero:" << nl_
              << "        db 'Error: Division by zero.', 10, 0" << nl_
+             << "eOutOfBounds:" << nl_
+             << "        db 'Error: Array index out of bounds.', 10, 0" << nl_
              << nl_;
     defineConstants(node);
     *output_ << nl_
@@ -81,8 +83,15 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "        pop     rbp                     ; reset stack base for caller" << nl_
              << "        ret                             ; Module end: " << node->getName() << nl_
              // here go the modules functions
+             << nl_
              << "DivByZero:                              ; Division by zero handler" << nl_
              << "        print   0, eDivByZero           ; there is no second argument" << nl_
+             << "        mov     rsp, rbp                ; reset stack pointer" << nl_
+             << "        pop     rbp                     ; reset base pointer"
+             << "        ret                             ; exit" << nl_
+             << nl_
+             << "OutOfBounds:" << nl_
+             << "        print   0, eOutOfBounds         ; there is no second argument" << nl_
              << "        mov     rsp, rbp                ; reset stack pointer" << nl_
              << "        pop     rbp                     ; reset base pointer"
              << "        ret                             ; exit" << nl_
@@ -121,7 +130,7 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
     const auto array = dynamic_cast<ArrayTypeNode*>(node->getArrayRef()->getType());
     assert(array != nullptr);
     const auto  elem_size = node->getType()->getByteSize();
-    const auto len = static_cast<size_t>(array->getSize()) * elem_size;
+    const auto array_len = static_cast<size_t>(array->getSize());
     *output_ << "        ; Array access index computation" << nl_;
     node->getIndex()->visit(this); // evaluates the index
 
@@ -131,10 +140,16 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
 
     *output_ << "        ; Array value reference" << nl_
              << "        pop     rbx                     ; array base address" << nl_
-             << "        pop     rax                     ; array index" << nl_;
+             << "        pop     rax                     ; array index" << nl_
+             << "        cmp     rax, 0                  ; bounds check lower" << nl_
+             << "        jl      OutOfBounds             ; exit" << nl_
+             << "        cmp     rax, " << array_len << " ; bounds check upper" << nl_
+             << "        jge     OutOfBounds             ; exit" << nl_;
+
+
     if (elem_size > 8) {
         *output_ << "        mov     rcx, " << elem_size << nl_
-                 << "        imul    rax, rcx                ; precompute large offsets" << nl_
+                 << "        imul    rax, rcx                ; offset too large for lea" << nl_
                  << "        lea     rbx, [rbx+rax]          ; array access" << nl_;
     } else {
         *output_ << "        lea     rbx, [rbx+rax*" << elem_size << "]  ; array access" << nl_;
