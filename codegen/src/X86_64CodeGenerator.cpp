@@ -57,7 +57,10 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << nl_
              << "section .data" << nl_
              << "dmsg:" << nl_
-             << "        db  'Debug output %d', 10, 0" << nl_;
+             << "        db  'Debug output %d', 10, 0" << nl_
+             << "eDivByZero:" << nl_
+             << "        db 'Error: Division by zero.', 10, 0" << nl_
+             << nl_;
     defineConstants(node);
     *output_ << nl_
              << "section .text" << nl_
@@ -77,6 +80,11 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
              << "        pop     rbp                     ; reset stack base for caller" << nl_
              << "        ret                             ; Module end: " << node->getName() << nl_
              // here go the modules functions
+             << "DivByZero:                              ; Division by zero handler" << nl_
+             << "        print   0, eDivByZero           ; there is no second argument" << nl_
+             << "        mov     rsp, rbp                ; reset stack pointer" << nl_
+             << "        pop     rbp                     ; reset base pointer"
+             << "        ret                             ; exit" << nl_
              << nl_;
 
 
@@ -192,29 +200,31 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
     switch (node->getOperator()) {
         case BinaryOperator::plus:
             *output_ << "        ; addition" << nl_
-                     << "        pop     rax" << nl_
                      << "        pop     rbx" << nl_
+                     << "        pop     rax" << nl_
                      << "        add     rax, rbx" << nl_
                      << "        push    rax" << nl_;
             break;
         case BinaryOperator::minus:
             *output_ << "        ; subtraction" << nl_
-                     << "        pop     rax" << nl_
                      << "        pop     rbx" << nl_
+                     << "        pop     rax" << nl_
                      << "        sub     rax, rbx" << nl_
                      << "        push    rax" << nl_;
             break;
         case BinaryOperator::times:
             *output_ << "        ; multiplication" << nl_
-                     << "        pop     rax" << nl_
                      << "        pop     rbx" << nl_
+                     << "        pop     rax" << nl_
                      << "        imul    rax, rbx                ; perform signed multiplication" << nl_
                      << "        push    rax" << nl_;
             break;
         case BinaryOperator::div:
             *output_ << "        ; signed integer division" << nl_
-                     << "        pop     rax" << nl_
-                     << "        pop     rbx" << nl_
+                     << "        pop     rbx                     ; denominator" << nl_
+                     << "        pop     rax                     ; numerator" << nl_
+                     << "        cmp     rbx, 0                  ; check denominator for Zero" << nl_
+                     << "        je      DivByZero               ; error out if zero" << nl_
                      << "        xor     rdx, rdx                ; zero out rdx" << nl_
                      << "        cqo                             ; build rdx:rax by sign extension" << nl_
                      << "        idiv    rbx                     ; perform signed division" << nl_
@@ -229,8 +239,10 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
             // m < 0 && b >= 0 -> modulus = m + b
             const auto jumpLabel = ".MOD_" + nextLabel();
             *output_ << "        ; modulus" << nl_
-                     << "        pop     rax" << nl_
-                     << "        pop     rbx" << nl_
+                     << "        pop     rbx                     ; denominator" << nl_
+                     << "        pop     rax                     ; numerator" << nl_
+                     << "        cmp     rbx, 0                  ; check denominator for Zero" << nl_
+                     << "        je      DivByZero               ; error out if zero" << nl_
                      << "        xor     rdx, rdx                ; zero out rdx" << nl_
                      << "        cqo                             ; build rdx:rax by sign extension" << nl_
                      << "        idiv    rbx                     ; perform signed division" << nl_
@@ -247,16 +259,16 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
             break;
         case BinaryOperator::logical_or:
             *output_ << "        ; logical or" << nl_
-                     << "        pop     rbx" << nl_
                      << "        pop     rcx" << nl_
+                     << "        pop     rbx" << nl_
                      << "        xor     eax, eax" << nl_
                      << "        or      rbx, rcx" << nl_
                      << "        setne   al" << nl_
                      << "        push    rax" << nl_;
         case BinaryOperator::logical_and:
             *output_ << "        ; logical and" << nl_
-                     << "        pop     rbx" << nl_
                      << "        pop     rcx" << nl_
+                     << "        pop     rbx" << nl_
                      << "        test    rbx, rbx                ; make first operand to real bool" << nl_
                      << "        setne   dl                      ; rdx is now real bool" << nl_
                      << "        xor     eax, eax                ; zero out rdx" << nl_
@@ -296,8 +308,8 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
                     throw std::runtime_error("Unsupported operation!");
             }
             *output_ << "        ; " << name << nl_
-                     << "        pop     rbx" << nl_
                      << "        pop     rcx" << nl_
+                     << "        pop     rbx" << nl_
                      << "        xor     eax, eax                ; zero out rdx" << nl_
                      << "        comp    rbx, rcx                ; compare a and b" << nl_
                      << "        " << op << "al                      ; set rax to result" << nl_
