@@ -1,6 +1,9 @@
 MODULE Test;
+TYPE A3 = ARRAY 3 OF INTEGER;
 VAR a,b,c,d,e,f,g, end: INTEGER; (*ARRAY 5 OF INTEGER;*)
     x: ARRAY 5 OF INTEGER;
+    y: ARRAY 5 OF A3;
+    z: ARRAY 5 OF ARRAY 2 OF A3;
 BEGIN
         (* Compile-time evaluation*)
         b := 5;
@@ -39,5 +42,17 @@ BEGIN
         a := x[2];
         a := x[3];
         a := x[4];
+        end := 999999999;
+        y[0][0] := 42;
+        a := y[0][0];
+        end := 999999999;
+        z[1][0][0] := 211;
+        a := z[1][0][0];
+        z[1][0][1] := 212;
+        a := z[1][0][1];
+        z[1][1][1] := 222;
+        a := z[1][1][1];
+        z[1][0][2] := 213;
+        a := z[1][0][2];
         end := 999999999
 END Test.

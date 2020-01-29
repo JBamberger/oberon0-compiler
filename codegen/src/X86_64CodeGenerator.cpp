@@ -1,12 +1,12 @@
 
 #include "X86_64CodeGenerator.h"
 #include "ArrayReferenceNode.h"
+#include "ArrayTypeNode.h"
 #include "AssignmentNode.h"
 #include "BinaryExpressionNode.h"
 #include "FieldReferenceNode.h"
 #include "NumberConstantNode.h"
 #include "RecordTypeNode.h"
-#include "ArrayTypeNode.h"
 #include "StringConstantNode.h"
 #include "UnaryExpressionNode.h"
 #include <iomanip>
@@ -130,10 +130,16 @@ void X86_64CodeGenerator::visit(const ArrayReferenceNode *node) {
     node->getArrayRef()->visit(this);
 
     *output_ << "        ; Array value reference" << nl_
-             << "        pop     rax                     ; array base address" << nl_
-             << "        pop     rbx                     ; array index" << nl_
-             << "        lea     rax, [rax+rbx*" << elem_size << "]  ; array access" << nl_
-             << "        push    rax" << nl_;
+             << "        pop     rbx                     ; array base address" << nl_
+             << "        pop     rax                     ; array index" << nl_;
+    if (elem_size > 8) {
+        *output_ << "        mov     rcx, " << elem_size << nl_
+                 << "        imul    rax, rcx                ; precompute large offsets" << nl_
+                 << "        lea     rbx, [rbx+rax]          ; array access" << nl_;
+    } else {
+        *output_ << "        lea     rbx, [rbx+rax*" << elem_size << "]  ; array access" << nl_;
+    }
+    *output_ << "        push    rbx" << nl_;
     should_deref = true;
     if (!deref) return;
     *output_ << "        pop     rax" << nl_
