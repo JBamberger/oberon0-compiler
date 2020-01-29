@@ -45,14 +45,25 @@ void X86_64CodeGenerator::visit(const ModuleNode *node) {
 
 
     *output_ << "%pragma macho64 prefix _" << nl_
-             << nl_
-             << "%macro print 2" << nl_
+             << nl_;
+
+    *output_ << "%macro print 2" << nl_
+             << "    %ifidn __OUTPUT_FORMAT__, elf64" << nl_
              << "        mov     rsi, %1                 ; first argument, message" << nl_
              << "        mov     rdi, %2                 ; second argument, integer" << nl_
              << "        xor     rax, rax                ; zero result" << nl_
              << "        call    printf                  ; print the formatted string" << nl_
-             << "%endmacro" << nl_
-             << nl_
+             << "    %elifidn __OUTPUT_FORMAT__, win64" << nl_
+             << "        sub     rsp, 40                 ; 32 bytes shadow space + 8b alignment" << nl_
+             << "        mov     rcx, %2                 ; first argument, message" << nl_
+             << "        mov     rdx, %1                 ; second argument, integer" << nl_
+             << "        xor     rax, rax                ; zero result" << nl_
+             << "        call    printf                  ; print the formatted string" << nl_
+             << "        add     rsp, 40                 ; remove shadow space and alignment" << nl_
+             << "    %endif" << nl_
+             << "%endmacro" << nl_;
+
+    *output_ << nl_
              << "%macro rtstackalign 1" << nl_
              << "        mov     rax, rsp                ;" << nl_
              << "        mov     rbx, 16                 ;" << nl_
