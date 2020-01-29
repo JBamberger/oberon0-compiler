@@ -173,7 +173,7 @@ void X86_64CodeGenerator::visit(const FieldReferenceNode *node) {
 
     *output_ << "        ; Record field reference " << node->getFieldName() << nl_
              << "        pop     rax" << nl_
-             << "        lea     rax, [rax - "<< offset <<"]" << nl_
+             << "        lea     rax, [rax + "<< offset <<"]" << nl_
              << "        push    rax" << nl_;
     should_deref = true;
     if (!deref) return;

@@ -1,9 +1,11 @@
 MODULE Test;
-TYPE A3 = ARRAY 3 OF INTEGER;
+TYPE A3      = ARRAY 3 OF INTEGER;
+     Point2D = RECORD x, y: INTEGER END;
 VAR a,b,c,d,e,f,g, end: INTEGER; (*ARRAY 5 OF INTEGER;*)
     x: ARRAY 5 OF INTEGER;
     y: ARRAY 5 OF A3;
     z: ARRAY 5 OF ARRAY 2 OF A3;
+    q: Point2D;
 BEGIN
         (* Compile-time evaluation*)
         b := 5;
@@ -54,5 +56,10 @@ BEGIN
         a := z[1][1][1];
         z[1][0][2] := 213;
         a := z[1][0][2];
+        end := 999999999;
+        q.x := 5;
+        a   := q.x;
+        q.y := 7;
+        a   := q.y;
         end := 999999999
 END Test.
