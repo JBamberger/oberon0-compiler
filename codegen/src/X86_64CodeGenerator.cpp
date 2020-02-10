@@ -329,6 +329,7 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
                      << "        or      rbx, rcx" << nl_
                      << "        setne   al" << nl_
                      << "        push    rax" << nl_;
+            break;
         case BinaryOperator::logical_and:
             *output_ << "        ; logical and" << nl_
                      << "        pop     rcx" << nl_
@@ -340,6 +341,7 @@ void X86_64CodeGenerator::visit(const BinaryExpressionNode *node) {
                      << "        setne   al                      ; rax is now real bool" << nl_
                      << "        and     rax, rdx                ; a && b" << nl_
                      << "        push    rax" << nl_;
+            break;
         default:
             std::string op;
             std::string name;

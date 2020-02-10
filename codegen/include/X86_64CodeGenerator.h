@@ -9,11 +9,6 @@
  * Simple stack-based x86_64 code generator.
  */
 class X86_64CodeGenerator : public CodeGenerator, private ThrowingNodeVisitor {
-    const size_t LABEL_COL = 0;
-    const size_t INSTR_COL = 8;
-    const size_t PARAM_COL = 16;
-    const size_t COMMENT_COL = 40;
-
     std::ostream* output_;
     std::string nl_;
     size_t label_nr_;

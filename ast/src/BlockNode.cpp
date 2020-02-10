@@ -69,7 +69,7 @@ void BlockNode::print(std::ostream& stream) const
         } else {
             stream << ", ";
         }
-        stream << member.member;
+        stream << *member.member;
     });
     stream << ")), ";
     printList(stream, "TypeList", types_) << ", ";

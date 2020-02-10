@@ -35,7 +35,7 @@ std::unique_ptr<ModuleNode> Parser::parse()
     types_ = std::unordered_map<std::string, std::unique_ptr<TypeNode>>();
     auto mod = module();
     logger_->info(file_name, "Finished parsing");
-    return std::move(mod);
+    return mod;
 }
 
 bool Parser::checkToken(const TokenType& type) const

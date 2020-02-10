@@ -52,7 +52,7 @@ void RecordTypeNode::print(std::ostream& stream) const
         } else {
             stream << ", ";
         }
-        stream << member.member;
+        stream << *member.member;
     });
     stream << "))";
 }
