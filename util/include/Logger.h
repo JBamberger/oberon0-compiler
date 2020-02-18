@@ -1,37 +1,16 @@
-/*
- * Header file of the logger class used by the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 2/8/18.
- */
-#ifndef OBERON0C_ERRORLOG_H
-#define OBERON0C_ERRORLOG_H
+#pragma once
 
+#include "FilePos.h"
 #include <iostream>
 #include <ostream>
 #include <sstream>
 #include <string>
 
-struct FilePos {
-    std::string fileName;
-    int lineNo, charNo;
+enum class LogLevel : unsigned int { INFO = 2, ERROR = 3 };
 
-    friend std::ostream& operator<<(std::ostream& os, const FilePos& obj)
-    {
-        if (!obj.fileName.empty()) {
-            os << obj.fileName;
-            if (obj.lineNo >= 0) {
-                os << ":" << obj.lineNo;
-                if (obj.charNo >= 0) {
-                    os << ":" << obj.charNo;
-                }
-            }
-        }
-        return os;
-    }
-};
-
-enum class LogLevel : unsigned int { DEBUG = 1, INFO = 2, ERROR = 3 };
-
+/**
+ * Error logger base class.
+ */
 class Logger {
 
     LogLevel level_;
@@ -39,9 +18,7 @@ class Logger {
 
   protected:
     virtual void log(LogLevel level,
-                     const std::string& fileName,
-                     int lineNo,
-                     int charNo,
+                     const FilePos& filePos,
                      const std::string& msg) const;
     void log(LogLevel level, const std::string& fileName, const std::string& msg) const;
 
@@ -50,11 +27,9 @@ class Logger {
     explicit Logger(LogLevel level, std::ostream* out, std::ostream* err);
     virtual ~Logger();
 
-    void error(FilePos pos, const std::string& msg) const;
-    void info(const FilePos& pos, const std::string& msg) const;
+    void error(const FilePos& pos, const std::string& msg) const;
     void error(const std::string& fileName, const std::string& msg) const;
     void info(const std::string& fileName, const std::string& msg) const;
-    void debug(const std::string& fileName, const std::string& msg) const;
 
     void setLevel(LogLevel level);
 };
@@ -66,5 +41,3 @@ static std::string to_string(T obj)
     stream << obj;
     return stream.str();
 }
-
-#endif // OBERON0C_ERRORLOG_H

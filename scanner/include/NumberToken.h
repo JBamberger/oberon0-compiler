@@ -1,11 +1,4 @@
-/*
- * Header file of the number tokens used by parser of the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 2/23/18.
- */
-
-#ifndef OBERON0C_NUMBERTOKEN_H
-#define OBERON0C_NUMBERTOKEN_H
+#pragma once
 
 #include "Token.h"
 
@@ -21,5 +14,3 @@ class NumberToken final : public Token {
 
     void print(std::ostream& stream) const override;
 };
-
-#endif // OBERON0C_NUMBERTOKEN_H

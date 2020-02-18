@@ -1,11 +1,4 @@
-/*
- * Header file of the base class of all AST nodes used by the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 2/2/18.
- */
-
-#ifndef OBERON0C_AST_H
-#define OBERON0C_AST_H
+#pragma once
 
 #include "Logger.h"
 #include <memory>
@@ -13,6 +6,9 @@
 
 class NodeVisitor;
 
+/**
+ * Base class for all abstract syntax tree nodes.
+ */
 class Node {
     FilePos pos_;
 
@@ -29,5 +25,3 @@ class Node {
 
     friend std::ostream& operator<<(std::ostream& stream, const Node& node);
 };
-
-#endif // OBERON0C_AST_H

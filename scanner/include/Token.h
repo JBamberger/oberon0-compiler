@@ -1,11 +1,4 @@
-/*
- * Header file of the class for the token used by parser of the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 2/23/18.
- */
-
-#ifndef OBERON0C_TOKEN_H
-#define OBERON0C_TOKEN_H
+#pragma once
 
 #include "Logger.h"
 #include <ostream>
@@ -78,5 +71,3 @@ class Token {
 };
 
 std::string to_string(const Token& t);
-
-#endif // OBERON0C_TOKEN_H

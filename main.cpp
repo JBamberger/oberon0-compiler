@@ -19,10 +19,10 @@ int main(const int argc, const char* argv[])
         return EXIT_FAILURE;
     }
     std::string filename = argv[1];
-    auto logger = std::make_unique<Logger>();
-    logger->setLevel(LogLevel::DEBUG);
-    const auto scanner = std::make_unique<Scanner>(filename, logger.get());
-    auto parser = std::make_unique<Parser>(scanner.get(), logger.get());
+    auto logger = std::make_shared<Logger>();
+    logger->setLevel(LogLevel::INFO);
+    const auto scanner = std::make_shared<Scanner>(filename, logger.get());
+    auto parser = std::make_unique<Parser>(scanner, logger);
     auto code_gen = CodeGenerator::create(Architecture::X86_64);
 
     std::unique_ptr<ModuleNode> tree;

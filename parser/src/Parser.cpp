@@ -1,7 +1,3 @@
-//
-// Created by Michael Grossniklaus on 11/20/18.
-//
-
 #include "Parser.h"
 
 #include "ArrayReferenceNode.h"
@@ -23,7 +19,8 @@
 #include "UnaryExpressionNode.h"
 #include <cassert>
 
-Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger)
+Parser::Parser(std::shared_ptr<Scanner> scanner, std::shared_ptr<Logger> logger)
+    : scanner_(std::move(scanner)), logger_(std::move(logger))
 {
 }
 

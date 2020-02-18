@@ -1,11 +1,8 @@
 /*
- * Header of the scanner class used by the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 12/15/17.
+ * Provided by Michael Grossniklaus, and modified.
  */
 
-#ifndef OBERON0C_SCANNER_H
-#define OBERON0C_SCANNER_H
+#pragma once
 
 #include "Logger.h"
 #include "Token.h"
@@ -40,5 +37,3 @@ class Scanner {
     const Token* peekToken();
     std::unique_ptr<const Token> nextToken();
 };
-
-#endif // OBERON0C_SCANNER_H

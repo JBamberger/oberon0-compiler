@@ -1,11 +1,4 @@
-/*
- * Header file of the class for the token used by parser of the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 2/23/18.
- */
-
 #include "Token.h"
-
 #include <utility>
 
 Token::Token(TokenType type, FilePos pos) : type_(type), pos_(std::move(pos))

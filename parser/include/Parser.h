@@ -22,8 +22,8 @@ enum class BinaryOperator : char;
 
 class Parser {
 
-    Scanner* scanner_;
-    Logger* logger_;
+    std::shared_ptr<Scanner> scanner_;
+    std::shared_ptr<Logger> logger_;
 
     std::unordered_map<std::string, std::unique_ptr<TypeNode>> types_;
     std::shared_ptr<Scope> current_scope_;
@@ -33,7 +33,8 @@ class Parser {
     TypeNode* string_ = nullptr;
 
   public:
-    explicit Parser(Scanner* scanner, Logger* logger);
+    explicit Parser(std::shared_ptr<Scanner> scanner, std::shared_ptr<Logger> logger);
+
     ~Parser();
 
     /**

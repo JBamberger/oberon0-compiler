@@ -1,7 +1,5 @@
 /*
- * Implementation of the scanner class used by the Oberon-0 compiler.
- *
- * Created by Michael Grossniklaus on 12/15/17.
+ * Provided by Michael Grossniklaus and modified.
  */
 
 #include "Scanner.h"

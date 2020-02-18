@@ -18,53 +18,35 @@ Logger::Logger(LogLevel level, std::ostream* out, std::ostream* err)
 
 Logger::~Logger() = default;
 
-void Logger::log(const LogLevel level,
-                 const std::string& fileName,
-                 int lineNo,
-                 int charNo,
-                 const std::string& msg) const
+void Logger::log(const LogLevel level, const FilePos& filePos, const std::string& msg) const
 {
-    if (level >= level_) {
-        std::ostream* out = (level == LogLevel::ERROR) ? err_ : out_;
-        if (!fileName.empty()) {
-            *out << fileName;
-            if (lineNo >= 0) {
-                *out << ":" << lineNo;
-                if (charNo >= 0) {
-                    *out << ":" << charNo;
-                }
-            }
-            *out << ": ";
-        }
-        *out << "[" << std::setw(5);
-        switch (level) {
-        case LogLevel::DEBUG:
-            *out << "DEBUG";
-            break;
-        case LogLevel::INFO:
-            *out << "INFO";
-            break;
-        case LogLevel::ERROR:
-            *out << "ERROR";
-            break;
-        }
-        *out << "] " << msg << std::endl;
+    if (level < level_) {
+        return;
     }
+
+    auto out = (level == LogLevel::ERROR) ? err_ : out_;
+
+    *out << filePos;
+
+    switch (level) {
+    case LogLevel::INFO:
+        *out << "info:";
+        break;
+    case LogLevel::ERROR:
+        *out << "error:";
+        break;
+    }
+    *out << msg << std::endl;
 }
 
 void Logger::log(const LogLevel level, const std::string& fileName, const std::string& msg) const
 {
-    log(level, fileName, -1, -1, msg);
+    log(level, FilePos{fileName, -1, -1}, msg);
 }
 
-void Logger::error(const FilePos pos, const std::string& msg) const
+void Logger::error(const FilePos& pos, const std::string& msg) const
 {
-    log(LogLevel::ERROR, pos.fileName, pos.lineNo, pos.charNo, msg);
-}
-
-void Logger::info(const FilePos& pos, const std::string& msg) const
-{
-    log(LogLevel::INFO, pos.fileName, pos.lineNo, pos.charNo, msg);
+    log(LogLevel::ERROR, pos, msg);
 }
 
 void Logger::error(const std::string& fileName, const std::string& msg) const
@@ -75,11 +57,6 @@ void Logger::error(const std::string& fileName, const std::string& msg) const
 void Logger::info(const std::string& fileName, const std::string& msg) const
 {
     log(LogLevel::INFO, fileName, msg);
-}
-
-void Logger::debug(const std::string& fileName, const std::string& msg) const
-{
-    log(LogLevel::DEBUG, fileName, msg);
 }
 
 void Logger::setLevel(LogLevel level)
