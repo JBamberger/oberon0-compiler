@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include "X86_64CodeGenerator.h"
 #include "ArrayReferenceNode.h"
 #include "ArrayTypeNode.h"

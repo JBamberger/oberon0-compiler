@@ -23,7 +23,7 @@ class StringToken final : public Token {
     std::string value_;
 
   public:
-    explicit StringToken(const FilePos& pos, std::string  value);
+    explicit StringToken(const FilePos& pos, std::string value);
     ~StringToken() override;
 
     std::string getValue() const;

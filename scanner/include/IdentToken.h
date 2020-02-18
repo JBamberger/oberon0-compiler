@@ -22,7 +22,7 @@ class IdentToken final : public Token {
     std::string value_;
 
   public:
-    explicit IdentToken(const FilePos& pos, std::string  value);
+    explicit IdentToken(const FilePos& pos, std::string value);
 
     ~IdentToken() override;
 

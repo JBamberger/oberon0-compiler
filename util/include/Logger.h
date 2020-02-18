@@ -33,9 +33,7 @@ class Logger {
     std::ostream *out_, *err_;
 
   protected:
-    virtual void log(LogLevel level,
-                     const FilePos& filePos,
-                     const std::string& msg) const;
+    virtual void log(LogLevel level, const FilePos& filePos, const std::string& msg) const;
     void log(LogLevel level, const std::string& fileName, const std::string& msg) const;
 
   public:
