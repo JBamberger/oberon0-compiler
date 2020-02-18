@@ -10,7 +10,9 @@
 
 class DebugLogger : public Logger {
   protected:
-    void log(LogLevel, const std::string&, int, int, const std::string&) const override {}
+    void log(LogLevel, const std::string&, int, int, const std::string&) const override
+    {
+    }
 
   public:
     DebugLogger() = default;
@@ -34,7 +36,10 @@ struct test_spec {
 struct ErrorTest : public testing::TestWithParam<test_spec> {
     std::shared_ptr<DebugLogger> logger;
 
-    ErrorTest() { logger = std::make_shared<DebugLogger>(); }
+    ErrorTest()
+    {
+        logger = std::make_shared<DebugLogger>();
+    }
 };
 
 TEST_P(ErrorTest, testSuccess)

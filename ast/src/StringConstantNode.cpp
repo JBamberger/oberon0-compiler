@@ -4,7 +4,7 @@
 #include <cassert>
 
 StringConstantNode::StringConstantNode(const FilePos& pos, std::string value, TypeNode* type)
-    : ConstantNode(NodeType::string_constant, pos, type), value_(std::move(value))
+    : ConstantNode(pos, type), value_(std::move(value))
 {
     assert(type->getId() == "STRING");
 }

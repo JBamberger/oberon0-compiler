@@ -3,7 +3,7 @@
 #include <utility>
 
 TypeDeclarationNode::TypeDeclarationNode(const FilePos& pos, std::string name, TypeNode* type)
-    : Node(NodeType::type_reference, pos), name_(std::move(name)), type_(type)
+    : Node(pos), name_(std::move(name)), type_(type)
 {
 }
 

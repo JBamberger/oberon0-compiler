@@ -25,7 +25,13 @@ class ParseException : public std::exception {
     {
     }
 
-    FilePos position() const { return pos_; }
+    FilePos position() const
+    {
+        return pos_;
+    }
 
-    char const* what() const noexcept override { return msg_.c_str(); }
+    char const* what() const noexcept override
+    {
+        return msg_.c_str();
+    }
 };

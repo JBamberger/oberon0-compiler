@@ -9,7 +9,7 @@ class BooleanConstantNode : public ConstantNode {
 
   public:
     BooleanConstantNode(const FilePos& pos, const int value, TypeNode* type)
-        : ConstantNode(NodeType::number_constant, pos, type), value_(value)
+        : ConstantNode(pos, type), value_(value)
     {
         assert(type->getId() == "BOOLEAN");
     }

@@ -8,8 +8,7 @@ UnaryExpressionNode::UnaryExpressionNode(const FilePos& pos,
                                          TypeNode* type,
                                          const UnaryOperator op,
                                          std::unique_ptr<ExpressionNode> operand)
-    : ExpressionNode(NodeType::unary_expression, pos, type), operator_(op),
-      operand_(std::move(operand))
+    : ExpressionNode(pos, type), operator_(op), operand_(std::move(operand))
 {
     assert(operand_ != nullptr);
 }

@@ -5,8 +5,7 @@
 ProcedureCallNode::ProcedureCallNode(const FilePos& pos,
                                      ProcedureDeclarationNode* procedure,
                                      ActualParamList params)
-    : StatementNode(NodeType::procedure_call, pos), procedure_(procedure),
-      params_(std::move(params))
+    : StatementNode(pos), procedure_(procedure), params_(std::move(params))
 {
 }
 

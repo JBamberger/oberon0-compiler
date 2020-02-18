@@ -4,8 +4,7 @@
 #include <utility>
 
 VariableReferenceNode::VariableReferenceNode(const FilePos& pos, VariableDeclarationNode* variable)
-    : AssignableExpressionNode(NodeType::variable_reference, pos, variable->getType()),
-      variable_(variable)
+    : AssignableExpressionNode(pos, variable->getType()), variable_(variable)
 {
 }
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Operator.h>
 #include "ArrayTypeNode.h"
 #include "AssignmentNode.h"
 #include "ExpressionNode.h"
@@ -16,6 +15,7 @@
 #include "TypeNode.h"
 #include "VariableDeclarationNode.h"
 #include "WhileStatementNode.h"
+#include <Operator.h>
 
 enum class OperatorType : char;
 enum class BinaryOperator : char;
@@ -32,8 +32,7 @@ class Parser {
     TypeNode* boolean_ = nullptr;
     TypeNode* string_ = nullptr;
 
-
-public:
+  public:
     explicit Parser(Scanner* scanner, Logger* logger);
     ~Parser();
 

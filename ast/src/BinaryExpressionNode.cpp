@@ -8,8 +8,8 @@ BinaryExpressionNode::BinaryExpressionNode(const FilePos& pos,
                                            const BinaryOperator op,
                                            std::unique_ptr<ExpressionNode> operand1,
                                            std::unique_ptr<ExpressionNode> operand2)
-    : ExpressionNode(NodeType::binary_expression, pos, type), op_(op),
-      operand1_(std::move(operand1)), operand2_(std::move(operand2))
+    : ExpressionNode(pos, type), op_(op), operand1_(std::move(operand1)),
+      operand2_(std::move(operand2))
 {
     assert(operand1_ != nullptr);
     assert(operand2_ != nullptr);

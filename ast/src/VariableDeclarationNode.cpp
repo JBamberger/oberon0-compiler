@@ -7,7 +7,7 @@ VariableDeclarationNode::VariableDeclarationNode(const FilePos& pos,
                                                  std::string name,
                                                  TypeNode* type,
                                                  BlockNode* parent)
-    : TypedIdentifierNode(NodeType::variable, pos, std::move(name), type), parent_(parent)
+    : TypedIdentifierNode(pos, std::move(name), type), parent_(parent)
 {
 }
 

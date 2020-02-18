@@ -3,7 +3,7 @@
 
 class TypeNode : public Node {
   public:
-    TypeNode() : Node(NodeType::type, FilePos())
+    TypeNode() : Node(FilePos())
     {
     }
 

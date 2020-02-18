@@ -5,7 +5,7 @@
 
 WhileStatementNode::WhileStatementNode(const FilePos& pos,
                                        std::unique_ptr<ExpressionNode> condition)
-    : StatementNode(NodeType::while_statement, pos), condition_(std::move(condition))
+    : StatementNode(pos), condition_(std::move(condition))
 {
     assert(condition_ != nullptr);
 }

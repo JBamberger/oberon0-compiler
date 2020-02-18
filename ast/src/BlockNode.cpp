@@ -4,7 +4,7 @@
 #include <utility>
 
 BlockNode::BlockNode(const FilePos& pos, std::string name, std::shared_ptr<Scope> scope)
-    : Node(NodeType::declarations, pos), name_(std::move(name)), scope_(std::move(scope))
+    : Node(pos), name_(std::move(name)), scope_(std::move(scope))
 {
 }
 

@@ -13,48 +13,13 @@
 
 class NodeVisitor;
 
-enum class NodeType : char {
-    unary_expression,
-    binary_expression,
-    constant_reference,
-    boolean_constant,
-    number_constant,
-    string_constant,
-    type_reference,
-    type,
-    field,
-    parameter,
-    variable,
-    variable_reference,
-    module,
-    procedure,
-    while_statement,
-    if_statement,
-    procedure_call,
-    assignment,
-    statement_sequence,
-    id_list,
-    typed_id_list,
-    declarations,
-    declaration_list,
-    type_declaration,
-    procedure_heading,
-    procedure_body,
-    procedure_declaration,
-    constant_declaration,
-    selector
-};
-
 class Node {
-    NodeType nodeType_;
     FilePos pos_;
 
   public:
-    explicit Node(NodeType nodeType, FilePos pos);
+    explicit Node(FilePos pos);
 
     virtual ~Node() = 0;
-
-    NodeType getNodeType() const;
 
     FilePos getFilePos() const;
 
@@ -64,7 +29,5 @@ class Node {
 
     friend std::ostream& operator<<(std::ostream& stream, const Node& node);
 };
-
-std::ostream& operator<<(std::ostream& stream, const NodeType& nt);
 
 #endif // OBERON0C_AST_H

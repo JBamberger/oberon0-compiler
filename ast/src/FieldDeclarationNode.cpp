@@ -4,7 +4,7 @@
 #include <utility>
 
 FieldDeclarationNode::FieldDeclarationNode(const FilePos& pos, std::string name, TypeNode* type)
-    : TypedIdentifierNode(NodeType::field, pos, std::move(name), type)
+    : TypedIdentifierNode(pos, std::move(name), type)
 {
 }
 

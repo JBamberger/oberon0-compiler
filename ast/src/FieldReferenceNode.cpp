@@ -5,8 +5,8 @@
 FieldReferenceNode::FieldReferenceNode(const FilePos& pos,
                                        FieldDeclarationNode* field,
                                        std::unique_ptr<AssignableExpressionNode> record_ref)
-    : AssignableExpressionNode(NodeType::selector, pos, field->getType()),
-      record_ref_(std::move(record_ref)), field_(field)
+    : AssignableExpressionNode(pos, field->getType()), record_ref_(std::move(record_ref)),
+      field_(field)
 {
 }
 

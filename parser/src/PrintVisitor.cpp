@@ -18,7 +18,9 @@
 #include "UnaryExpressionNode.h"
 #include "WhileStatementNode.h"
 
-PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0) {}
+PrintVisitor::PrintVisitor(std::ostream& out) : out_(out), indent_(0)
+{
+}
 
 PrintVisitor::~PrintVisitor() = default;
 
@@ -30,9 +32,15 @@ std::ostream& PrintVisitor::line() const
     return out_;
 }
 
-void PrintVisitor::inc() { indent_++; }
+void PrintVisitor::inc()
+{
+    indent_++;
+}
 
-void PrintVisitor::dec() { indent_--; }
+void PrintVisitor::dec()
+{
+    indent_--;
+}
 
 void PrintVisitor::visit(const ArrayReferenceNode* node)
 {

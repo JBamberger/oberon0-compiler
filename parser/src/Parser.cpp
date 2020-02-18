@@ -23,7 +23,9 @@
 #include "UnaryExpressionNode.h"
 #include <cassert>
 
-Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger) {}
+Parser::Parser(Scanner* scanner, Logger* logger) : scanner_(scanner), logger_(logger)
+{
+}
 
 Parser::~Parser() = default;
 

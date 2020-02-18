@@ -5,7 +5,7 @@
 ConstantDeclarationNode::ConstantDeclarationNode(const FilePos& pos,
                                                  std::string name,
                                                  std::unique_ptr<ConstantNode> value)
-    : Node(NodeType::constant_declaration, pos), name_(std::move(name)), value_(std::move(value))
+    : Node(pos), name_(std::move(name)), value_(std::move(value))
 {
     assert(value_ != nullptr);
 }

@@ -4,7 +4,7 @@
 #include <cassert>
 
 IfStatementNode::IfStatementNode(const FilePos& pos, std::unique_ptr<ExpressionNode> condition)
-    : StatementNode(NodeType::if_statement, pos), condition_(std::move(condition))
+    : StatementNode(pos), condition_(std::move(condition))
 {
     assert(condition_ != nullptr);
 }

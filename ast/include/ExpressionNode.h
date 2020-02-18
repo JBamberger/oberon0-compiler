@@ -6,8 +6,7 @@ class ExpressionNode : public Node {
     TypeNode* type_;
 
   public:
-    ExpressionNode(const NodeType node_type, const FilePos& pos, TypeNode* type)
-        : Node(node_type, pos), type_(type)
+    ExpressionNode(const FilePos& pos, TypeNode* type) : Node(pos), type_(type)
     {
     }
 
@@ -24,16 +23,14 @@ class ExpressionNode : public Node {
 
 class ConstantNode : public ExpressionNode {
   public:
-    ConstantNode(const NodeType node_type, const FilePos& pos, TypeNode* type)
-        : ExpressionNode(node_type, pos, type)
+    ConstantNode(const FilePos& pos, TypeNode* type) : ExpressionNode(pos, type)
     {
     }
 };
 
 class AssignableExpressionNode : public ExpressionNode {
   public:
-    AssignableExpressionNode(const NodeType node_type, const FilePos& pos, TypeNode* type)
-        : ExpressionNode(node_type, pos, type)
+    AssignableExpressionNode(const FilePos& pos, TypeNode* type) : ExpressionNode(pos, type)
     {
     }
 };

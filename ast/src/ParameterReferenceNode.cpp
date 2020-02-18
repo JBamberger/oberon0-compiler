@@ -4,7 +4,7 @@
 #include <utility>
 
 ParameterReferenceNode::ParameterReferenceNode(const FilePos& pos, ParameterDeclarationNode* param)
-    : AssignableExpressionNode(NodeType::variable_reference, pos, param->getType()), param_(param)
+    : AssignableExpressionNode(pos, param->getType()), param_(param)
 {
 }
 

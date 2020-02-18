@@ -5,8 +5,7 @@
 AssignmentNode::AssignmentNode(const FilePos& pos,
                                std::unique_ptr<AssignableExpressionNode> assignee,
                                std::unique_ptr<ExpressionNode> value)
-    : StatementNode(NodeType::assignment, pos), assignee_(std::move(assignee)),
-      value_(std::move(value))
+    : StatementNode(pos), assignee_(std::move(assignee)), value_(std::move(value))
 {
     assert(assignee_ != nullptr);
     assert(value_ != nullptr);
